@@ -9,16 +9,16 @@
  *  This header provides an STL-compliant allocator that uses the
  *  MPI-2 memory allocation facilities.
  */
-#ifndef BOOST_PARALLEL_MPI_ALLOCATOR_HPP
-#define BOOST_PARALLEL_MPI_ALLOCATOR_HPP
+#ifndef BOOST_MPI_ALLOCATOR_HPP
+#define BOOST_MPI_ALLOCATOR_HPP
 
-#include <boost/parallel/mpi/config.hpp>
-#include <boost/parallel/mpi/exception.hpp>
+#include <boost/mpi/config.hpp>
+#include <boost/mpi/exception.hpp>
 #include <cstddef>
 #include <memory>
 #include <boost/limits.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 #if defined(BOOST_MPI_HAS_MEMORY_ALLOCATION)
 template<typename T> class allocator;
@@ -205,6 +205,6 @@ inline bool operator!=(const allocator<T1>&, const allocator<T2>&) throw()
 using std::allocator;
 #endif
 
-} } } /// end namespace boost::parallel::mpi
+} } /// end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_ALLOCATOR_HPP
+#endif // BOOST_MPI_ALLOCATOR_HPP

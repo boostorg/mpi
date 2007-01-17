@@ -9,13 +9,13 @@
  *  This header provides the @c timer class, which provides access to
  *  the MPI timers.
  */
-#ifndef BOOST_PARALLEL_MPI_TIMER_HPP
-#define BOOST_PARALLEL_MPI_TIMER_HPP
+#ifndef BOOST_MPI_TIMER_HPP
+#define BOOST_MPI_TIMER_HPP
 
 #include <mpi.h>
 #include <boost/limits.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 /** @brief A simple timer that provides access to the MPI timing
  * facilities.
@@ -86,6 +86,6 @@ inline double timer::elapsed_min() const
   return MPI_Wtick();
 }
 
-} } } /// end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_TIMER_HPP
+#endif // BOOST_MPI_TIMER_HPP

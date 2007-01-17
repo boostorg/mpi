@@ -6,10 +6,10 @@
 
 // Compute parents, children, levels, etc. to effect a parallel
 // computation tree.
-#ifndef BOOST_PARALLEL_MPI_COMPUTATION_TREE_HPP
-#define BOOST_PARALLEL_MPI_COMPUTATION_TREE_HPP
+#ifndef BOOST_MPI_COMPUTATION_TREE_HPP
+#define BOOST_MPI_COMPUTATION_TREE_HPP
 
-namespace boost { namespace parallel { namespace mpi { namespace detail {
+namespace boost { namespace mpi { namespace detail {
 
 /**
  * @brief Aids tree-based parallel collective algorithms.
@@ -81,6 +81,6 @@ class computation_tree
   int level_;
 };
 
-} } } } // end namespace boost::parallel::mpi::detail
+} } } // end namespace boost::mpi::detail
 
-#endif // BOOST_PARALLEL_MPI_COMPUTATION_TREE_HPP
+#endif // BOOST_MPI_COMPUTATION_TREE_HPP

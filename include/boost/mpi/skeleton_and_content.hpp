@@ -20,20 +20,20 @@
  *  local computation (serialization need only be performed once for
  *  the content).
  */
-#ifndef BOOST_PARALLEL_MPI_SKELETON_AND_CONTENT_HPP
-#define BOOST_PARALLEL_MPI_SKELETON_AND_CONTENT_HPP
+#ifndef BOOST_MPI_SKELETON_AND_CONTENT_HPP
+#define BOOST_MPI_SKELETON_AND_CONTENT_HPP
 
 #include <mpi.h>
 #include <boost/archive/detail/auto_link_archive.hpp>
-#include <boost/parallel/mpi/packed_iarchive.hpp>
-#include <boost/parallel/mpi/packed_oarchive.hpp>
-#include <boost/parallel/mpi/detail/forward_skeleton_iarchive.hpp>
-#include <boost/parallel/mpi/detail/forward_skeleton_oarchive.hpp>
-#include <boost/parallel/mpi/detail/ignore_iprimitive.hpp>
-#include <boost/parallel/mpi/detail/ignore_oprimitive.hpp>
+#include <boost/mpi/packed_iarchive.hpp>
+#include <boost/mpi/packed_oarchive.hpp>
+#include <boost/mpi/detail/forward_skeleton_iarchive.hpp>
+#include <boost/mpi/detail/forward_skeleton_oarchive.hpp>
+#include <boost/mpi/detail/ignore_iprimitive.hpp>
+#include <boost/mpi/detail/ignore_oprimitive.hpp>
 #include <boost/shared_ptr.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 /**
  *  @brief A proxy that requests that the skeleton of an object be
@@ -356,21 +356,21 @@ private:
   packed_oarchive skeleton_archive_;
 };
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#include <boost/parallel/mpi/detail/content_oarchive.hpp>
+#include <boost/mpi/detail/content_oarchive.hpp>
 
 // For any headers that have provided declarations based on forward
 // declarations of the contents of this header, include definitions
 // for those declarations. This means that the inclusion of
 // skeleton_and_content.hpp enables the use of skeleton/content
 // transmission throughout the library.
-#ifdef BOOST_PARALLEL_MPI_BROADCAST_HPP
-#  include <boost/parallel/mpi/detail/broadcast_sc.hpp>
+#ifdef BOOST_MPI_BROADCAST_HPP
+#  include <boost/mpi/detail/broadcast_sc.hpp>
 #endif
 
-#ifdef BOOST_PARALLEL_MPI_COMMUNICATOR_HPP
-#  include <boost/parallel/mpi/detail/communicator_sc.hpp>
+#ifdef BOOST_MPI_COMMUNICATOR_HPP
+#  include <boost/mpi/detail/communicator_sc.hpp>
 #endif
 
-#endif // BOOST_PARALLEL_MPI_SKELETON_AND_CONTENT_HPP
+#endif // BOOST_MPI_SKELETON_AND_CONTENT_HPP

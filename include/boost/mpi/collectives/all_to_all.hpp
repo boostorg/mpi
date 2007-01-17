@@ -5,21 +5,21 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 // Message Passing Interface 1.1 -- Section 4.8. All-to-all
-#ifndef BOOST_PARALLEL_MPI_ALL_TO_ALL_HPP
-#define BOOST_PARALLEL_MPI_ALL_TO_ALL_HPP
+#ifndef BOOST_MPI_ALL_TO_ALL_HPP
+#define BOOST_MPI_ALL_TO_ALL_HPP
 
-#include <boost/parallel/mpi/exception.hpp>
-#include <boost/parallel/mpi/datatype.hpp>
+#include <boost/mpi/exception.hpp>
+#include <boost/mpi/datatype.hpp>
 #include <vector>
-#include <boost/parallel/mpi/packed_oarchive.hpp>
-#include <boost/parallel/mpi/packed_iarchive.hpp>
-#include <boost/parallel/mpi/communicator.hpp>
-#include <boost/parallel/mpi/environment.hpp>
+#include <boost/mpi/packed_oarchive.hpp>
+#include <boost/mpi/packed_iarchive.hpp>
+#include <boost/mpi/communicator.hpp>
+#include <boost/mpi/environment.hpp>
 #include <boost/assert.hpp>
-#include <boost/parallel/mpi/collectives_fwd.hpp>
-#include <boost/parallel/mpi/allocator.hpp>
+#include <boost/mpi/collectives_fwd.hpp>
+#include <boost/mpi/allocator.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
           
 namespace detail {
   // We're performaing an all-to-all with a type that has an
@@ -124,7 +124,7 @@ all_to_all(const communicator& comm, const std::vector<T>& in_values,
 {
   BOOST_ASSERT((int)in_values.size() == comm.size());
   out_values.resize(comm.size());
-  ::boost::parallel::mpi::all_to_all(comm, &in_values[0], &out_values[0]);
+  ::boost::mpi::all_to_all(comm, &in_values[0], &out_values[0]);
 }
 
 template<typename T>
@@ -141,9 +141,9 @@ all_to_all(const communicator& comm, const std::vector<T>& in_values, int n,
 {
   BOOST_ASSERT((int)in_values.size() == comm.size() * n);
   out_values.resize(comm.size() * n);
-  ::boost::parallel::mpi::all_to_all(comm, &in_values[0], n, &out_values[0]);
+  ::boost::mpi::all_to_all(comm, &in_values[0], n, &out_values[0]);
 }
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_ALL_TO_ALL_HPP
+#endif // BOOST_MPI_ALL_TO_ALL_HPP

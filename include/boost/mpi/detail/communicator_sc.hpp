@@ -8,10 +8,10 @@
 
 // This header should be included only after both communicator.hpp and
 // skeleton_and_content.hpp have been included.
-#ifndef BOOST_PARALLEL_MPI_COMMUNICATOR_SC_HPP
-#define BOOST_PARALLEL_MPI_COMMUNICATOR_SC_HPP
+#ifndef BOOST_MPI_COMMUNICATOR_SC_HPP
+#define BOOST_MPI_COMMUNICATOR_SC_HPP
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 template<typename T>
 void
@@ -90,7 +90,7 @@ namespace detail {
   };
 }
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_COMMUNICATOR_SC_HPP
+#endif // BOOST_MPI_COMMUNICATOR_SC_HPP
 

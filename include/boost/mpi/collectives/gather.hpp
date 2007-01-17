@@ -5,20 +5,20 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 // Message Passing Interface 1.1 -- Section 4.5. Gather
-#ifndef BOOST_PARALLEL_MPI_GATHER_HPP
-#define BOOST_PARALLEL_MPI_GATHER_HPP
+#ifndef BOOST_MPI_GATHER_HPP
+#define BOOST_MPI_GATHER_HPP
 
-#include <boost/parallel/mpi/exception.hpp>
-#include <boost/parallel/mpi/datatype.hpp>
+#include <boost/mpi/exception.hpp>
+#include <boost/mpi/datatype.hpp>
 #include <vector>
-#include <boost/parallel/mpi/packed_oarchive.hpp>
-#include <boost/parallel/mpi/packed_iarchive.hpp>
-#include <boost/parallel/mpi/detail/point_to_point.hpp>
-#include <boost/parallel/mpi/communicator.hpp>
-#include <boost/parallel/mpi/environment.hpp>
+#include <boost/mpi/packed_oarchive.hpp>
+#include <boost/mpi/packed_iarchive.hpp>
+#include <boost/mpi/detail/point_to_point.hpp>
+#include <boost/mpi/communicator.hpp>
+#include <boost/mpi/environment.hpp>
 #include <boost/assert.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 namespace detail {
   // We're gathering at the root for a type that has an associated MPI
@@ -102,7 +102,7 @@ gather(const communicator& comm, const T& in_value, std::vector<T>& out_values,
   if (comm.rank() == root)
     out_values.resize(comm.size());
 
-  ::boost::parallel::mpi::gather(comm, in_value, &out_values[0], root);
+  ::boost::mpi::gather(comm, in_value, &out_values[0], root);
 }
 
 template<typename T>
@@ -129,7 +129,7 @@ void
 gather(const communicator& comm, const T* in_values, int n, 
        std::vector<T>& out_values, int root)
 {
-  ::boost::parallel::mpi::gather(comm, in_values, n, &out_values[0], root);
+  ::boost::mpi::gather(comm, in_values, n, &out_values[0], root);
 }
 
 template<typename T>
@@ -140,6 +140,6 @@ void gather(const communicator& comm, const T* in_values, int n, int root)
 }
 
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_GATHER_HPP
+#endif // BOOST_MPI_GATHER_HPP

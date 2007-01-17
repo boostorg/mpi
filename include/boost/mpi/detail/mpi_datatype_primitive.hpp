@@ -6,8 +6,8 @@
 
 //  Authors: Matthias Troyer
 
-#ifndef BOOST_PARALLEL_MPI_DETAIL_MPI_DATATYPE_OPRIMITIVE_HPP
-#define BOOST_PARALLEL_MPI_DETAIL_MPI_DATATYPE_OPRIMITIVE_HPP
+#ifndef BOOST_MPI_DETAIL_MPI_DATATYPE_OPRIMITIVE_HPP
+#define BOOST_MPI_DETAIL_MPI_DATATYPE_OPRIMITIVE_HPP
 
 #include <mpi.h>
 #include <cstddef> // size_t
@@ -19,8 +19,8 @@ namespace std{
 } // namespace std
 #endif
 
-#include <boost/parallel/mpi/datatype_fwd.hpp>
-#include <boost/parallel/mpi/exception.hpp>
+#include <boost/mpi/datatype_fwd.hpp>
+#include <boost/mpi/exception.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/assert.hpp>
 #include <boost/mpl/placeholders.hpp>
@@ -30,7 +30,7 @@ namespace std{
 #include <iostream>
 #include <vector>
 
-namespace boost { namespace parallel { namespace mpi { namespace detail {
+namespace boost { namespace mpi { namespace detail {
 
 /////////////////////////////////////////////////////////////////////////
 // class mpi_data_type_oprimitive - creation of custom MPI data types
@@ -62,7 +62,7 @@ public:
     void save_array(serialization::array<T> const& x, unsigned int /* version */)
     {
       if (x.count())
-        save_impl(x.address(), boost::parallel::mpi::get_mpi_datatype(*x.address()), x.count());
+        save_impl(x.address(), boost::mpi::get_mpi_datatype(*x.address()), x.count());
     }
 
     typedef is_mpi_datatype<mpl::_1> use_array_optimization;
@@ -93,7 +93,7 @@ public:
     template<class T>
     void save(const T & t)
     {
-        save_impl(&t, boost::parallel::mpi::get_mpi_datatype(t), 1);
+        save_impl(&t, boost::mpi::get_mpi_datatype(t), 1);
     }
 
 private:
@@ -122,7 +122,7 @@ private:
 };
 
 
-} } } } // end namespace boost::parallel::mpi::detail
+} } } // end namespace boost::mpi::detail
 
 
-#endif // BOOST_PARALLEL_MPI_DETAIL_MPI_DATATYPE_OPRIMITIVE_HPP
+#endif // BOOST_MPI_DETAIL_MPI_DATATYPE_OPRIMITIVE_HPP

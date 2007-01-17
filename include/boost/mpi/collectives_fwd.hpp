@@ -11,13 +11,13 @@
  *  This header provides forward declarations for all of the
  *  collective operations contained in the header @c collectives.hpp.
  */
-#ifndef BOOST_PARALLEL_MPI_COLLECTIVES_FWD_HPP
-#define BOOST_PARALLEL_MPI_COLLECTIVES_FWD_HPP
+#ifndef BOOST_MPI_COLLECTIVES_FWD_HPP
+#define BOOST_MPI_COLLECTIVES_FWD_HPP
 
 /// INTERNAL ONLY
-#define BOOST_PARALLEL_MPI_COLLECTIVES_FORWARD_ONLY
-#include <boost/parallel/mpi/collectives.hpp>
-#undef BOOST_PARALLEL_MPI_COLLECTIVES_FORWARD_ONLY
+#define BOOST_MPI_COLLECTIVES_FORWARD_ONLY
+#include <boost/mpi/collectives.hpp>
+#undef BOOST_MPI_COLLECTIVES_FORWARD_ONLY
 
-#endif // BOOST_PARALLEL_MPI_COLLECTIVES_FWD_HPP
+#endif // BOOST_MPI_COLLECTIVES_FWD_HPP
 

@@ -17,8 +17,8 @@
  *  registered with register_serialized(), objects are directly
  *  serialized for transmissing, skipping the pickling step.
  */
-#ifndef BOOST_PARALLEL_MPI_PYTHON_SERIALIZE_HPP
-#define BOOST_PARALLEL_MPI_PYTHON_SERIALIZE_HPP
+#ifndef BOOST_MPI_PYTHON_SERIALIZE_HPP
+#define BOOST_MPI_PYTHON_SERIALIZE_HPP
 
 #include <boost/python/object.hpp>
 #include <boost/python/str.hpp>
@@ -39,8 +39,8 @@
 
 #include <boost/type_traits/is_fundamental.hpp>
 
-#define BOOST_PARALLEL_MPI_PYTHON_FORWARD_ONLY
-#include <boost/parallel/mpi/python.hpp>
+#define BOOST_MPI_PYTHON_FORWARD_ONLY
+#include <boost/mpi/python.hpp>
 
 /************************************************************************
  * Boost.Python Serialization Section                                   *
@@ -509,16 +509,16 @@ serialize(Archive& ar, boost::python::object& obj, const unsigned int version)
 /************************************************************************
  * Boost.MPI-Specific Section                                           *
  ************************************************************************/
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
  class packed_iarchive;
  class packed_oarchive;
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
 BOOST_PYTHON_DIRECT_SERIALIZATION_ARCHIVE(
-  ::boost::parallel::mpi::packed_iarchive,
-  ::boost::parallel::mpi::packed_oarchive)
+  ::boost::mpi::packed_iarchive,
+  ::boost::mpi::packed_oarchive)
 
-namespace boost { namespace parallel { namespace mpi { namespace python {
+namespace boost { namespace mpi { namespace python {
 
 template<typename T>
 void
@@ -528,6 +528,6 @@ register_serialized(const T& value, PyTypeObject* type)
   register_serialized<packed_iarchive, packed_oarchive>(value, type);
 }
 
-} } } } // end namespace boost::parallel::mpi::python
+} } } // end namespace boost::mpi::python
 
-#endif // BOOST_PARALLEL_MPI_PYTHON_SERIALIZE_HPP
+#endif // BOOST_MPI_PYTHON_SERIALIZE_HPP

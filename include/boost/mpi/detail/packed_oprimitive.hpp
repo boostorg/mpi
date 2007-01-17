@@ -6,23 +6,23 @@
 
 //  Authors: Matthias Troyer
 
-#ifndef BOOST_PARALLEL_MPI_PACKED_OPRIMITIVE_HPP
-#define BOOST_PARALLEL_MPI_PACKED_OPRIMITIVE_HPP
+#ifndef BOOST_MPI_PACKED_OPRIMITIVE_HPP
+#define BOOST_MPI_PACKED_OPRIMITIVE_HPP
 
 #include <mpi.h>
 #include <iostream>
 #include <cstddef> // size_t
 #include <boost/config.hpp>
 
-#include <boost/parallel/mpi/datatype.hpp>
-#include <boost/parallel/mpi/exception.hpp>
+#include <boost/mpi/datatype.hpp>
+#include <boost/mpi/exception.hpp>
 #include <boost/serialization/detail/get_data.hpp>
 #include <boost/serialization/array.hpp>
 #include <boost/assert.hpp>
 #include <vector>
-#include <boost/parallel/mpi/allocator.hpp>
+#include <boost/mpi/allocator.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 /// serialization using MPI::Pack
 
@@ -110,6 +110,6 @@ private:
   MPI_Comm comm;
 };
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_PACKED_OPRIMITIVE_HPP
+#endif // BOOST_MPI_PACKED_OPRIMITIVE_HPP

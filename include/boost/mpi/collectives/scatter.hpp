@@ -5,20 +5,20 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 // Message Passing Interface 1.1 -- Section 4.6. Scatter
-#ifndef BOOST_PARALLEL_MPI_SCATTER_HPP
-#define BOOST_PARALLEL_MPI_SCATTER_HPP
+#ifndef BOOST_MPI_SCATTER_HPP
+#define BOOST_MPI_SCATTER_HPP
 
-#include <boost/parallel/mpi/exception.hpp>
-#include <boost/parallel/mpi/datatype.hpp>
+#include <boost/mpi/exception.hpp>
+#include <boost/mpi/datatype.hpp>
 #include <vector>
-#include <boost/parallel/mpi/packed_oarchive.hpp>
-#include <boost/parallel/mpi/packed_iarchive.hpp>
-#include <boost/parallel/mpi/detail/point_to_point.hpp>
-#include <boost/parallel/mpi/communicator.hpp>
-#include <boost/parallel/mpi/environment.hpp>
+#include <boost/mpi/packed_oarchive.hpp>
+#include <boost/mpi/packed_iarchive.hpp>
+#include <boost/mpi/detail/point_to_point.hpp>
+#include <boost/mpi/communicator.hpp>
+#include <boost/mpi/environment.hpp>
 #include <boost/assert.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 namespace detail {
   // We're scattering from the root for a type that has an associated MPI
@@ -112,9 +112,9 @@ scatter(const communicator& comm, const std::vector<T>& in_values, T& out_value,
         int root)
 {
   if (comm.rank() == root)
-    ::boost::parallel::mpi::scatter(comm, &in_values[0], out_value, root);
+    ::boost::mpi::scatter(comm, &in_values[0], out_value, root);
   else
-    ::boost::parallel::mpi::scatter(comm, static_cast<const T*>(0), out_value, 
+    ::boost::mpi::scatter(comm, static_cast<const T*>(0), out_value, 
                                     root);
 }
 
@@ -143,9 +143,9 @@ scatter(const communicator& comm, const std::vector<T>& in_values,
         T* out_values, int n, int root)
 {
   if (comm.rank() == root)
-    ::boost::parallel::mpi::scatter(comm, &in_values[0], out_values, n, root);
+    ::boost::mpi::scatter(comm, &in_values[0], out_values, n, root);
   else
-    ::boost::parallel::mpi::scatter(comm, static_cast<const T*>(0), out_values, 
+    ::boost::mpi::scatter(comm, static_cast<const T*>(0), out_values, 
                                     n, root);
 }
 
@@ -156,6 +156,6 @@ void scatter(const communicator& comm, T* out_values, int n, int root)
   detail::scatter_impl(comm, out_values, n, root, is_mpi_datatype<T>());
 }
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_SCATTER_HPP
+#endif // BOOST_MPI_SCATTER_HPP

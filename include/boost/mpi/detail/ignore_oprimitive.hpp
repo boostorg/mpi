@@ -6,14 +6,14 @@
 
 //  Authors: Matthias Troyer
 
-#ifndef BOOST_PARALLEL_MPI_DETAIL_IGNORE_OPRIMITIVE_HPP
-#define BOOST_PARALLEL_MPI_DETAIL_IGNORE_OPRIMITIVE_HPP
+#ifndef BOOST_MPI_DETAIL_IGNORE_OPRIMITIVE_HPP
+#define BOOST_MPI_DETAIL_IGNORE_OPRIMITIVE_HPP
 
 #include <boost/config.hpp>
-#include <boost/parallel/mpi/datatype.hpp>
+#include <boost/mpi/datatype.hpp>
 #include <boost/serialization/array.hpp>
 
-namespace boost { namespace parallel { namespace mpi { namespace detail {
+namespace boost { namespace mpi { namespace detail {
 
 /// @brief a minimal output archive, which ignores any save
 ///
@@ -57,6 +57,6 @@ public:
     }
 };
 
-} } } } // end namespace boost::parallel::mpi::detail
+} } } // end namespace boost::mpi::detail
 
-#endif // BOOST_PARALLEL_MPI_DETAIL_IGNORE_OPRIMITIVE_HPP
+#endif // BOOST_MPI_DETAIL_IGNORE_OPRIMITIVE_HPP

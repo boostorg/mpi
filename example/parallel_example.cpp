@@ -8,14 +8,14 @@
 // data and others to aggregate the data
 #include <iostream>
 
-#include <boost/parallel/mpi.hpp>
+#include <boost/mpi.hpp>
 #include <boost/random/parallel.hpp>
 #include <boost/random.hpp>
 #include <boost/foreach.hpp>
 #include <iostream>
 #include <cstdlib>
 
-namespace mpi = boost::parallel::mpi;
+namespace mpi = boost::mpi;
 
 enum {sample_tag, sample_skeleton_tag, sample_broadcast_tag, quit_tag};
 

@@ -5,8 +5,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 //  Authors: Douglas Gregor
-#ifndef BOOST_PARALLEL_MPI_PYTHON_HPP
-#define BOOST_PARALLEL_MPI_PYTHON_HPP
+#ifndef BOOST_MPI_PYTHON_HPP
+#define BOOST_MPI_PYTHON_HPP
 
 #include <boost/python/object.hpp>
 
@@ -20,7 +20,7 @@
  *
  */
 
-namespace boost { namespace parallel { namespace mpi { namespace python {
+namespace boost { namespace mpi { namespace python {
 
 /**
  * @brief Register the type T for direct serialization within Boost.MPI
@@ -67,13 +67,13 @@ template<typename T>
 void 
 register_skeleton_and_content(const T& value = T(), PyTypeObject* type = 0);
 
-} } } } // end namespace boost::parallel::mpi::python
+} } } // end namespace boost::mpi::python
 
-#ifndef BOOST_PARALLEL_MPI_PYTHON_FORWARD_ONLY
-#  include <boost/parallel/mpi/python/serialize.hpp>
-#  include <boost/parallel/mpi/python/skeleton_and_content.hpp>
+#ifndef BOOST_MPI_PYTHON_FORWARD_ONLY
+#  include <boost/mpi/python/serialize.hpp>
+#  include <boost/mpi/python/skeleton_and_content.hpp>
 #else
-#  undef BOOST_PARALLEL_MPI_PYTHON_FORWARD_ONLY
+#  undef BOOST_MPI_PYTHON_FORWARD_ONLY
 #endif
 
-#endif // BOOST_PARALLEL_MPI_PYTHON_HPP
+#endif // BOOST_MPI_PYTHON_HPP

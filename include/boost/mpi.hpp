@@ -17,14 +17,14 @@
 #ifndef BOOST_MPI_HPP
 #define BOOST_MPI_HPP
 
-#include <boost/parallel/mpi/allocator.hpp>
-#include <boost/parallel/mpi/collectives.hpp>
-#include <boost/parallel/mpi/communicator.hpp>
-#include <boost/parallel/mpi/datatype.hpp>
-#include <boost/parallel/mpi/environment.hpp>
-#include <boost/parallel/mpi/nonblocking.hpp>
-#include <boost/parallel/mpi/operations.hpp>
-#include <boost/parallel/mpi/skeleton_and_content.hpp>
-#include <boost/parallel/mpi/timer.hpp>
+#include <boost/mpi/allocator.hpp>
+#include <boost/mpi/collectives.hpp>
+#include <boost/mpi/communicator.hpp>
+#include <boost/mpi/datatype.hpp>
+#include <boost/mpi/environment.hpp>
+#include <boost/mpi/nonblocking.hpp>
+#include <boost/mpi/operations.hpp>
+#include <boost/mpi/skeleton_and_content.hpp>
+#include <boost/mpi/timer.hpp>
 
 #endif // BOOST_MPI_HPP

@@ -5,19 +5,19 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 // Message Passing Interface 1.1 -- Section 4.7. Gather-to-all
-#ifndef BOOST_PARALLEL_MPI_ALL_GATHER_HPP
-#define BOOST_PARALLEL_MPI_ALL_GATHER_HPP
+#ifndef BOOST_MPI_ALL_GATHER_HPP
+#define BOOST_MPI_ALL_GATHER_HPP
 
-#include <boost/parallel/mpi/exception.hpp>
-#include <boost/parallel/mpi/datatype.hpp>
+#include <boost/mpi/exception.hpp>
+#include <boost/mpi/datatype.hpp>
 #include <vector>
 #include <boost/serialization/vector.hpp>
 
 // all_gather falls back to gather+broadcast in some cases
-#include <boost/parallel/mpi/collectives/broadcast.hpp>
-#include <boost/parallel/mpi/collectives/gather.hpp>
+#include <boost/mpi/collectives/broadcast.hpp>
+#include <boost/mpi/collectives/gather.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 namespace detail {
   // We're all-gathering for a type that has an associated MPI
@@ -27,7 +27,7 @@ namespace detail {
   all_gather_impl(const communicator& comm, const T* in_values, int n, 
                   T* out_values, mpl::true_)
   {
-    MPI_Datatype type = boost::parallel::mpi::get_mpi_datatype<T>();
+    MPI_Datatype type = boost::mpi::get_mpi_datatype<T>();
     BOOST_MPI_CHECK_RESULT(MPI_Allgather,
                            (const_cast<T*>(in_values), n, type,
                             out_values, n, type, comm));
@@ -61,7 +61,7 @@ all_gather(const communicator& comm, const T& in_value,
            std::vector<T>& out_values)
 {
   out_values.resize(comm.size());
-  ::boost::parallel::mpi::all_gather(comm, &in_value, 1, &out_values[0]);
+  ::boost::mpi::all_gather(comm, &in_value, 1, &out_values[0]);
 }
 
 template<typename T>
@@ -77,9 +77,9 @@ all_gather(const communicator& comm, const T* in_values, int n,
            std::vector<T>& out_values)
 {
   out_values.resize(comm.size() * n);
-  ::boost::parallel::mpi::all_gather(comm, in_values, n, &out_values[0]);
+  ::boost::mpi::all_gather(comm, in_values, n, &out_values[0]);
 }
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_ALL_GATHER_HPP
+#endif // BOOST_MPI_ALL_GATHER_HPP

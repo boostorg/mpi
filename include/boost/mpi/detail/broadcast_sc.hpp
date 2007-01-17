@@ -8,10 +8,10 @@
 
 // This header may only be included after both the broadcast.hpp and
 // and skeleton_and_content.hpp headers have been included.
-#ifndef BOOST_PARALLEL_MPI_BROADCAST_SC_HPP
-#define BOOST_PARALLEL_MPI_BROADCAST_SC_HPP
+#ifndef BOOST_MPI_BROADCAST_SC_HPP
+#define BOOST_MPI_BROADCAST_SC_HPP
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 template<typename T>
 inline void
@@ -36,6 +36,6 @@ broadcast(const communicator& comm, const skeleton_proxy<T>& proxy, int root)
   }
 }
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_BROADCAST_SC_HPP
+#endif // BOOST_MPI_BROADCAST_SC_HPP

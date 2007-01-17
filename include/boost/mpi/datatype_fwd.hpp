@@ -11,12 +11,12 @@
  *  user-defined C++ classes that need to specialize @c
  *  is_mpi_datatype.
  */
-#ifndef BOOST_PARALLEL_MPI_DATATYPE_FWD_HPP
-#define BOOST_PARALLEL_MPI_DATATYPE_FWD_HPP
+#ifndef BOOST_MPI_DATATYPE_FWD_HPP
+#define BOOST_MPI_DATATYPE_FWD_HPP
 
 #include <mpi.h>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 template<typename T> struct is_mpi_builtin_datatype;
 template<typename T> struct is_mpi_integer_datatype;
@@ -27,6 +27,6 @@ template<typename T> struct is_mpi_byte_datatype;
 template<typename T> struct is_mpi_datatype;
 template<typename T> MPI_Datatype get_mpi_datatype(const T& x = T());
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_MPI_DATATYPE_FWD_HPP
+#endif // BOOST_MPI_MPI_DATATYPE_FWD_HPP

@@ -6,22 +6,22 @@
 
 //  Authors: Matthias Troyer
 
-#ifndef BOOST_PARALLEL_MPI_PACKED_IPRIMITIVE_HPP
-#define BOOST_PARALLEL_MPI_PACKED_IPRIMITIVE_HPP
+#ifndef BOOST_MPI_PACKED_IPRIMITIVE_HPP
+#define BOOST_MPI_PACKED_IPRIMITIVE_HPP
 
 #include <mpi.h>
 #include <iostream>
 #include <cstddef> // size_t
 #include <boost/config.hpp>
-#include <boost/parallel/mpi/datatype.hpp>
-#include <boost/parallel/mpi/exception.hpp>
+#include <boost/mpi/datatype.hpp>
+#include <boost/mpi/exception.hpp>
 #include <boost/assert.hpp>
 #include <boost/serialization/array.hpp>
 #include <boost/serialization/detail/get_data.hpp>
 #include <vector>
-#include <boost/parallel/mpi/allocator.hpp>
+#include <boost/mpi/allocator.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 /// deserialization using MPI_Unpack
 
@@ -114,6 +114,6 @@ private:
         int position;
 };
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_PACKED_IPRIMITIVE_HPP
+#endif // BOOST_MPI_PACKED_IPRIMITIVE_HPP

@@ -8,10 +8,10 @@
 
 #include <boost/serialization/array.hpp>
 
-#ifndef BOOST_PARALLEL_MPI_DETAIL_FORWARD_IPRIMITIVE_HPP
-#define BOOST_PARALLEL_MPI_DETAIL_FORWARD_IPRIMITIVE_HPP
+#ifndef BOOST_MPI_DETAIL_FORWARD_IPRIMITIVE_HPP
+#define BOOST_MPI_DETAIL_FORWARD_IPRIMITIVE_HPP
 
-namespace boost { namespace parallel { namespace mpi { namespace detail {
+namespace boost { namespace mpi { namespace detail {
 
 /// @brief a minimal input archive, which forwards reading to another archive
 ///
@@ -67,6 +67,6 @@ private:
     implementation_archive_type& implementation_archive;
 };
 
-} } } } // end namespace boost::parallel::mpi::detail
+} } } // end namespace boost::mpi::detail
 
-#endif // BOOST_PARALLEL_MPI_DETAIL_FORWARD_IPRIMITIVE_HPP
+#endif // BOOST_MPI_DETAIL_FORWARD_IPRIMITIVE_HPP

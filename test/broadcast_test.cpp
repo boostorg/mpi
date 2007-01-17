@@ -5,21 +5,21 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 // A test of the broadcast() collective.
-#include <boost/parallel/mpi/collectives/broadcast.hpp>
-#include <boost/parallel/mpi/communicator.hpp>
-#include <boost/parallel/mpi/environment.hpp>
+#include <boost/mpi/collectives/broadcast.hpp>
+#include <boost/mpi/communicator.hpp>
+#include <boost/mpi/environment.hpp>
 #include <boost/test/minimal.hpp>
 #include <algorithm>
 #include "gps_position.hpp"
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/list.hpp>
-#include <boost/parallel/mpi/skeleton_and_content.hpp>
+#include <boost/mpi/skeleton_and_content.hpp>
 #include <boost/iterator/counting_iterator.hpp>
 
-using boost::parallel::mpi::communicator;
+using boost::mpi::communicator;
 
-using boost::parallel::mpi::packed_skeleton_iarchive;
-using boost::parallel::mpi::packed_skeleton_oarchive;
+using boost::mpi::packed_skeleton_iarchive;
+using boost::mpi::packed_skeleton_oarchive;
 
 template<typename T>
 void
@@ -30,7 +30,7 @@ broadcast_test(const communicator& comm, const T& bc_value,
     for (root = 0; root < comm.size(); ++root)
       broadcast_test(comm, bc_value, kind, root);
   } else {
-    using boost::parallel::mpi::broadcast;
+    using boost::mpi::broadcast;
 
     T value;
     if (comm.rank() == root) {
@@ -51,12 +51,12 @@ broadcast_test(const communicator& comm, const T& bc_value,
 void
 test_skeleton_and_content(const communicator& comm, int root = 0)
 {
-  using boost::parallel::mpi::content;
-  using boost::parallel::mpi::get_content;
+  using boost::mpi::content;
+  using boost::mpi::get_content;
   using boost::make_counting_iterator;
-  using boost::parallel::mpi::broadcast;
-  using boost::parallel::mpi::content;
-  using boost::parallel::mpi::get_content;
+  using boost::mpi::broadcast;
+  using boost::mpi::content;
+  using boost::mpi::get_content;
 
   typedef std::list<int>::iterator iterator;
 
@@ -128,7 +128,7 @@ test_skeleton_and_content(const communicator& comm, int root = 0)
 
 int test_main(int argc, char* argv[])
 {
-  boost::parallel::mpi::environment env(argc, argv);
+  boost::mpi::environment env(argc, argv);
 
   communicator comm;
   if (comm.size() == 1) {

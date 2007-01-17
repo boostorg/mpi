@@ -6,19 +6,19 @@
 
 //  Authors: Matthias Troyer
 
-#ifndef BOOST_PARALLEL_MPI_DETAIL_TYPE_MPI_DATATYPE_CACHE_HPP
-#define BOOST_PARALLEL_MPI_DETAIL_TYPE_MPI_DATATYPE_CACHE_HPP
+#ifndef BOOST_MPI_DETAIL_TYPE_MPI_DATATYPE_CACHE_HPP
+#define BOOST_MPI_DETAIL_TYPE_MPI_DATATYPE_CACHE_HPP
 
-#include <boost/parallel/mpi/datatype_fwd.hpp>
-#include <boost/parallel/mpi/detail/mpi_datatype_oarchive.hpp>
-#include <boost/parallel/mpi/exception.hpp>
+#include <boost/mpi/datatype_fwd.hpp>
+#include <boost/mpi/detail/mpi_datatype_oarchive.hpp>
+#include <boost/mpi/exception.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/mpl/assert.hpp>
 #include <boost/noncopyable.hpp>
 #include <map>
 #include <typeinfo>
 
-namespace boost { namespace parallel { namespace mpi { namespace detail {
+namespace boost { namespace mpi { namespace detail {
 
 /// @brief comparison function object for two std::type_info pointers
 ///
@@ -92,7 +92,7 @@ private:
 
 extern mpi_datatype_map mpi_datatype_cache;
 
-} } } } // end namespace boost::parallel::mpi::detail
+} } } // end namespace boost::mpi::detail
 
 
-#endif // BOOST_PARALLEL_MPI_DETAIL_TYPE_MPI_DATATYPE_CACHE_HPP
+#endif // BOOST_MPI_DETAIL_TYPE_MPI_DATATYPE_CACHE_HPP

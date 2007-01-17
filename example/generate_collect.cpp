@@ -7,11 +7,11 @@
 // An example using Boost.MPI's split() operation on communicators to
 // create separate data-generating processes and data-collecting
 // processes.
-#include <boost/parallel/mpi.hpp>
+#include <boost/mpi.hpp>
 #include <iostream>
 #include <cstdlib>
 #include <boost/serialization/vector.hpp>
-namespace mpi = boost::parallel::mpi;
+namespace mpi = boost::mpi;
 
 enum message_tags { msg_data_packet, msg_broadcast_data, msg_finished };
 

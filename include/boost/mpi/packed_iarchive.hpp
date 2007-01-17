@@ -15,16 +15,16 @@
  *  transmitted via MPI and then be unpacked either via the facilities
  *  in @c packed_oarchive.hpp or @c MPI_Unpack.
  */
-#ifndef BOOST_PARALLEL_MPI_PACKED_IARCHIVE_HPP
-#define BOOST_PARALLEL_MPI_PACKED_IARCHIVE_HPP
+#ifndef BOOST_MPI_PACKED_IARCHIVE_HPP
+#define BOOST_MPI_PACKED_IARCHIVE_HPP
 
-#include <boost/parallel/mpi/datatype.hpp>
+#include <boost/mpi/datatype.hpp>
 #include <boost/archive/detail/auto_link_archive.hpp>
 #include <boost/archive/basic_binary_iarchive.hpp>
-#include <boost/parallel/mpi/detail/packed_iprimitive.hpp>
+#include <boost/mpi/detail/packed_iprimitive.hpp>
 #include <boost/assert.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 /** @brief An archive that packs binary data into an MPI buffer.
  *
@@ -84,9 +84,8 @@ private:
   buffer_type internal_buffer_;
 };
 
-} } } // end namespace boost::parallel::mpi
-
+} } // end namespace boost::mpi
 
 BOOST_BROKEN_COMPILER_TYPE_TRAITS_SPECIALIZATION(parallel::mpi::packed_iarchive)
 
-#endif // BOOST_PARALLEL_MPI_PACKED_IARCHIVE_HPP
+#endif // BOOST_MPI_PACKED_IARCHIVE_HPP

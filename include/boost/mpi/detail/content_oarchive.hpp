@@ -6,16 +6,16 @@
 
 //  Authors: Matthias Troyer
 
-#ifndef BOOST_PARALLEL_MPI_DETAIL_CONTENT_OARCHIVE_HPP
-#define BOOST_PARALLEL_MPI_DETAIL_CONTENT_OARCHIVE_HPP
+#ifndef BOOST_MPI_DETAIL_CONTENT_OARCHIVE_HPP
+#define BOOST_MPI_DETAIL_CONTENT_OARCHIVE_HPP
 
 #include <boost/archive/detail/auto_link_archive.hpp>
 #include <boost/archive/basic_archive.hpp>
-#include <boost/parallel/mpi/detail/ignore_skeleton_oarchive.hpp>
-#include <boost/parallel/mpi/detail/mpi_datatype_primitive.hpp>
-#include <boost/parallel/mpi/datatype.hpp>
+#include <boost/mpi/detail/ignore_skeleton_oarchive.hpp>
+#include <boost/mpi/detail/mpi_datatype_primitive.hpp>
+#include <boost/mpi/datatype.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 namespace detail {
   // an archive wrapper that stores only the data members but not the
@@ -56,6 +56,6 @@ const content get_content(const T& x)
   return ar.get_content();
 }
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_DETAIL_CONTENT_OARCHIVE_HPP
+#endif // BOOST_MPI_DETAIL_CONTENT_OARCHIVE_HPP

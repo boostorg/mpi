@@ -10,32 +10,32 @@
  *  of all communication within Boost.MPI, and provides point-to-point
  *  communication operations.
  */
-#ifndef BOOST_PARALLEL_MPI_COMMUNICATOR_HPP
-#define BOOST_PARALLEL_MPI_COMMUNICATOR_HPP
+#ifndef BOOST_MPI_COMMUNICATOR_HPP
+#define BOOST_MPI_COMMUNICATOR_HPP
 
-#include <boost/parallel/mpi/exception.hpp>
+#include <boost/mpi/exception.hpp>
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/parallel/mpi/datatype.hpp>
+#include <boost/mpi/datatype.hpp>
 #include <utility>
 #include <iterator>
 #include <stdexcept> // for std::range_error
 
 // For (de-)serializing sends and receives
-#include <boost/parallel/mpi/packed_oarchive.hpp>
-#include <boost/parallel/mpi/packed_iarchive.hpp>
+#include <boost/mpi/packed_oarchive.hpp>
+#include <boost/mpi/packed_iarchive.hpp>
 
 // For (de-)serializing skeletons and content
-#include <boost/parallel/mpi/skeleton_and_content_fwd.hpp>
+#include <boost/mpi/skeleton_and_content_fwd.hpp>
 
 // For (de-)serializing arrays
 #include <boost/serialization/array.hpp>
 
-#include <boost/parallel/mpi/detail/point_to_point.hpp>
-#include <boost/parallel/mpi/status.hpp>
-#include <boost/parallel/mpi/request.hpp>
+#include <boost/mpi/detail/point_to_point.hpp>
+#include <boost/mpi/status.hpp>
+#include <boost/mpi/request.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 /**
  * @brief A constant representing "any process."
@@ -1572,12 +1572,12 @@ communicator::irecv<content>(int source, int tag,
 }
 
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
 // If the user has already included skeleton_and_content.hpp, include
 // the code to send/receive skeletons and content.
-#ifdef BOOST_PARALLEL_MPI_SKELETON_AND_CONTENT_HPP
-#  include <boost/parallel/mpi/detail/communicator_sc.hpp>
+#ifdef BOOST_MPI_SKELETON_AND_CONTENT_HPP
+#  include <boost/mpi/detail/communicator_sc.hpp>
 #endif
 
-#endif // BOOST_PARALLEL_MPI_COMMUNICATOR_HPP
+#endif // BOOST_MPI_COMMUNICATOR_HPP

@@ -9,8 +9,8 @@
  *  This header provides MPI configuration details that expose the
  *  capabilities of the underlying MPI implementation.
  */
-#ifndef BOOST_PARALLEL_MPI_CONFIG_HPP
-#define BOOST_PARALLEL_MPI_CONFIG_HPP
+#ifndef BOOST_MPI_CONFIG_HPP
+#define BOOST_MPI_CONFIG_HPP
 
 #include <mpi.h>
 
@@ -47,4 +47,4 @@
 // Configuration for MPICH
 #endif
 
-#endif // BOOST_PARALLEL_MPI_CONFIG_HPP
+#endif // BOOST_MPI_CONFIG_HPP

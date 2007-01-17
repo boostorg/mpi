@@ -9,15 +9,15 @@
  *  This header defines the class @c request, which contains a request
  *  for non-blocking communication.
  */
-#ifndef BOOST_PARALLEL_MPI_REQUEST_HPP
-#define BOOST_PARALLEL_MPI_REQUEST_HPP
+#ifndef BOOST_MPI_REQUEST_HPP
+#define BOOST_MPI_REQUEST_HPP
 
 #include <mpi.h>
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/parallel/mpi/packed_iarchive.hpp>
+#include <boost/mpi/packed_iarchive.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 class status;
 class communicator;
@@ -97,6 +97,6 @@ class request
   friend class communicator;
 };
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_REQUEST_HPP
+#endif // BOOST_MPI_REQUEST_HPP

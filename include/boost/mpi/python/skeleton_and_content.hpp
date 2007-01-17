@@ -5,22 +5,22 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 //  Authors: Douglas Gregor
-#ifndef BOOST_PARALLEL_MPI_PYTHON_SKELETON_AND_CONTENT_HPP
-#define BOOST_PARALLEL_MPI_PYTHON_SKELETON_AND_CONTENT_HPP
+#ifndef BOOST_MPI_PYTHON_SKELETON_AND_CONTENT_HPP
+#define BOOST_MPI_PYTHON_SKELETON_AND_CONTENT_HPP
 
 /** @file skeleton_and_content.hpp
  *
  *  This file reflects the skeleton/content facilities into Python.
  */
 #include <boost/python.hpp>
-#include <boost/parallel/mpi.hpp>
+#include <boost/mpi.hpp>
 #include <boost/function/function1.hpp>
-#define BOOST_PARALLEL_MPI_PYTHON_FORWARD_ONLY
-#include <boost/parallel/mpi/python.hpp>
-#include <boost/parallel/mpi/python/serialize.hpp>
+#define BOOST_MPI_PYTHON_FORWARD_ONLY
+#include <boost/mpi/python.hpp>
+#include <boost/mpi/python/serialize.hpp>
 
 
-namespace boost { namespace parallel { namespace mpi { namespace python {
+namespace boost { namespace mpi { namespace python {
 
 /**
  * INTERNAL ONLY
@@ -29,9 +29,9 @@ namespace boost { namespace parallel { namespace mpi { namespace python {
  * retrieved from get_content. This wrapper is only needed to store a
  * copy of the Python object on which get_content() was called.
  */
-class content : public boost::parallel::mpi::content
+class content : public boost::mpi::content
 {
-  typedef boost::parallel::mpi::content inherited;
+  typedef boost::mpi::content inherited;
 
  public:
   content(const inherited& base, boost::python::object object) 
@@ -142,7 +142,7 @@ namespace detail {
   {
     content operator()(object value_obj) {
       T& value = extract<T&>(value_obj)();
-      return content(boost::parallel::mpi::get_content(value), value_obj);
+      return content(boost::mpi::get_content(value), value_obj);
     }
   };
 
@@ -204,6 +204,6 @@ void register_skeleton_and_content(const T& value, PyTypeObject* type)
   detail::register_skeleton_and_content_handler(type, handler);
 }
 
-} } } } // end namespace boost::parallel::mpi::python
+} } } // end namespace boost::mpi::python
 
-#endif // BOOST_PARALLEL_MPI_PYTHON_SKELETON_AND_CONTENT_HPP
+#endif // BOOST_MPI_PYTHON_SKELETON_AND_CONTENT_HPP

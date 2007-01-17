@@ -5,9 +5,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 // A test of the scatter() collective.
-#include <boost/parallel/mpi/collectives/scatter.hpp>
-#include <boost/parallel/mpi/communicator.hpp>
-#include <boost/parallel/mpi/environment.hpp>
+#include <boost/mpi/collectives/scatter.hpp>
+#include <boost/mpi/communicator.hpp>
+#include <boost/mpi/environment.hpp>
 #include <boost/test/minimal.hpp>
 #include <algorithm>
 #include "gps_position.hpp"
@@ -16,10 +16,10 @@
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/lexical_cast.hpp>
 
-using boost::parallel::mpi::communicator;
+using boost::mpi::communicator;
 
-using boost::parallel::mpi::packed_skeleton_iarchive;
-using boost::parallel::mpi::packed_skeleton_oarchive;
+using boost::mpi::packed_skeleton_iarchive;
+using boost::mpi::packed_skeleton_oarchive;
 
 template<typename Generator>
 void
@@ -32,7 +32,7 @@ scatter_test(const communicator& comm, Generator generator,
     for (root = 0; root < comm.size(); ++root)
       scatter_test(comm, generator, kind, root);
   } else {
-    using boost::parallel::mpi::scatter;
+    using boost::mpi::scatter;
 
     value_type value;
 
@@ -107,7 +107,7 @@ struct string_list_generator
 
 int test_main(int argc, char* argv[])
 {
-  boost::parallel::mpi::environment env(argc, argv);
+  boost::mpi::environment env(argc, argv);
 
   communicator comm;
   scatter_test(comm, int_generator(), "integers");

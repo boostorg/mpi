@@ -9,14 +9,14 @@
 //            Andrew Lumsdaine
 
 // Message Passing Interface 1.1 -- Section 4.9.1. Reduce
-#ifndef BOOST_PARALLEL_MPI_ALL_REDUCE_HPP
-#define BOOST_PARALLEL_MPI_ALL_REDUCE_HPP
+#ifndef BOOST_MPI_ALL_REDUCE_HPP
+#define BOOST_MPI_ALL_REDUCE_HPP
 
 // All-reduce falls back to reduce() + broadcast() in some cases.
-#include <boost/parallel/mpi/collectives/broadcast.hpp>
-#include <boost/parallel/mpi/collectives/reduce.hpp>
+#include <boost/mpi/collectives/broadcast.hpp>
+#include <boost/mpi/collectives/reduce.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 namespace detail {
   /**********************************************************************
@@ -32,7 +32,7 @@ namespace detail {
   {
     BOOST_MPI_CHECK_RESULT(MPI_Allreduce,
                            (const_cast<T*>(in_values), out_values, n,
-                            boost::parallel::mpi::get_mpi_datatype<T>(),
+                            boost::mpi::get_mpi_datatype<T>(),
                             is_mpi_op<Op, T>::op(), comm));
   }
 
@@ -51,7 +51,7 @@ namespace detail {
     user_op<Op, T> mpi_op(op);
     BOOST_MPI_CHECK_RESULT(MPI_Allreduce,
                            (const_cast<T*>(in_values), out_values, n,
-                            boost::parallel::mpi::get_mpi_datatype<T>(),
+                            boost::mpi::get_mpi_datatype<T>(),
                             mpi_op.get_mpi_op(), comm));
   }
 
@@ -93,10 +93,10 @@ template<typename T, typename Op>
 T all_reduce(const communicator& comm, const T& in_value, Op op)
 {
   T result;
-  ::boost::parallel::mpi::all_reduce(comm, in_value, result, op);
+  ::boost::mpi::all_reduce(comm, in_value, result, op);
   return result;
 }
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_ALL_REDUCE_HPP
+#endif // BOOST_MPI_ALL_REDUCE_HPP

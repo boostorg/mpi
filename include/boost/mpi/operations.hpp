@@ -15,18 +15,18 @@
  *  several new function object types not present in the standard @c
  *  <functional> header that have direct mappings to @c MPI_Op.
  */
-#ifndef BOOST_PARALLEL_MPI_IS_MPI_OP_HPP
-#define BOOST_PARALLEL_MPI_IS_MPI_OP_HPP
+#ifndef BOOST_MPI_IS_MPI_OP_HPP
+#define BOOST_MPI_IS_MPI_OP_HPP
 
 #include <mpi.h>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/and.hpp>
-#include <boost/parallel/mpi/datatype.hpp>
+#include <boost/mpi/datatype.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <functional>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 template<typename Op, typename T> struct is_mpi_op;
 
@@ -169,7 +169,7 @@ struct bitwise_xor : public std::binary_function<T, T, T>
  *  that map onto operations that have @c MPI_Op equivalences, such as
  *  bitwise OR, logical and, or maximum. However, users are encouraged
  *  to use the standard function objects in the @c functional and @c
- *  boost/parallel/mpi/operations.hpp headers whenever possible. For
+ *  boost/mpi/operations.hpp headers whenever possible. For
  *  function objects that are class templates with a single template
  *  parameter, it may be easier to specialize @c is_builtin_mpi_op.
  */
@@ -317,6 +317,6 @@ namespace detail {
 
 } // end namespace detail
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_GET_MPI_OP_HPP
+#endif // BOOST_MPI_GET_MPI_OP_HPP

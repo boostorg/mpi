@@ -8,16 +8,16 @@
 // verifies that the same data makes it all the way. Should test all
 // of the various kinds of data that can be sent (primitive types, POD
 // types, serializable objects, etc.)
-#include <boost/parallel/mpi/communicator.hpp>
-#include <boost/parallel/mpi/environment.hpp>
+#include <boost/mpi/communicator.hpp>
+#include <boost/mpi/environment.hpp>
 #include <boost/test/minimal.hpp>
 #include <algorithm>
 #include "gps_position.hpp"
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/list.hpp>
 
-using boost::parallel::mpi::communicator;
-using boost::parallel::mpi::status;
+using boost::mpi::communicator;
+using boost::mpi::status;
 
 template<typename T>
 void
@@ -66,9 +66,9 @@ ring_array_test(const communicator& comm, const T* pass_values,
     BOOST_CHECK(okay);
     if (okay) std::cout << " OK." << std::endl;
   } else {
-    status stat = comm.probe(boost::parallel::mpi::any_source, 0);
+    status stat = comm.probe(boost::mpi::any_source, 0);
     boost::optional<int> num_values = stat.template count<T>();
-    if (boost::parallel::mpi::is_mpi_datatype<T>())
+    if (boost::mpi::is_mpi_datatype<T>())
       BOOST_CHECK(num_values && *num_values == n);
     else
       BOOST_CHECK(!num_values || *num_values == n);     
@@ -83,7 +83,7 @@ ring_array_test(const communicator& comm, const T* pass_values,
 
 int test_main(int argc, char* argv[])
 {
-  boost::parallel::mpi::environment env(argc, argv);
+  boost::mpi::environment env(argc, argv);
 
   communicator comm;
   if (comm.size() == 1) {

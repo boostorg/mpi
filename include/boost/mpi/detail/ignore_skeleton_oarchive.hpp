@@ -6,8 +6,8 @@
 
 //  Authors: Matthias Troyer
 
-#ifndef BOOST_PARALLEL_MPI_DETAIL_IGNORE_SKELETON_OARCHIVE_HPP
-#define BOOST_PARALLEL_MPI_DETAIL_IGNORE_SKELETON_OARCHIVE_HPP
+#ifndef BOOST_MPI_DETAIL_IGNORE_SKELETON_OARCHIVE_HPP
+#define BOOST_MPI_DETAIL_IGNORE_SKELETON_OARCHIVE_HPP
 
 #include <boost/pfto.hpp>
 
@@ -17,7 +17,7 @@
 #include <boost/archive/detail/oserializer.hpp>
 #include <boost/serialization/collection_size_type.hpp>
 
-namespace boost { namespace parallel { namespace mpi { namespace detail {
+namespace boost { namespace mpi { namespace detail {
 
 template<class Archive>
 class ignore_skeleton_oarchive 
@@ -65,6 +65,6 @@ BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(serialization::collection_size_type)
 };
 
 
-} } } } // end namespace boost::parallel::mpi::detail
+} } } // end namespace boost::mpi::detail
 
-#endif // BOOST_PARALLEL_MPI_DETAIL_IGNORE_SKELETON_OARCHIVE_HPP
+#endif // BOOST_MPI_DETAIL_IGNORE_SKELETON_OARCHIVE_HPP

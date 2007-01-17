@@ -5,10 +5,10 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 // An example using Boost.MPI's reduce() to compute a minimum value.
-#include <boost/parallel/mpi.hpp>
+#include <boost/mpi.hpp>
 #include <iostream>
 #include <cstdlib>
-namespace mpi = boost::parallel::mpi;
+namespace mpi = boost::mpi;
 
 int main(int argc, char* argv[])
 {

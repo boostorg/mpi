@@ -14,18 +14,18 @@
  *
  *  This header provides the mapping from C++ types to MPI data types.
  */
-#ifndef BOOST_PARALLEL_MPI_DATATYPE_HPP
-#define BOOST_PARALLEL_MPI_DATATYPE_HPP
+#ifndef BOOST_MPI_DATATYPE_HPP
+#define BOOST_MPI_DATATYPE_HPP
 
-#include <boost/parallel/mpi/datatype_fwd.hpp>
+#include <boost/mpi/datatype_fwd.hpp>
 #include <mpi.h>
 #include <boost/config.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/or.hpp>
-#include <boost/parallel/mpi/detail/mpi_datatype_cache.hpp>
+#include <boost/mpi/detail/mpi_datatype_cache.hpp>
 #include <boost/mpl/assert.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 /**
  *  @brief Type trait that determines if there exists a built-in
@@ -142,10 +142,10 @@ struct is_mpi_builtin_datatype
  *  mpl::true_:
  *
  *    @code
- *    namespace boost { namespace parallel { namespace mpi {
+ *    namespace boost { namespace mpi {
  *      template<> struct is_mpi_datatype<point>
  *        : public mpl::true_ { };
- *    } } }
+ *    } }
  *    @endcode
  */
 template<typename T>
@@ -288,6 +288,6 @@ struct is_mpi_datatype<bool>
   : boost::mpl::bool_<true>
 {};
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_MPI_DATATYPE_HPP
+#endif // BOOST_MPI_MPI_DATATYPE_HPP

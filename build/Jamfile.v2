@@ -14,27 +14,27 @@ import python ;
 if [ mpi.configured ]
 {
 
-project boost/parallel
+project boost/mpi
   : source-location ../src
   ;
 
 lib boost_mpi 
   : 
-    mpi/broadcast.cpp
-    mpi/communicator.cpp
-    mpi/computation_tree.cpp
-    mpi/content_oarchive.cpp
-    mpi/environment.cpp
-    mpi/mpi_datatype_cache.cpp
-    mpi/mpi_datatype_oarchive.cpp
-    mpi/packed_iarchive.cpp
-    mpi/packed_oarchive.cpp
-    mpi/packed_skeleton_iarchive.cpp
-    mpi/packed_skeleton_oarchive.cpp
-    mpi/point_to_point.cpp
-    mpi/request.cpp
-    mpi/text_skeleton_oarchive.cpp
-    mpi/timer.cpp
+    broadcast.cpp
+    communicator.cpp
+    computation_tree.cpp
+    content_oarchive.cpp
+    environment.cpp
+    mpi_datatype_cache.cpp
+    mpi_datatype_oarchive.cpp
+    packed_iarchive.cpp
+    packed_oarchive.cpp
+    packed_skeleton_iarchive.cpp
+    packed_skeleton_oarchive.cpp
+    point_to_point.cpp
+    request.cpp
+    text_skeleton_oarchive.cpp
+    timer.cpp
   : # Requirements
     <library>../../serialization/build//boost_serialization
     <library>/mpi//mpi [ mpi.extra-requirements ]
@@ -49,7 +49,7 @@ lib boost_mpi
   {
     lib boost_mpi_python
       : # Sources
-        mpi/python/serialize.cpp
+        python/serialize.cpp
       : # Requirements
       <library>boost_mpi
       <library>/boost/python//boost_python
@@ -57,23 +57,23 @@ lib boost_mpi
 
     python-extension mpi 
       : # Sources
-        mpi/python/collectives.cpp
-        mpi/python/py_communicator.cpp
-        mpi/python/datatypes.cpp
-        mpi/python/documentation.cpp
-        mpi/python/py_environment.cpp
-        mpi/python/exception.cpp
-        mpi/python/module.cpp
-        mpi/python/py_request.cpp
-        mpi/python/skeleton_and_content.cpp
-        mpi/python/status.cpp
-        mpi/python/py_timer.cpp
+        python/collectives.cpp
+        python/py_communicator.cpp
+        python/datatypes.cpp
+        python/documentation.cpp
+        python/py_environment.cpp
+        python/exception.cpp
+        python/module.cpp
+        python/py_request.cpp
+        python/skeleton_and_content.cpp
+        python/status.cpp
+        python/py_timer.cpp
       : # Requirements
         <library>boost_mpi_python
         <library>boost_mpi 
         <library>/boost/python//boost_python
       ;
-    }
+  }
 }
 else
 {

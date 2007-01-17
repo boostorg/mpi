@@ -6,10 +6,10 @@
 
 // A simple Hello, world! example using Boost.MPI broadcast()
 
-#include <boost/parallel/mpi.hpp>
+#include <boost/mpi.hpp>
 #include <iostream>
 #include <boost/serialization/string.hpp> // Needed to send/receive strings!
-namespace mpi = boost::parallel::mpi;
+namespace mpi = boost::mpi;
 
 int main(int argc, char* argv[])
 {

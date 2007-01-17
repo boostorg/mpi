@@ -8,10 +8,10 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 // Performance test of the reduce() collective
-#include <boost/parallel/mpi.hpp>
+#include <boost/mpi.hpp>
 #include <boost/lexical_cast.hpp>
 
-namespace mpi = boost::parallel::mpi;
+namespace mpi = boost::mpi;
 
 struct add_int {
   int operator()(int x, int y) const { return x + y; }
@@ -35,9 +35,9 @@ inline wrapped_int operator+(wrapped_int x, wrapped_int y)
   return wrapped_int(x.value + y.value);
 }
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
   template<> struct is_mpi_datatype<wrapped_int> : mpl::true_ { };
-} } }
+} }
 
 struct serialized_int
 {

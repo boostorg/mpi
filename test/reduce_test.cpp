@@ -5,9 +5,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 // A test of the reduce() collective.
-#include <boost/parallel/mpi/collectives/reduce.hpp>
-#include <boost/parallel/mpi/communicator.hpp>
-#include <boost/parallel/mpi/environment.hpp>
+#include <boost/mpi/collectives/reduce.hpp>
+#include <boost/mpi/communicator.hpp>
+#include <boost/mpi/environment.hpp>
 #include <boost/test/minimal.hpp>
 #include <algorithm>
 #include <boost/serialization/string.hpp>
@@ -15,7 +15,7 @@
 #include <boost/lexical_cast.hpp>
 #include <numeric>
 
-using boost::parallel::mpi::communicator;
+using boost::mpi::communicator;
 
 // A simple point class that we can build, add, compare, and
 // serialize.
@@ -58,12 +58,12 @@ point operator+(const point& p1, const point& p2)
   return point(p1.x + p2.x, p1.y + p2.y, p1.z + p2.z);
 }
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
   template <>
   struct is_mpi_datatype<point> : public mpl::true_ { };
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
 template<typename Generator, typename Op>
 void
@@ -79,7 +79,7 @@ reduce_test(const communicator& comm, Generator generator,
     for (root = 0; root < comm.size(); ++root)
       reduce_test(comm, generator, type_kind, op, op_kind, init, root);
   } else {
-    using boost::parallel::mpi::reduce;
+    using boost::mpi::reduce;
 
     if (comm.rank() == root) {
       std::cout << "Reducing to " << op_kind << " of " << type_kind
@@ -191,18 +191,18 @@ struct wrapped_int_generator
   int base;
 };
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 // Make std::plus<wrapped_int> commutative.
 template<>
 struct is_commutative<std::plus<wrapped_int>, wrapped_int>
   : mpl::true_ { };
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
 int test_main(int argc, char* argv[])
 {
-  using namespace boost::parallel::mpi;
+  using namespace boost::mpi;
   environment env(argc, argv);
 
   communicator comm;

@@ -6,8 +6,8 @@
 
 //  Authors: Matthias Troyer
 
-#ifndef BOOST_PARALLEL_MPI_DETAIL_FORWARD_SKELETON_IARCHIVE_HPP
-#define BOOST_PARALLEL_MPI_DETAIL_FORWARD_SKELETON_IARCHIVE_HPP
+#ifndef BOOST_MPI_DETAIL_FORWARD_SKELETON_IARCHIVE_HPP
+#define BOOST_MPI_DETAIL_FORWARD_SKELETON_IARCHIVE_HPP
 
 #include <boost/pfto.hpp>
 
@@ -18,7 +18,7 @@
 #include <boost/serialization/collection_size_type.hpp>
 #include <boost/archive/array/iarchive.hpp>
 
-namespace boost { namespace parallel { namespace mpi { namespace detail {
+namespace boost { namespace mpi { namespace detail {
 
 template<class Archive, class ImplementationArchive>
 class forward_skeleton_iarchive 
@@ -73,6 +73,6 @@ protected:
 };
 
 
-} } } } // end namespace boost::parallel::mpi::detail
+} } } // end namespace boost::mpi::detail
 
-#endif // BOOST_PARALLEL_MPI_DETAIL_FORWARD_STRUCTURE_IARCHIVE_HPP
+#endif // BOOST_MPI_DETAIL_FORWARD_STRUCTURE_IARCHIVE_HPP

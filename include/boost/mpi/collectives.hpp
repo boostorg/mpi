@@ -13,15 +13,15 @@
  *  processes within a communicator. The header @c collectives_fwd.hpp
  *  provides forward declarations for each of these operations. To
  *  include only specific collective algorithms, use the headers @c
- *  boost/parallel/mpi/collectives/algorithm_name.hpp.
+ *  boost/mpi/collectives/algorithm_name.hpp.
  */
-#ifndef BOOST_PARALLEL_MPI_COLLECTIVES_HPP
-#define BOOST_PARALLEL_MPI_COLLECTIVES_HPP
+#ifndef BOOST_MPI_COLLECTIVES_HPP
+#define BOOST_MPI_COLLECTIVES_HPP
 
-#include <boost/parallel/mpi/communicator.hpp>
+#include <boost/mpi/communicator.hpp>
 #include <vector>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 /**
  *  @brief Gather the values stored at every process into vectors of
@@ -528,18 +528,18 @@ template<typename T, typename Op>
 void
 scan(const communicator& comm, const T* in_values, int n, T* out_values, Op op);
 
-} } } // end namespace boost::parallel::mpi
-#endif // BOOST_PARALLEL_MPI_COLLECTIVES_HPP
+} } // end namespace boost::mpi
+#endif // BOOST_MPI_COLLECTIVES_HPP
 
-#ifndef BOOST_PARALLEL_MPI_COLLECTIVES_FORWARD_ONLY
+#ifndef BOOST_MPI_COLLECTIVES_FORWARD_ONLY
 // Include implementations of each of the collectives
-#  include <boost/parallel/mpi/collectives/all_gather.hpp>
-#  include <boost/parallel/mpi/collectives/all_reduce.hpp>
-#  include <boost/parallel/mpi/collectives/all_to_all.hpp>
-#  include <boost/parallel/mpi/collectives/broadcast.hpp>
-#  include <boost/parallel/mpi/collectives/gather.hpp>
-#  include <boost/parallel/mpi/collectives/scatter.hpp>
-#  include <boost/parallel/mpi/collectives/reduce.hpp>
-#  include <boost/parallel/mpi/collectives/scan.hpp>
+#  include <boost/mpi/collectives/all_gather.hpp>
+#  include <boost/mpi/collectives/all_reduce.hpp>
+#  include <boost/mpi/collectives/all_to_all.hpp>
+#  include <boost/mpi/collectives/broadcast.hpp>
+#  include <boost/mpi/collectives/gather.hpp>
+#  include <boost/mpi/collectives/scatter.hpp>
+#  include <boost/mpi/collectives/reduce.hpp>
+#  include <boost/mpi/collectives/scan.hpp>
 #endif
 

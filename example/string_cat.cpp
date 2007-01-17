@@ -5,11 +5,11 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 // An example using Boost.MPI's reduce() to concatenate strings.
-#include <boost/parallel/mpi.hpp>
+#include <boost/mpi.hpp>
 #include <iostream>
 #include <string>
 #include <boost/serialization/string.hpp> // Important for sending strings!
-namespace mpi = boost::parallel::mpi;
+namespace mpi = boost::mpi;
 
 /* Defining STRING_CONCAT_COMMUTATIVE lies to Boost.MPI by forcing it
  * to assume that string concatenation is commutative, which it is
@@ -18,12 +18,12 @@ namespace mpi = boost::parallel::mpi;
  * commutative.
  */
 #ifdef STRING_CONCAT_COMMUTATIVE
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 template<>
 struct is_commutative<std::plus<std::string>, std::string> : mpl::true_ { };
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 #endif
 
 int main(int argc, char* argv[])

@@ -9,8 +9,8 @@
  *  This header defines operations for completing non-blocking
  *  communication requests.
  */
-#ifndef BOOST_PARALLEL_MPI_NONBLOCKING_HPP
-#define BOOST_PARALLEL_MPI_NONBLOCKING_HPP
+#ifndef BOOST_MPI_NONBLOCKING_HPP
+#define BOOST_MPI_NONBLOCKING_HPP
 
 #include <mpi.h>
 #include <vector>
@@ -19,11 +19,11 @@
 #include <utility> // for std::pair
 #include <algorithm> // for iter_swap, reverse
 #include <boost/static_assert.hpp>
-#include <boost/parallel/mpi/request.hpp>
-#include <boost/parallel/mpi/status.hpp>
-#include <boost/parallel/mpi/exception.hpp>
+#include <boost/mpi/request.hpp>
+#include <boost/mpi/status.hpp>
+#include <boost/mpi/exception.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 /** 
  *  @brief Wait until any non-blocking request has completed.
@@ -726,7 +726,7 @@ test_some(BidirectionalIterator first, BidirectionalIterator last)
   return start_of_completed;
 }
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
 
-#endif // BOOST_PARALLEL_MPI_NONBLOCKING_HPP
+#endif // BOOST_MPI_NONBLOCKING_HPP

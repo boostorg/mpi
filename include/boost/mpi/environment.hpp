@@ -10,15 +10,15 @@
  *  routines to initialize, finalization, and query the status of the
  *  Boost MPI environment.
  */
-#ifndef BOOST_PARALLEL_MPI_ENVIRONMENT_HPP
-#define BOOST_PARALLEL_MPI_ENVIRONMENT_HPP
+#ifndef BOOST_MPI_ENVIRONMENT_HPP
+#define BOOST_MPI_ENVIRONMENT_HPP
 
 #include <boost/noncopyable.hpp>
 #include <boost/optional.hpp>
 #include <string>
-#include <boost/parallel/mpi/config.hpp>
+#include <boost/mpi/config.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 /** @brief Initialize, finalize, and query the MPI environment.
  *
@@ -196,6 +196,6 @@ private:
   static const int num_reserved_tags = 1;
 };
 
-} } } /// end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_ENVIRONMENT_HPP
+#endif // BOOST_MPI_ENVIRONMENT_HPP

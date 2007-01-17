@@ -5,15 +5,16 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 // Message Passing Interface 1.1 -- Section 4.4. Broadcast
-#ifndef BOOST_PARALLEL_MPI_BROADCAST_HPP
-#define BOOST_PARALLEL_MPI_BROADCAST_HPP
+#ifndef BOOST_MPI_BROADCAST_HPP
+#define BOOST_MPI_BROADCAST_HPP
 
-#include <boost/parallel/mpi/collectives_fwd.hpp>
-#include <boost/parallel/mpi/exception.hpp>
-#include <boost/parallel/mpi/datatype.hpp>
-#include <boost/parallel/mpi/communicator.hpp>
+#include <boost/mpi/collectives_fwd.hpp>
+#include <boost/mpi/exception.hpp>
+#include <boost/mpi/datatype.hpp>
+#include <boost/mpi/communicator.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
+
 /************************************************************************
  * Specializations                                                      *
  ************************************************************************/
@@ -94,7 +95,7 @@ namespace detail {
   {
     BOOST_MPI_CHECK_RESULT(MPI_Bcast,
                            (values, n,
-                            boost::parallel::mpi::get_mpi_datatype<T>(),
+                            boost::mpi::get_mpi_datatype<T>(),
                             root, MPI_Comm(comm)));
   }
 
@@ -133,12 +134,12 @@ void broadcast(const communicator& comm, T* values, int n, int root)
   detail::broadcast_impl(comm, values, n, root, is_mpi_datatype<T>());
 }
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
 // If the user has already included skeleton_and_content.hpp, include
 // the code to broadcast skeletons and content.
-#ifdef BOOST_PARALLEL_MPI_SKELETON_AND_CONTENT_HPP
-#  include <boost/parallel/mpi/detail/broadcast_sc.hpp>
+#ifdef BOOST_MPI_SKELETON_AND_CONTENT_HPP
+#  include <boost/mpi/detail/broadcast_sc.hpp>
 #endif
 
-#endif // BOOST_PARALLEL_MPI_BROADCAST_HPP
+#endif // BOOST_MPI_BROADCAST_HPP

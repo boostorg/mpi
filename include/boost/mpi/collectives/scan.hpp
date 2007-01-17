@@ -9,28 +9,28 @@
 //            Andrew Lumsdaine
 
 // Message Passing Interface 1.1 -- Section 4.9.1. Scan
-#ifndef BOOST_PARALLEL_MPI_SCAN_HPP
-#define BOOST_PARALLEL_MPI_SCAN_HPP
+#ifndef BOOST_MPI_SCAN_HPP
+#define BOOST_MPI_SCAN_HPP
 
-#include <boost/parallel/mpi/exception.hpp>
-#include <boost/parallel/mpi/datatype.hpp>
+#include <boost/mpi/exception.hpp>
+#include <boost/mpi/datatype.hpp>
 
 // For (de-)serializing sends and receives
-#include <boost/parallel/mpi/packed_oarchive.hpp>
-#include <boost/parallel/mpi/packed_iarchive.hpp>
+#include <boost/mpi/packed_oarchive.hpp>
+#include <boost/mpi/packed_iarchive.hpp>
 
 // For packed_[io]archive sends and receives
-#include <boost/parallel/mpi/detail/point_to_point.hpp>
+#include <boost/mpi/detail/point_to_point.hpp>
 
-#include <boost/parallel/mpi/communicator.hpp>
-#include <boost/parallel/mpi/environment.hpp>
-#include <boost/parallel/mpi/detail/computation_tree.hpp>
-#include <boost/parallel/mpi/operations.hpp>
+#include <boost/mpi/communicator.hpp>
+#include <boost/mpi/environment.hpp>
+#include <boost/mpi/detail/computation_tree.hpp>
+#include <boost/mpi/operations.hpp>
 #include <algorithm>
 #include <exception>
 #include <boost/assert.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 
 /************************************************************************
@@ -51,7 +51,7 @@ namespace detail {
   {
     BOOST_MPI_CHECK_RESULT(MPI_Scan,
                            (const_cast<T*>(in_values), out_values, n,
-                            boost::parallel::mpi::get_mpi_datatype<T>(),
+                            boost::mpi::get_mpi_datatype<T>(),
                             is_mpi_op<Op, T>::op(), comm));
   }
 
@@ -70,7 +70,7 @@ namespace detail {
     user_op<Op, T> mpi_op(op);
     BOOST_MPI_CHECK_RESULT(MPI_Scan,
                            (const_cast<T*>(in_values), out_values, n,
-                            boost::parallel::mpi::get_mpi_datatype<T>(),
+                            boost::mpi::get_mpi_datatype<T>(),
                             mpi_op.get_mpi_op(), comm));
   }
 
@@ -163,6 +163,6 @@ scan(const communicator& comm, const T& in_value, Op op)
   return out_value;
 }
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_SCAN_HPP
+#endif // BOOST_MPI_SCAN_HPP

@@ -6,30 +6,30 @@
 
 // A test of the communicator that transmits skeletons and
 // content for data types.
-#include <boost/parallel/mpi/communicator.hpp>
-#include <boost/parallel/mpi/environment.hpp>
+#include <boost/mpi/communicator.hpp>
+#include <boost/mpi/environment.hpp>
 #include <boost/test/minimal.hpp>
 #include <boost/serialization/list.hpp>
-#include <boost/parallel/mpi/skeleton_and_content.hpp>
-#include <boost/parallel/mpi/nonblocking.hpp>
+#include <boost/mpi/skeleton_and_content.hpp>
+#include <boost/mpi/nonblocking.hpp>
 #include <algorithm>
 #include <boost/iterator/counting_iterator.hpp>
-#include <boost/parallel/mpi/collectives/broadcast.hpp>
+#include <boost/mpi/collectives/broadcast.hpp>
 
-using boost::parallel::mpi::communicator;
+using boost::mpi::communicator;
 
-using boost::parallel::mpi::packed_skeleton_iarchive;
-using boost::parallel::mpi::packed_skeleton_oarchive;
+using boost::mpi::packed_skeleton_iarchive;
+using boost::mpi::packed_skeleton_oarchive;
 
 void
 test_skeleton_and_content(const communicator& comm, int root,
                           bool manual_broadcast)
 {
-  using boost::parallel::mpi::skeleton;
-  using boost::parallel::mpi::content;
-  using boost::parallel::mpi::get_content;
+  using boost::mpi::skeleton;
+  using boost::mpi::content;
+  using boost::mpi::get_content;
   using boost::make_counting_iterator;
-  using boost::parallel::mpi::broadcast;
+  using boost::mpi::broadcast;
 
   typedef std::list<int>::iterator iterator;
 
@@ -104,13 +104,13 @@ test_skeleton_and_content(const communicator& comm, int root,
 void
 test_skeleton_and_content_nonblocking(const communicator& comm, int root)
 {
-  using boost::parallel::mpi::skeleton;
-  using boost::parallel::mpi::content;
-  using boost::parallel::mpi::get_content;
+  using boost::mpi::skeleton;
+  using boost::mpi::content;
+  using boost::mpi::get_content;
   using boost::make_counting_iterator;
-  using boost::parallel::mpi::broadcast;
-  using boost::parallel::mpi::request;
-  using boost::parallel::mpi::wait_all;
+  using boost::mpi::broadcast;
+  using boost::mpi::request;
+  using boost::mpi::wait_all;
 
   typedef std::list<int>::iterator iterator;
 
@@ -189,7 +189,7 @@ test_skeleton_and_content_nonblocking(const communicator& comm, int root)
 
 int test_main(int argc, char* argv[])
 {
-  boost::parallel::mpi::environment env(argc, argv);
+  boost::mpi::environment env(argc, argv);
 
   communicator comm;
   if (comm.size() == 1) {

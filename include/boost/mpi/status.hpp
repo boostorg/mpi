@@ -9,13 +9,13 @@
  *  This header defines the class @c status, which reports on the
  *  results of point-to-point communication.
  */
-#ifndef BOOST_PARALLEL_MPI_STATUS_HPP
-#define BOOST_PARALLEL_MPI_STATUS_HPP
+#ifndef BOOST_MPI_STATUS_HPP
+#define BOOST_MPI_STATUS_HPP
 
 #include <mpi.h>
 #include <boost/optional.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 class request;
 class communicator;
@@ -100,6 +100,6 @@ class status
 };
 
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_STATUS_HPP
+#endif // BOOST_MPI_STATUS_HPP

@@ -5,9 +5,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 // A test of the nonblocking point-to-point operations.
-#include <boost/parallel/mpi/nonblocking.hpp>
-#include <boost/parallel/mpi/communicator.hpp>
-#include <boost/parallel/mpi/environment.hpp>
+#include <boost/mpi/nonblocking.hpp>
+#include <boost/mpi/communicator.hpp>
+#include <boost/mpi/environment.hpp>
 #include <boost/test/minimal.hpp>
 #include "gps_position.hpp"
 #include <boost/lexical_cast.hpp>
@@ -16,9 +16,9 @@
 #include <iterator>
 #include <algorithm>
 
-using boost::parallel::mpi::communicator;
-using boost::parallel::mpi::request;
-using boost::parallel::mpi::status;
+using boost::mpi::communicator;
+using boost::mpi::request;
+using boost::mpi::status;
 
 enum method_kind { 
   mk_wait_any, mk_test_any, mk_wait_all, mk_wait_all_keep, 
@@ -47,12 +47,12 @@ void
 nonblocking_test(const communicator& comm, const T* values, int num_values, 
                  const char* kind, method_kind method = mk_all)
 {
-  using boost::parallel::mpi::wait_any;
-  using boost::parallel::mpi::test_any;
-  using boost::parallel::mpi::wait_all;
-  using boost::parallel::mpi::test_all;
-  using boost::parallel::mpi::wait_some;
-  using boost::parallel::mpi::test_some;
+  using boost::mpi::wait_any;
+  using boost::mpi::test_any;
+  using boost::mpi::wait_all;
+  using boost::mpi::test_all;
+  using boost::mpi::wait_some;
+  using boost::mpi::test_some;
 
   if (method == mk_all || method == mk_all_except_test_all) {
     nonblocking_test(comm, values, num_values, kind, mk_wait_any);
@@ -219,7 +219,7 @@ nonblocking_test(const communicator& comm, const T* values, int num_values,
 
 int test_main(int argc, char* argv[])
 {
-  boost::parallel::mpi::environment env(argc, argv);
+  boost::mpi::environment env(argc, argv);
 
   communicator comm;
 

@@ -11,13 +11,13 @@
  *  This header contains all of the forward declarations required to
  *  use transmit skeletons of data structures and the content of data
  *  structures separately. To actually transmit skeletons or content,
- *  include the header @c boost/parallel/mpi/skeleton_and_content.hpp.
+ *  include the header @c boost/mpi/skeleton_and_content.hpp.
  */
 
-#ifndef BOOST_PARALLEL_MPI_SKELETON_AND_CONTENT_FWD_HPP
-#define BOOST_PARALLEL_MPI_SKELETON_AND_CONTENT_FWD_HPP
+#ifndef BOOST_MPI_SKELETON_AND_CONTENT_FWD_HPP
+#define BOOST_MPI_SKELETON_AND_CONTENT_FWD_HPP
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 template <class T> struct skeleton_proxy;
 template <class T> const skeleton_proxy<T> skeleton(T& x);
@@ -26,6 +26,6 @@ template <class T> const content get_content(const T& x);
 class packed_skeleton_iarchive;
 class packed_skeleton_oarchive;
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_SKELETON_AND_CONTENT_FWD_HPP
+#endif // BOOST_MPI_SKELETON_AND_CONTENT_FWD_HPP

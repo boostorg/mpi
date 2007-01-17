@@ -5,14 +5,14 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 // Message Passing Interface 1.1 -- Section 3. MPI Point-to-point
-#ifndef BOOST_PARALLEL_MPI_DETAIL_POINT_TO_POINT_HPP
-#define BOOST_PARALLEL_MPI_DETAIL_POINT_TO_POINT_HPP
+#ifndef BOOST_MPI_DETAIL_POINT_TO_POINT_HPP
+#define BOOST_MPI_DETAIL_POINT_TO_POINT_HPP
 
 // For (de-)serializing sends and receives
-#include <boost/parallel/mpi/packed_oarchive.hpp>
-#include <boost/parallel/mpi/packed_iarchive.hpp>
+#include <boost/mpi/packed_oarchive.hpp>
+#include <boost/mpi/packed_iarchive.hpp>
 
-namespace boost { namespace parallel { namespace mpi { namespace detail {
+namespace boost { namespace mpi { namespace detail {
 
 /** Sends a packed archive using MPI_Send. */
 void
@@ -46,6 +46,6 @@ void
 packed_archive_recv(MPI_Comm comm, int source, int tag, packed_iarchive& ar,
                     MPI_Status& status);
 
-} } } } // end namespace boost::parallel::mpi::detail
+} } } // end namespace boost::mpi::detail
 
-#endif // BOOST_PARALLEL_MPI_DETAIL_POINT_TO_POINT_HPP
+#endif // BOOST_MPI_DETAIL_POINT_TO_POINT_HPP

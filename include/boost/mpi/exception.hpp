@@ -10,15 +10,15 @@
  *  the user and macros that translate MPI error codes into Boost.MPI
  *  exceptions.
  */
-#ifndef BOOST_PARALLEL_MPI_EXCEPTION_HPP
-#define BOOST_PARALLEL_MPI_EXCEPTION_HPP
+#ifndef BOOST_MPI_EXCEPTION_HPP
+#define BOOST_MPI_EXCEPTION_HPP
 
 #include <mpi.h>
 #include <exception>
 #include <boost/config.hpp>
 #include <boost/throw_exception.hpp>
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
 /** @brief Catch-all exception class for MPI errors.
  *
@@ -80,10 +80,10 @@ class exception : public std::exception
  {                                                                      \
    int _check_result = MPIFunc Args;                                    \
    if (_check_result != MPI_SUCCESS)                                    \
-     boost::throw_exception(boost::parallel::mpi::exception(#MPIFunc,   \
+     boost::throw_exception(boost::mpi::exception(#MPIFunc,   \
                                                              _check_result)); \
  }
 
-} } } // end namespace boost::parallel::mpi
+} } // end namespace boost::mpi
 
-#endif // BOOST_PARALLEL_MPI_EXCEPTION_HPP
+#endif // BOOST_MPI_EXCEPTION_HPP
