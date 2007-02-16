@@ -6,7 +6,7 @@
 // 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include <boost/parallel/mpi/datatype_fwd.hpp>
+#include <boost/mpi/datatype_fwd.hpp>
 #include <boost/mpl/and.hpp>
 #include <boost/serialization/export.hpp>
 #include <boost/shared_ptr.hpp>
@@ -46,7 +46,7 @@ public:
 };
 
 
-namespace boost { namespace parallel { namespace mpi {
+namespace boost { namespace mpi {
 
   template <>
   struct is_mpi_datatype<gps_position>
@@ -57,7 +57,5 @@ namespace boost { namespace parallel { namespace mpi {
            >
   {};
 
-}}}
-
-
+} }
 #endif
