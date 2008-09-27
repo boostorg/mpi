@@ -9,7 +9,7 @@
 #ifndef BOOST_MPI_PACKED_IPRIMITIVE_HPP
 #define BOOST_MPI_PACKED_IPRIMITIVE_HPP
 
-#include <mpi.h>
+#include <boost/mpi/config.hpp>
 #include <iostream>
 #include <cstddef> // size_t
 #include <boost/config.hpp>
@@ -65,20 +65,19 @@ public:
 
     // fast saving of arrays of fundamental types
     template<class T>
-    void load_array(serialization::array<T> & x, unsigned int /* file_version */)
+    void load_array(serialization::array<T> const& x, unsigned int /* file_version */)
     {
       if (x.count())
         load_impl(x.address(), get_mpi_datatype(*x.address()), x.count());
     }
 
-    typedef is_mpi_datatype<mpl::_1> use_array_optimization;
+    template<class T>
+    void load(serialization::array<T> const& x)
+    {
+      load_array(x,0u);
+    }
 
-#ifndef BOOST_NO_MEMBER_TEMPLATE_FRIENDS
-    friend class archive::load_access;
-protected:
-#else
-public:
-#endif
+    typedef is_mpi_datatype<mpl::_1> use_array_optimization;
 
     // default saving of primitives.
     template<class T>

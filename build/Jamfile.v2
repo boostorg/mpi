@@ -11,6 +11,8 @@
 import mpi ;
 import python ;
 
+libraries = ;
+
 if [ mpi.configured ]
 {
 
@@ -50,6 +52,8 @@ lib boost_mpi
     <library>../../serialization/build//boost_serialization
     <library>/mpi//mpi [ mpi.extra-requirements ]
   ;
+  
+libraries += boost_mpi ;  
 
   if [ python.configured ]
   {
@@ -69,6 +73,7 @@ lib boost_mpi
       : # Usage requirements
         <library>/mpi//mpi [ mpi.extra-requirements ]
       ;
+    libraries += boost_mpi_python ;   
 
     python-extension mpi 
       : # Sources
@@ -77,6 +82,7 @@ lib boost_mpi
         python/datatypes.cpp
         python/documentation.cpp
         python/py_environment.cpp
+        python/py_nonblocking.cpp
         python/py_exception.cpp
         python/module.cpp
         python/py_request.cpp
@@ -96,10 +102,12 @@ lib boost_mpi
       ;
   }
 }
-else
+else if ! ( --without-mpi in  [ modules.peek : ARGV ] )
 {
   ECHO "warning: skipping optional Message Passing Interface (MPI) library." ;
   ECHO "note: to enable MPI support, add \"using mpi ;\" to user-config.jam." ;
   ECHO "note: to suppress this message, pass \"--without-mpi\" to bjam." ;
   ECHO "note: otherwise, you can safely ignore this message." ;
 }
+
+boost-install $(libraries) ;

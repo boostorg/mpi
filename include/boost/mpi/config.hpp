@@ -13,8 +13,17 @@
 #ifndef BOOST_MPI_CONFIG_HPP
 #define BOOST_MPI_CONFIG_HPP
 
+/* Force MPICH not to define SEEK_SET, SEEK_CUR, and SEEK_END, which
+   conflict with the versions in <stdio.h> and <cstdio>. */
+#define MPICH_IGNORE_CXX_SEEK 1
+
 #include <mpi.h>
 #include <boost/config.hpp>
+
+/** @brief Define this macro to avoid expensice MPI_Pack/Unpack calls on 
+ *  homogeneous machines.
+*/
+//#define BOOST_MPI_HOMOGENEOUS
 
 // If this is an MPI-2 implementation, define configuration macros for
 // the features we are interested in.

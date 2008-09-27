@@ -23,8 +23,10 @@
 #include <boost/config.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/or.hpp>
+#include <boost/mpl/and.hpp>
 #include <boost/mpi/detail/mpi_datatype_cache.hpp>
 #include <boost/mpl/assert.hpp>
+#include <utility> // for std::pair
 
 namespace boost { namespace mpi {
 
@@ -180,7 +182,7 @@ struct is_mpi_datatype
 template<typename T> MPI_Datatype get_mpi_datatype(const T& x)
 {
   BOOST_MPL_ASSERT((is_mpi_datatype<T>));
-  return detail::mpi_datatype_cache.datatype(x);
+  return detail::mpi_datatype_cache().datatype(x);
 }
 
 // Don't parse this part when we're generating Doxygen documentation.
@@ -196,6 +198,9 @@ template<>                                                              \
  struct BOOST_JOIN(is_mpi_,BOOST_JOIN(Kind,_datatype))< CppType >       \
 : boost::mpl::bool_<true>                                               \
 {}
+
+/// INTERNAL ONLY
+BOOST_MPI_DATATYPE(packed, MPI_PACKED, builtin);
 
 /// INTERNAL ONLY
 BOOST_MPI_DATATYPE(char, MPI_CHAR, builtin);
@@ -251,15 +256,46 @@ BOOST_MPI_DATATYPE(std::pair<BOOST_MPI_LIST2(short, int>), MPI_SHORT_INT,
 BOOST_MPI_DATATYPE(std::pair<BOOST_MPI_LIST2(int, int>), MPI_2INT, builtin);
 #undef BOOST_MPI_LIST2
 
-#if 0
-#ifndef BOOST_NO_INTRINSIC_WCHAR_T
+/// specialization of is_mpi_datatype for pairs
+template <class T, class U>
+struct is_mpi_datatype<std::pair<T,U> >
+ : public mpl::and_<is_mpi_datatype<T>,is_mpi_datatype<U> >
+{
+};
+
+// Define wchar_t specialization of is_mpi_datatype, if possible.
+#if !defined(BOOST_NO_INTRINSIC_WCHAR_T) && \
+  (defined(MPI_WCHAR) || (defined(MPI_VERSION) && MPI_VERSION >= 2))
 BOOST_MPI_DATATYPE(wchar_t, MPI_WCHAR, builtin);
 #endif
 
-#ifdef BOOST_HAS_LONG_LONG
+// Define long long or __int64 specialization of is_mpi_datatype, if possible.
+#if defined(BOOST_HAS_LONG_LONG) && \
+  (defined(MPI_LONG_LONG_INT) || (defined(MPI_VERSION) && MPI_VERSION >= 2))
 BOOST_MPI_DATATYPE(long long, MPI_LONG_LONG_INT, builtin);
-BOOST_MPI_DATATYPE(unsigned long long, MPI_UNSIGNED_LONG_LONG, builtin);
+#elif defined(BOOST_HAS_MS_INT64) && \
+  (defined(MPI_LONG_LONG_INT) || (defined(MPI_VERSION) && MPI_VERSION >= 2))
+BOOST_MPI_DATATYPE(__int64, MPI_LONG_LONG_INT, builtin); 
 #endif
+
+// Define unsigned long long or unsigned __int64 specialization of
+// is_mpi_datatype, if possible. We separate this from the check for
+// the (signed) long long/__int64 because some MPI implementations
+// (e.g., MPICH-MX) have MPI_LONG_LONG_INT but not
+// MPI_UNSIGNED_LONG_LONG.
+#if defined(BOOST_HAS_LONG_LONG) && \
+  (defined(MPI_UNSIGNED_LONG_LONG) \
+   || (defined(MPI_VERSION) && MPI_VERSION >= 2))
+BOOST_MPI_DATATYPE(unsigned long long, MPI_UNSIGNED_LONG_LONG, builtin);
+#elif defined(BOOST_HAS_MS_INT64) && \
+  (defined(MPI_UNSIGNED_LONG_LONG) \
+   || (defined(MPI_VERSION) && MPI_VERSION >= 2))
+BOOST_MPI_DATATYPE(unsigned __int64, MPI_UNSIGNED_LONG_LONG, builtin); 
+#endif
+
+// Define signed char specialization of is_mpi_datatype, if possible.
+#if defined(MPI_SIGNED_CHAR) || (defined(MPI_VERSION) && MPI_VERSION >= 2)
+BOOST_MPI_DATATYPE(signed char, MPI_SIGNED_CHAR, builtin);
 #endif
 
 #endif // Doxygen
@@ -290,5 +326,15 @@ struct is_mpi_datatype<bool>
 {};
 
 } } // end namespace boost::mpi
+
+// define a macro to make explicit designation of this more transparent
+#define BOOST_IS_MPI_DATATYPE(T)              \
+namespace boost {                             \
+namespace mpi {                               \
+template<>                                    \
+struct is_mpi_datatype< T > : mpl::true_ {};  \
+}}                                            \
+/**/
+
 
 #endif // BOOST_MPI_MPI_DATATYPE_HPP
