@@ -176,7 +176,7 @@ copy the resulting `bjam` executable some place convenient.
 
 For many users using _LAM_, _MPICH_, or _OpenMPI_, configuration is
 almost automatic. If you don't already have a file `user-config.jam`
-in your home directory, copy `tools/build/v2/user-config.jam`
+in your home directory, copy `tools/build/user-config.jam`
 there. For many users, MPI support can be enabled simply by adding the
 following line to your user-config.jam file, which is used to configure
 Boost.Build version 2. 
