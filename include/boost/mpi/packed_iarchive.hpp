@@ -21,7 +21,6 @@
 #include <boost/mpi/datatype.hpp>
 #include <boost/archive/detail/auto_link_archive.hpp>
 #include <boost/archive/detail/common_iarchive.hpp>
-#include <boost/archive/shared_ptr_helper.hpp>
 #include <boost/archive/basic_archive.hpp>
 #include <boost/mpi/detail/packed_iprimitive.hpp>
 #include <boost/mpi/detail/binary_buffer_iprimitive.hpp>
@@ -51,7 +50,6 @@ namespace boost { namespace mpi {
 class BOOST_MPI_DECL packed_iarchive
   : public iprimitive
   , public archive::detail::common_iarchive<packed_iarchive>
-  , public archive::detail::shared_ptr_helper
 {
 public:
   /**
@@ -87,7 +85,7 @@ public:
    */
 
   packed_iarchive
-          ( MPI_Comm const & comm , std::size_t s=0, 
+          ( MPI_Comm const & comm , std::size_t s=0,
            unsigned int flags = boost::archive::no_header)
          : iprimitive(internal_buffer_,comm)
          , archive::detail::common_iarchive<packed_iarchive>(flags)
@@ -118,7 +116,7 @@ public:
     load_override(x, version, use_optimized());
   }
 
-  // input archives need to ignore  the optional information 
+  // input archives need to ignore  the optional information
   void load_override(archive::class_id_optional_type & /*t*/, int){}
 
   void load_override(archive::class_id_type & t, int version){
