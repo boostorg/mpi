@@ -67,7 +67,6 @@ public:
    *  @param position Set the offset into buffer @p b at which
    *  deserialization will begin.
    */
-
   packed_oarchive( MPI_Comm const & comm, buffer_type & b, unsigned int flags = boost::archive::no_header)
          : oprimitive(b,comm),
            archive::detail::common_oarchive<packed_oarchive>(flags)
@@ -86,7 +85,6 @@ public:
    *  to the Boost.Serialization documentation before changing the
    *  default flags.
    */
-
   packed_oarchive ( MPI_Comm const & comm, unsigned int flags =  boost::archive::no_header)
          : oprimitive(internal_buffer_,comm),
            archive::detail::common_oarchive<packed_oarchive>(flags)
