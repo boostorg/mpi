@@ -1455,7 +1455,7 @@ boost::mpi::communicator::barrier `communicator::barrier`]]]
 `MPI_Gather`]] [[funcref boost::mpi::gather `gather`]]]
 
   [[[@http://www.mpi-forum.org/docs/mpi-11-html/node69.html#Node69
-`MPI_Gatherv`]] [most uses supported by [funcref boost::mpi::gather `gather`]]]
+`MPI_Gatherv`]] [[funcref boost::mpi::gatherv `gatherv`]]]
 
   [[[@http://www.mpi-forum.org/docs/mpi-11-html/node77.html#Node77
 `MPI_Reduce`]] [[funcref boost::mpi::reduce `reduce`]]]
@@ -1470,7 +1470,7 @@ boost::mpi::communicator::barrier `communicator::barrier`]]]
 `MPI_Scatter`]] [[funcref boost::mpi::scatter `scatter`]]]
 
   [[[@http://www.mpi-forum.org/docs/mpi-11-html/node71.html#Node71
-`MPI_Scatterv`]] [most uses supported by [funcref boost::mpi::scatter `scatter`]]]
+`MPI_Scatterv`]] [[funcref boost::mpi::scatterv `scatterv`]]]
 
   [[[@http://www.mpi-forum.org/docs/mpi-20-html/node145.htm#Node145
 `MPI_IN_PLACE`]] [supported implicitly by [funcref boost::mpi::all_reduce 
