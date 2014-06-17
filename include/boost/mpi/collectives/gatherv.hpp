@@ -144,9 +144,9 @@ gatherv(const communicator& comm, const T* in_values, int in_size,
   int nprocs = comm.size();
 
   std::vector<int> displs( nprocs );
-  for ( int rank = 0, aux = 0; rank < nprocs; ++rank ) {
-	  displs[rank] = aux;
-	  aux += sizes[rank];
+  for (int rank = 0, aux = 0; rank < nprocs; ++rank) {
+    displs[rank] = aux;
+    aux += sizes[rank];
   }
   ::boost::mpi::gatherv(comm, in_values, in_size, out_values, sizes, displs, root);
 }

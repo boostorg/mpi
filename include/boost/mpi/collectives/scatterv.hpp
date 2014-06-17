@@ -142,15 +142,15 @@ scatterv(const communicator& comm, const T* in_values,
          const std::vector<int>& sizes, T* out_values, int root)
 {
   int nprocs = comm.size();
-  int thisRank = comm.rank();
+  int myrank = comm.rank();
 
   std::vector<int> displs(nprocs);
-  for ( int rank = 0, aux = 0; rank < nprocs; ++rank ) {
-	  displs[rank] = aux;
-	  aux += sizes[rank];
+  for (int rank = 0, aux = 0; rank < nprocs; ++rank) {
+    displs[rank] = aux;
+    aux += sizes[rank];
   }
   ::boost::mpi::scatterv(comm, in_values, sizes, displs, out_values,
-                         sizes[thisRank], root);
+                         sizes[myrank], root);
 }
 
 template<typename T>
