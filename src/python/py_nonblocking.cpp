@@ -163,10 +163,11 @@ namespace
   {
     check_request_list_not_empty(requests);
     if (py_callable != object())
-      return test_all(requests.begin(), requests.end(), 
-          status_value_iterator(py_callable, requests.begin()));
+      return static_cast<bool>(
+          test_all(requests.begin(), requests.end(),
+                   status_value_iterator(py_callable, requests.begin())));
     else
-      return test_all(requests.begin(), requests.end());
+      return static_cast<bool>(test_all(requests.begin(), requests.end()));
   }
 
 
