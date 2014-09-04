@@ -121,12 +121,12 @@ public:
       * this->This() << s;
   }
 
-  void save_override(archive::class_id_type & t, int version){
+  void save_override(const archive::class_id_type & t, int version){
     const boost::int_least16_t x = t;
     * this->This() << x;
   }
 
-  void save_override(archive::version_type & t, int version){
+  void save_override(const archive::version_type & t, int version){
     const boost::int_least8_t x = t;
     * this->This() << x;
   }
