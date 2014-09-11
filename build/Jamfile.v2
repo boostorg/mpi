@@ -43,6 +43,7 @@ rule tag ( name : type ? : property-set )
 lib boost_mpi 
   : 
     broadcast.cpp
+    cartesian_communicator.cpp
     communicator.cpp
     computation_tree.cpp
     content_oarchive.cpp

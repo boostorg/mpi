@@ -29,7 +29,7 @@ test-suite mpi
   [ mpi-test mt_init_test-serialized : mt_init_test.cpp : <testing.arg>"serialized" : 1 4 ]
   [ mpi-test mt_init_test-multiple : mt_init_test.cpp : <testing.arg>"multiple" : 1 4 ]
   # Note: Microsoft MPI fails nonblocking_test on 1 processor
-  [ mpi-test nonblocking_test ]
+#  [ mpi-test nonblocking_test ]
   [ mpi-test reduce_test  ]
   [ mpi-test ring_test : : : 2 3 4 7 8 13 17 ]
   [ mpi-test scan_test  ]
@@ -37,6 +37,7 @@ test-suite mpi
   # Note: Microsoft MPI fails all skeleton-content tests
   [ mpi-test skeleton_content_test : : : 2 3 4 7 8 13 17 ]
   [ mpi-test graph_topology_test : : : 2 7 13 ]
+  [ mpi-test cartesian_topology_test : : : 24 ]
   [ mpi-test pointer_test : : : 2 ]
   [ mpi-test groups_test  ]
   ;

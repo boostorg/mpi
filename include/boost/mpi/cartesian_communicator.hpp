@@ -1,10 +1,10 @@
-// Copyright (C) 2007 Trustees of Indiana University
+
+//          Copyright Alain Miniussi 2014.
+// Distributed under the Boost Software License, Version 1.0.
+//    (See accompanying file LICENSE_1_0.txt or copy at
+//          http://www.boost.org/LICENSE_1_0.txt)
 
 // Authors: Alain Miniussi
-
-// Use, modification and distribution is subject to the Boost Software
-// License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
-// http://www.boost.org/LICENSE_1_0.txt)
 
 /** @file cartesian_communicator.hpp
  *
@@ -28,6 +28,8 @@
 #include <boost/assert.hpp>
 
 namespace boost { namespace mpi {
+
+class cartesian_topology;
 
 /**
  * @brief An MPI communicator with a cartesian topology.
@@ -101,10 +103,12 @@ public:
    *  @param comm The communicator that the new, cartesian communicator
    *  will be based on. 
    * 
-   *  @param cartesian Any type that meets the requirements of the
-   *  Incidence Cartesian and Vertex List Cartesian concepts from the Boost Cartesian
-   *  Library. This structure of this cartesian will become the topology
-   *  of the communicator that is returned.
+   *  @param dims the dimension of the new communicator. The size indicate 
+   *  the number of dimension. Some value can be set to zero, in which case
+   *  the corresponding dimension value is left to the system.
+   *  
+   * @param periodic must be the same size as dims. Each value indicate if
+   * the corresponding dimension is cyclic.
    *
    *  @param reorder Whether MPI is permitted to re-order the process
    *  ranks within the returned communicator, to better optimize
@@ -116,6 +120,65 @@ public:
                          const std::vector<int>&  dims,
                          const std::vector<bool>& periodic,
                          bool                     reorder = false);
+  
+  /**
+   * Create a new cartesian communicator whose topology is a subset of
+   * an existing cartesian cimmunicator.
+   * @param comm the original communicator.
+   * @param keep and array containiing the dimension to keep from the existing 
+   * communicator.
+   */
+  cartesian_communicator(const cartesian_communicator& comm,
+                         const std::vector<int>&       keep );
+    
+  using communicator::rank;
+
+  /** 
+   * Retrive the number of dimension of the underlying toppology.
+   */
+  int ndims() const;
+  
+  /**
+   * Return the rank of the process at the given coordinates.
+   * @param coords the coordinates. the size must match the communicator's topology.
+   */
+  int rank(std::vector<int> const& coords) const;
+  /**
+   * Provides the coordinates of the process with the given rank.
+   * @param rk the ranks in this communicator.
+   * @param cbuf a buffer were to store the coordinates.
+   * @returns a reference to cbuf.
+   */
+  std::vector<int>& coords(int rk, std::vector<int>& cbuf) const;
+  /**
+   * Provides the coordinates of the process with the given rank.
+   * @param rk the ranks in this communicator.
+   * @returns the coordinates.
+   */
+  std::vector<int> coords(int rk) const;
+  /**
+   * Retrieve the topology.
+   *
+   */
+  void topology( std::vector<int>&  dims,
+                 std::vector<bool>& periodic,
+                 std::vector<int>& coords ) const;
+};
+
+std::vector<int>& cartesian_dimensions(int sz, std::vector<int>&  dims);
+
+inline
+std::vector<int>& cartesian_dimensions(communicator const& comm, std::vector<int>&  dims) {
+  return cartesian_dimensions(comm.size(), dims);
+}
+
+class BOOST_MPI_DECL cartesian_topology {
+ public:
+  cartesian_topology(cartesian_communicator const& comm);
+  
+ private:
+  cartesian_communicator const& comm_ref;
+
 };
 
 } } // end namespace boost::mpi
