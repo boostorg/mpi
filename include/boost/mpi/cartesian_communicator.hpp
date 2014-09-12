@@ -22,6 +22,7 @@
 
 #include <vector>
 #include <utility>
+#include <iostream>
 
 // Headers required to implement cartesian topologies
 #include <boost/shared_array.hpp>
@@ -29,7 +30,66 @@
 
 namespace boost { namespace mpi {
 
-class cartesian_topology;
+struct cartesian_dimension {
+
+  int size;
+  bool periodic;
+  cartesian_dimension(int sz = 0, bool p = false) : size(sz), periodic(p) {}
+private:
+  friend class boost::serialization::access;
+  template<class Archive>
+  void serialize(Archive & ar, const unsigned int version)
+  {
+    ar & size & periodic;
+  }
+
+};
+
+template <>
+struct is_mpi_datatype<cartesian_dimension> : mpl::true_ { };
+
+bool
+operator==(cartesian_dimension const& d1, cartesian_dimension const& d2) {
+  return d1.size == d2.size && d1.periodic == d2.periodic;
+}
+
+bool
+operator!=(cartesian_dimension const& d1, cartesian_dimension const& d2) {
+  return !(d1 == d2);
+}
+
+std::ostream& operator<<(std::ostream& out, cartesian_dimension const& d);
+
+class BOOST_MPI_DECL cartesian_topology 
+  : private std::vector<cartesian_dimension> {
+  friend class cartesian_communicator;
+  typedef std::vector<cartesian_dimension> super;
+ public:
+  using super::operator[];
+  using super::size;
+  using super::begin;
+  using super::end;
+  using super::swap;
+
+  cartesian_topology(int sz) 
+    : super(sz) {}
+
+  template<int NDIM>
+  explicit cartesian_topology(array<cartesian_dimension, NDIM> const& dims)
+    : super(NDIM) {
+    std::copy(dims.begin(), dims.end(), begin());
+  }
+  
+  template<class DimIter, class PerIter>
+  cartesian_topology(DimIter dim_iter, PerIter period_iter, int ndim) 
+    : super(ndim) {
+    for(int i = 0; i < ndim; ++i) {
+      (*this)[i] = cartesian_dimension(*dim_iter++, *period_iter++);
+    }
+  }
+  
+  void split(std::vector<int>& dims, std::vector<bool>& periodics) const;
+};
 
 /**
  * @brief An MPI communicator with a cartesian topology.
@@ -103,23 +163,19 @@ public:
    *  @param comm The communicator that the new, cartesian communicator
    *  will be based on. 
    * 
-   *  @param dims the dimension of the new communicator. The size indicate 
-   *  the number of dimension. Some value can be set to zero, in which case
+   *  @param dims the cartesian dimension of the new communicator. The size indicate 
+   *  the number of dimension. Some dimensions be set to zero, in which case
    *  the corresponding dimension value is left to the system.
    *  
-   * @param periodic must be the same size as dims. Each value indicate if
-   * the corresponding dimension is cyclic.
-   *
    *  @param reorder Whether MPI is permitted to re-order the process
    *  ranks within the returned communicator, to better optimize
    *  communication. If false, the ranks of each process in the
    *  returned process will match precisely the rank of that process
    *  within the original communicator.
    */
-  cartesian_communicator(const communicator&      comm,
-                         const std::vector<int>&  dims,
-                         const std::vector<bool>& periodic,
-                         bool                     reorder = false);
+  cartesian_communicator(const communicator&       comm,
+                         const cartesian_topology& dims,
+                         bool                      reorder = false);
   
   /**
    * Create a new cartesian communicator whose topology is a subset of
@@ -142,10 +198,10 @@ public:
    * Return the rank of the process at the given coordinates.
    * @param coords the coordinates. the size must match the communicator's topology.
    */
-  int rank(std::vector<int> const& coords) const;
+  int rank(const std::vector<int>& coords) const;
   /**
-   * Provides the coordinates of the process with the given rank.
-   * @param rk the ranks in this communicator.
+   * Provides the coordinates of a process with the given rank.
+   * @param rk the rank in this communicator.
    * @param cbuf a buffer were to store the coordinates.
    * @returns a reference to cbuf.
    */
@@ -160,29 +216,31 @@ public:
    * Retrieve the topology.
    *
    */
-  void topology( std::vector<int>&  dims,
-                 std::vector<bool>& periodic,
-                 std::vector<int>& coords ) const;
+  void topology( cartesian_topology&  dims, std::vector<int>& coords ) const;
 };
 
-std::vector<int>& cartesian_dimensions(int sz, std::vector<int>&  dims);
+/**
+ * Given en number of processes, and a partially filled sequence 
+ * of dimension, try to complete the dimension sequence.
+ * @param nb_proc the numer of mpi processes.fill a sequence of dimension.
+ * @param dims a sequence of positive or null dimensions. Non zero dimension 
+ *  will be left untouched.
+ */
+std::vector<int>& cartesian_dimensions(int nb_proc, std::vector<int>&  dims);
 
+/**
+ * Given en communicator and a partially filled sequence 
+ * of dimension, try to complete the dimension sequence to produce an acceptable
+ * cartesian topology.
+ * @param comm the prospective parent communicator.
+ * @param dims a sequence of positive or null dimensions. Non zero dimension 
+ *  will be left untouched.
+ */
 inline
-std::vector<int>& cartesian_dimensions(communicator const& comm, std::vector<int>&  dims) {
+std::vector<int>& cartesian_dimensions(const communicator& comm, std::vector<int>&  dims) {
   return cartesian_dimensions(comm.size(), dims);
 }
 
-class BOOST_MPI_DECL cartesian_topology {
- public:
-  cartesian_topology(cartesian_communicator const& comm);
-  
- private:
-  cartesian_communicator const& comm_ref;
-
-};
-
 } } // end namespace boost::mpi
-
-
 
 #endif // BOOST_MPI_CARTESIAN_COMMUNICATOR_HPP
