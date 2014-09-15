@@ -1644,9 +1644,10 @@ algorithms.
   [[`MPI_CART`] [unnecessary; use [memberref boost::mpi::communicator::has_cartesian_topology `communicator::has_cartesian_topology`]]]
 
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node133.html#Node133
-  `MPI_Cart_create`]] [unsupported]]
+  `MPI_Cart_create`]] [[classref boost::mpi::cartesian_communicator `cartesian_communicator`]
+  constructor]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node134.html#Node134
-  `MPI_Dims_create`]] [unsupported]]
+  `MPI_Dims_create`]] [[funcref boost::mpi::cartesian_dimensions `cartesian_dimensions`]]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node135.html#Node135
   `MPI_Graph_create`]] [[memberref
   boost::mpi::communicator::with_graph_topology
@@ -1664,7 +1665,7 @@ algorithms.
   `MPI_Graph_get`]] [[funcref boost::mpi::vertices
   `vertices`], [funcref boost::mpi::edges `edges`]]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node136.html#Node136
-  `MPI_Cartdim_get`]] [unsupported]]
+  `MPI_Cartdim_get`]] [[memberref boost::mpi::cartesian_communicator::ndims `cartesian_communicator::ndims` ]]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node136.html#Node136
   `MPI_Cart_get`]] [unsupported]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node136.html#Node136
