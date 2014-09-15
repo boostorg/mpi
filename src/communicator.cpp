@@ -7,6 +7,7 @@
 #include <boost/mpi/group.hpp>
 #include <boost/mpi/intercommunicator.hpp>
 #include <boost/mpi/graph_communicator.hpp>
+#include <boost/mpi/cartesian_communicator.hpp>
 #include <boost/mpi/skeleton_and_content.hpp>
 #include <boost/mpi/detail/point_to_point.hpp>
 
@@ -160,14 +161,21 @@ optional<intercommunicator> communicator::as_intercommunicator() const
     return optional<intercommunicator>();
 }
 
-optional<graph_communicator> communicator::as_graph_communicator() const
+bool communicator::has_graph_topology() const
 {
   int status;
   BOOST_MPI_CHECK_RESULT(MPI_Topo_test, ((MPI_Comm)*this, &status));
-  if (status == MPI_GRAPH)
+
+  return status == MPI_GRAPH;
+}
+
+optional<graph_communicator> communicator::as_graph_communicator() const
+{
+  if (has_graph_topology()) {
     return graph_communicator(comm_ptr);
-  else
+      } else {
     return optional<graph_communicator>();
+  }
 }
 
 bool communicator::has_cartesian_topology() const
@@ -176,6 +184,15 @@ bool communicator::has_cartesian_topology() const
   BOOST_MPI_CHECK_RESULT(MPI_Topo_test, ((MPI_Comm)*this, &status));
 
   return status == MPI_CART;
+}
+
+optional<cartesian_communicator> communicator::as_cartesian_communicator() const
+{
+  if (has_cartesian_topology()) {
+    return cartesian_communicator(comm_ptr);
+      } else {
+    return optional<cartesian_communicator>();
+  }
 }
 
 void communicator::abort(int errcode) const

@@ -113,6 +113,14 @@ class intercommunicator;
 class graph_communicator;
 
 /**
+ * INTERNAL ONLY
+ *
+ * Forward declaration of @c cartesian_communicator needed for the "cast"
+ * from a communicator to a cartesian communicator.
+ */
+class cartesian_communicator;
+
+/**
  * @brief A communicator that permits communication and
  * synchronization among a set of processes.
  *
@@ -817,6 +825,24 @@ class BOOST_MPI_DECL communicator
    * an empty @c optional.
    */
   optional<graph_communicator> as_graph_communicator() const;
+
+  /**
+   * Determines whether this communicator has a Cartesian topology.
+   */
+  bool has_graph_topology() const;
+
+  /**
+   * Determine if the communicator has a cartesian topology and, if so,
+   * return that @c cartesian_communicator. Even though the communicators
+   * have different types, they refer to the same underlying
+   * communication space and can be used interchangeably for
+   * communication.
+   *
+   * @returns an @c optional containing the cartesian communicator, if this
+   * communicator does in fact have a cartesian topology. Otherwise, returns
+   * an empty @c optional.
+   */
+  optional<cartesian_communicator> as_cartesian_communicator() const;
 
   /**
    * Determines whether this communicator has a Cartesian topology.

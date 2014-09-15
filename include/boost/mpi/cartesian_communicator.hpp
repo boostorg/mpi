@@ -54,11 +54,13 @@ private:
 template <>
 struct is_mpi_datatype<cartesian_dimension> : mpl::true_ { };
 
+inline
 bool
 operator==(cartesian_dimension const& d1, cartesian_dimension const& d2) {
   return d1.size == d2.size && d1.periodic == d2.periodic;
 }
 
+inline
 bool
 operator!=(cartesian_dimension const& d1, cartesian_dimension const& d2) {
   return !(d1 == d2);
