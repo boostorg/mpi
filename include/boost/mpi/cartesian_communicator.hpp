@@ -71,7 +71,7 @@ std::ostream& operator<<(std::ostream& out, cartesian_dimension const& d);
 /**
  * @brief Describe the topology of a cartesian grid.
  * 
- * Behave mostly like a sequence of @cartesian_dimension with the notable 
+ * Behave mostly like a sequence of @c cartesian_dimension with the notable 
  * exception that its size is fixed.
  */
 class BOOST_MPI_DECL cartesian_topology 
