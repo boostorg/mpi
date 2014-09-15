@@ -30,11 +30,17 @@
 
 namespace boost { namespace mpi {
 
+/**
+ * Specify the size and periodicity of the grid in a single dimension.
+ */
 struct cartesian_dimension {
-
+  /** The size of the grid n this dimension. */
   int size;
+  /** Is the grid periodic in this dimension. */
   bool periodic;
+  
   cartesian_dimension(int sz = 0, bool p = false) : size(sz), periodic(p) {}
+  
 private:
   friend class boost::serialization::access;
   template<class Archive>
@@ -60,6 +66,12 @@ operator!=(cartesian_dimension const& d1, cartesian_dimension const& d2) {
 
 std::ostream& operator<<(std::ostream& out, cartesian_dimension const& d);
 
+/**
+ * @brief Describe the topology of a cartesian grid.
+ * 
+ * Behave mostly like a sequence of @cartesian_dimension with the notable 
+ * exception that its size is fixed.
+ */
 class BOOST_MPI_DECL cartesian_topology 
   : private std::vector<cartesian_dimension> {
   friend class cartesian_communicator;
@@ -87,7 +99,9 @@ class BOOST_MPI_DECL cartesian_topology
       (*this)[i] = cartesian_dimension(*dim_iter++, *period_iter++);
     }
   }
-  
+  /** 
+   * Split the topology in two sequences of sizes and periodicities.
+   */
   void split(std::vector<int>& dims, std::vector<bool>& periodics) const;
 };
 
