@@ -1667,11 +1667,11 @@ algorithms.
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node136.html#Node136
   `MPI_Cartdim_get`]] [[memberref boost::mpi::cartesian_communicator::ndims `cartesian_communicator::ndims` ]]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node136.html#Node136
-  `MPI_Cart_get`]] [unsupported]]
+  `MPI_Cart_get`]] [[memberref boost::mpi::cartesian_communicator::topology `cartesian_communicator::topology` ]]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node136.html#Node136
-  `MPI_Cart_rank`]] [unsupported]]
+  `MPI_Cart_rank`]] [[memberref boost::mpi::cartesian_communicator::rank `cartesian_communicator::rank` ]]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node136.html#Node136
-  `MPI_Cart_coords`]] [unsupported]]
+  `MPI_Cart_coords`]] [[memberref boost::mpi::cartesian_communicator::coords `cartesian_communicator::coords` ]]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node136.html#Node136
   `MPI_Graph_neighbors_count`]] [[funcref boost::mpi::out_degree
   `out_degree`]]]
@@ -1681,7 +1681,8 @@ algorithms.
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node137.html#Node137
   `MPI_Cart_shift`]] [unsupported]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node138.html#Node138
-  `MPI_Cart_sub`]] [unsupported]]
+  `MPI_Cart_sub`]]  [[classref boost::mpi::cartesian_communicator `cartesian_communicator`]
+  constructor]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node139.html#Node139
   `MPI_Cart_map`]] [unsupported]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node139.html#Node139
