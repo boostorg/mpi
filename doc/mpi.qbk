@@ -1177,127 +1177,127 @@ interfaces to MPI, or for porting existing parallel programs to Boost.MPI.
 
   [[`MPI_ANY_TAG`] [`any_tag`]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node40.html#Node40
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node40.html#Node40
 `MPI_Bsend`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node51.html#Node51
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node51.html#Node51
 `MPI_Bsend_init`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node42.html#Node42
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node42.html#Node42
 `MPI_Buffer_attach`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node42.html#Node42
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node42.html#Node42
 `MPI_Buffer_detach`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node50.html#Node50
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node50.html#Node50
 `MPI_Cancel`]] 
    [[memberref boost::mpi::request::cancel
 `request::cancel`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node35.html#Node35
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node35.html#Node35
 `MPI_Get_count`]] 
    [[memberref boost::mpi::status::count `status::count`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node46.html#Node46
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node46.html#Node46
 `MPI_Ibsend`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node50.html#Node50
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node50.html#Node50
 `MPI_Iprobe`]]
    [[memberref boost::mpi::communicator::iprobe `communicator::iprobe`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node46.html#Node46
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node46.html#Node46
 `MPI_Irsend`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node46.html#Node46
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node46.html#Node46
 `MPI_Isend`]] 
    [[memberref boost::mpi::communicator::isend
 `communicator::isend`]]] 
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node46.html#Node46
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node46.html#Node46
 `MPI_Issend`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node46.html#Node46
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node46.html#Node46
 `MPI_Irecv`]] 
    [[memberref boost::mpi::communicator::isend
 `communicator::irecv`]]] 
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node50.html#Node50
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node50.html#Node50
 `MPI_Probe`]]
    [[memberref boost::mpi::communicator::probe `communicator::probe`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node53.html#Node53
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node53.html#Node53
 `MPI_PROC_NULL`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node34.html#Node34 `MPI_Recv`]]
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node34.html#Node34 `MPI_Recv`]]
    [[memberref boost::mpi::communicator::recv
 `communicator::recv`]]] 
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node51.html#Node51
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node51.html#Node51
 `MPI_Recv_init`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node47.html#Node47
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node47.html#Node47
 `MPI_Request_free`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node40.html#Node40
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node40.html#Node40
 `MPI_Rsend`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node51.html#Node51
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node51.html#Node51
 `MPI_Rsend_init`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node31.html#Node31
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node31.html#Node31
 `MPI_Send`]]
    [[memberref boost::mpi::communicator::send
 `communicator::send`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node52.html#Node52
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node52.html#Node52
 `MPI_Sendrecv`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node52.html#Node52
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node52.html#Node52
 `MPI_Sendrecv_replace`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node51.html#Node51
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node51.html#Node51
 `MPI_Send_init`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node40.html#Node40
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node40.html#Node40
 `MPI_Ssend`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node51.html#Node51
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node51.html#Node51
 `MPI_Ssend_init`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node51.html#Node51
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node51.html#Node51
 `MPI_Start`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node51.html#Node51
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node51.html#Node51
 `MPI_Startall`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node47.html#Node47
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node47.html#Node47
 `MPI_Test`]] [[memberref boost::mpi::request::wait `request::test`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node47.html#Node47
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node47.html#Node47
 `MPI_Testall`]] [[funcref boost::mpi::test_all `test_all`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node47.html#Node47
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node47.html#Node47
 `MPI_Testany`]] [[funcref boost::mpi::test_any `test_any`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node47.html#Node47
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node47.html#Node47
 `MPI_Testsome`]] [[funcref boost::mpi::test_some `test_some`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node50.html#Node50
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node50.html#Node50
 `MPI_Test_cancelled`]] 
    [[memberref boost::mpi::status::cancelled
 `status::cancelled`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node47.html#Node47
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node47.html#Node47
 `MPI_Wait`]] [[memberref boost::mpi::request::wait
 `request::wait`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node47.html#Node47
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node47.html#Node47
 `MPI_Waitall`]] [[funcref boost::mpi::wait_all `wait_all`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node47.html#Node47
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node47.html#Node47
 `MPI_Waitany`]] [[funcref boost::mpi::wait_any `wait_any`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node47.html#Node47
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node47.html#Node47
 `MPI_Waitsome`]] [[funcref boost::mpi::wait_some `wait_some`]]]
 ]
 
@@ -1351,49 +1351,49 @@ operations are called internally by Boost.MPI.
 [table Derived datatypes
   [[C Function/Constant] [Boost.MPI Equivalent]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node56.html#Node56
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node56.html#Node56
 `MPI_Address`]] [used automatically in Boost.MPI for MPI version 1.x]]
 
   [[[@http://www.mpi-forum.org/docs/mpi-20-html/node76.htm#Node76
 `MPI_Get_address`]] [used automatically in Boost.MPI for MPI version 2.0 and higher]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node58.html#Node58
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node58.html#Node58
 `MPI_Type_commit`]] [used automatically in Boost.MPI]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node55.html#Node55
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node55.html#Node55
 `MPI_Type_contiguous`]] [arrays]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node56.html#Node56
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node56.html#Node56
 `MPI_Type_extent`]] [used automatically in Boost.MPI]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node58.html#Node58
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node58.html#Node58
 `MPI_Type_free`]] [used automatically in Boost.MPI]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node55.html#Node55
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node55.html#Node55
 `MPI_Type_hindexed`]] [any type used as a subobject]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node55.html#Node55
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node55.html#Node55
 `MPI_Type_hvector`]] [unused]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node55.html#Node55
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node55.html#Node55
 `MPI_Type_indexed`]] [any type used as a subobject]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node57.html#Node57
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node57.html#Node57
 `MPI_Type_lb`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node56.html#Node56
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node56.html#Node56
 `MPI_Type_size`]] [used automatically in Boost.MPI]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node55.html#Node55
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node55.html#Node55
 `MPI_Type_struct`]] [user-defined classes and structs with MPI 1.x]]
 
   [[[@http://www.mpi-forum.org/docs/mpi-20-html/node76.htm#Node76
 `MPI_Type_create_struct`]] [user-defined classes and structs with MPI 2.0 and higher]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node57.html#Node57
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node57.html#Node57
 `MPI_Type_ub`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node55.html#Node55
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node55.html#Node55
 `MPI_Type_vector`]] [used automatically in Boost.MPI]]
 ]
 
@@ -1409,14 +1409,14 @@ to pack or unpack a contiguous buffer using MPI's facilities.
 [table Packing and unpacking
   [[C Function] [Boost.MPI Equivalent]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node62.html#Node62
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node62.html#Node62
 `MPI_Pack`]] [[classref
 boost::mpi::packed_oarchive `packed_oarchive`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node62.html#Node62
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node62.html#Node62
 `MPI_Pack_size`]] [used internally by Boost.MPI]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node62.html#Node62
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node62.html#Node62
 `MPI_Unpack`]] [[classref
 boost::mpi::packed_iarchive `packed_iarchive`]]]
 ]
@@ -1429,47 +1429,47 @@ to do so.
 [table Collectives
   [[C Function] [Boost.MPI Equivalent]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node73.html#Node73
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node73.html#Node73
 `MPI_Allgather`]] [[funcref boost::mpi::all_gather `all_gather`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node73.html#Node73
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node73.html#Node73
 `MPI_Allgatherv`]] [most uses supported by [funcref boost::mpi::all_gather `all_gather`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node82.html#Node82
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node82.html#Node82
 `MPI_Allreduce`]] [[funcref boost::mpi::all_reduce `all_reduce`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node75.html#Node75
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node75.html#Node75
 `MPI_Alltoall`]] [[funcref boost::mpi::all_to_all `all_to_all`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node75.html#Node75
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node75.html#Node75
 `MPI_Alltoallv`]] [most uses supported by [funcref boost::mpi::all_to_all `all_to_all`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node66.html#Node66
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node66.html#Node66
 `MPI_Barrier`]] [[memberref
 boost::mpi::communicator::barrier `communicator::barrier`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node67.html#Node67
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node67.html#Node67
 `MPI_Bcast`]] [[funcref boost::mpi::broadcast `broadcast`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node69.html#Node69
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node69.html#Node69
 `MPI_Gather`]] [[funcref boost::mpi::gather `gather`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node69.html#Node69
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node69.html#Node69
 `MPI_Gatherv`]] [[funcref boost::mpi::gatherv `gatherv`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node77.html#Node77
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node77.html#Node77
 `MPI_Reduce`]] [[funcref boost::mpi::reduce `reduce`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node83.html#Node83
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node83.html#Node83
 `MPI_Reduce_scatter`]] [unsupported]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node84.html#Node84
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node84.html#Node84
 `MPI_Scan`]] [[funcref boost::mpi::scan `scan`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node71.html#Node71
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node71.html#Node71
 `MPI_Scatter`]] [[funcref boost::mpi::scatter `scatter`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node71.html#Node71
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node71.html#Node71
 `MPI_Scatterv`]] [[funcref boost::mpi::scatterv `scatterv`]]]
 
   [[[@http://www.mpi-forum.org/docs/mpi-20-html/node145.htm#Node145
@@ -1480,9 +1480,9 @@ boost::mpi::communicator::barrier `communicator::barrier`]]]
 Boost.MPI uses function objects to specify how reductions should occur
 in its equivalents to `MPI_Allreduce`, `MPI_Reduce`, and
 `MPI_Scan`. The following table illustrates how
-[@http://www.mpi-forum.org/docs/mpi-11-html/node78.html#Node78
+[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node78.html#Node78
 predefined] and
-[@http://www.mpi-forum.org/docs/mpi-11-html/node80.html#Node80
+[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node80.html#Node80
 user-defined] reduction operations can be mapped between the C MPI and
 Boost.MPI.
 
@@ -1528,35 +1528,35 @@ boost::mpi::group `group`] class.
 
   [[`MPI_GROUP_EMPTY`] [a default-constructed [classref
   boost::mpi::group `group`]]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node97.html#Node97
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node97.html#Node97
   `MPI_Group_size`]] [[memberref boost::mpi::group::size `group::size`]]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node97.html#Node97
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node97.html#Node97
   `MPI_Group_rank`]] [memberref boost::mpi::group::rank `group::rank`]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node97.html#Node97
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node97.html#Node97
   `MPI_Group_translate_ranks`]] [memberref boost::mpi::group::translate_ranks `group::translate_ranks`]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node97.html#Node97
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node97.html#Node97
   `MPI_Group_compare`]] [operators `==` and `!=`]]
   [[`MPI_IDENT`] [operators `==` and `!=`]]
   [[`MPI_SIMILAR`] [operators `==` and `!=`]]
   [[`MPI_UNEQUAL`] [operators `==` and `!=`]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node98.html#Node98
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node98.html#Node98
   `MPI_Comm_group`]] [[memberref
   boost::mpi::communicator::group `communicator::group`]]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node98.html#Node98
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node98.html#Node98
   `MPI_Group_union`]] [operator `|` for groups]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node98.html#Node98
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node98.html#Node98
   `MPI_Group_intersection`]] [operator `&` for groups]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node98.html#Node98
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node98.html#Node98
   `MPI_Group_difference`]] [operator `-` for groups]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node98.html#Node98
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node98.html#Node98
   `MPI_Group_incl`]] [[memberref boost::mpi::group::include `group::include`]]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node98.html#Node98
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node98.html#Node98
   `MPI_Group_excl`]] [[memberref boost::mpi::group::include `group::exclude`]]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node98.html#Node98
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node98.html#Node98
   `MPI_Group_range_incl`]] [unsupported]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node98.html#Node98
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node98.html#Node98
   `MPI_Group_range_excl`]] [unsupported]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node99.html#Node99
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node99.html#Node99
   `MPI_Group_free`]] [used automatically in Boost.MPI]]
 ]
 
@@ -1566,23 +1566,23 @@ boost::mpi::communicator `communicator`] class.
 [table Communicator operations
   [[C Function] [Boost.MPI Equivalent]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node101.html#Node101
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node101.html#Node101
   `MPI_Comm_size`]] [[memberref boost::mpi::communicator::size `communicator::size`]]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node101.html#Node101
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node101.html#Node101
   `MPI_Comm_rank`]] [[memberref boost::mpi::communicator::rank
   `communicator::rank`]]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node101.html#Node101
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node101.html#Node101
   `MPI_Comm_compare`]] [operators `==` and `!=`]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node102.html#Node102
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node102.html#Node102
   `MPI_Comm_dup`]] [[classref boost::mpi::communicator `communicator`]
   class constructor using `comm_duplicate`]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node102.html#Node102
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node102.html#Node102
   `MPI_Comm_create`]] [[classref boost::mpi::communicator
   `communicator`] constructor]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node102.html#Node102
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node102.html#Node102
   `MPI_Comm_split`]] [[memberref boost::mpi::communicator::split
   `communicator::split`]]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node103.html#Node103
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node103.html#Node103
   `MPI_Comm_free`]] [used automatically in Boost.MPI]]
 ]
 
@@ -1592,15 +1592,15 @@ Boost.MPI currently provides support for inter-communicators via the
 [table Inter-communicator operations
   [[C Function] [Boost.MPI Equivalent]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node112.html#Node112
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node112.html#Node112
   `MPI_Comm_test_inter`]] [use [memberref boost::mpi::communicator::as_intercommunicator `communicator::as_intercommunicator`]]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node112.html#Node112
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node112.html#Node112
   `MPI_Comm_remote_size`]] [[memberref boost::mpi::intercommunicator::remote_size] `intercommunicator::remote_size`]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node112.html#Node112
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node112.html#Node112
   `MPI_Comm_remote_group`]] [[memberref boost::mpi::intercommunicator::remote_group `intercommunicator::remote_group`]]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node113.html#Node113
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node113.html#Node113
   `MPI_Intercomm_create`]] [[classref boost::mpi::intercommunicator `intercommunicator`] constructor]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node113.html#Node113
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node113.html#Node113
   `MPI_Intercomm_merge`]] [[memberref boost::mpi::intercommunicator::merge `intercommunicator::merge`]]]
 ]
 
@@ -1612,19 +1612,19 @@ Boost.MPI currently provides no support for attribute caching.
  [[`MPI_NULL_COPY_FN`] [unsupported]]
  [[`MPI_NULL_DELETE_FN`] [unsupported]]
  [[`MPI_KEYVAL_INVALID`] [unsupported]]
- [[[@http://www.mpi-forum.org/docs/mpi-11-html/node119.html#Node119
+ [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node119.html#Node119
  `MPI_Keyval_create`]] [unsupported]]
- [[[@http://www.mpi-forum.org/docs/mpi-11-html/node119.html#Node119
+ [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node119.html#Node119
  `MPI_Copy_function`]] [unsupported]]
- [[[@http://www.mpi-forum.org/docs/mpi-11-html/node119.html#Node119
+ [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node119.html#Node119
  `MPI_Delete_function`]] [unsupported]]
- [[[@http://www.mpi-forum.org/docs/mpi-11-html/node119.html#Node119
+ [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node119.html#Node119
  `MPI_Keyval_free`]] [unsupported]]
- [[[@http://www.mpi-forum.org/docs/mpi-11-html/node119.html#Node119
+ [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node119.html#Node119
  `MPI_Attr_put`]] [unsupported]]
- [[[@http://www.mpi-forum.org/docs/mpi-11-html/node119.html#Node119
+ [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node119.html#Node119
  `MPI_Attr_get`]] [unsupported]]
- [[[@http://www.mpi-forum.org/docs/mpi-11-html/node119.html#Node119
+ [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node119.html#Node119
  `MPI_Attr_delete`]] [unsupported]]
 ]
 
@@ -1643,47 +1643,47 @@ algorithms.
   [[`MPI_GRAPH`] [unnecessary; use [memberref boost::mpi::communicator::has_graph_topology `communicator::has_graph_topology`]]]
   [[`MPI_CART`] [unnecessary; use [memberref boost::mpi::communicator::has_cartesian_topology `communicator::has_cartesian_topology`]]]
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node133.html#Node133
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node133.html#Node133
   `MPI_Cart_create`]] [unsupported]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node134.html#Node134
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node134.html#Node134
   `MPI_Dims_create`]] [unsupported]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node135.html#Node135
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node135.html#Node135
   `MPI_Graph_create`]] [[memberref
   boost::mpi::communicator::with_graph_topology
   `communicator::with_graph_topology`]]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node136.html#Node136
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node136.html#Node136
   `MPI_Topo_test`]] [[memberref
   boost::mpi::communicator::has_graph_topology
   `communicator::has_graph_topology`], [memberref
   boost::mpi::communicator::has_cartesian_topology
   `communicator::has_cartesian_topology`]]] 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node136.html#Node136
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node136.html#Node136
   `MPI_Graphdims_get`]] [[funcref boost::mpi::num_vertices
   `num_vertices`], [funcref boost::mpi::num_edges `num_edges`]]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node136.html#Node136
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node136.html#Node136
   `MPI_Graph_get`]] [[funcref boost::mpi::vertices
   `vertices`], [funcref boost::mpi::edges `edges`]]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node136.html#Node136
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node136.html#Node136
   `MPI_Cartdim_get`]] [unsupported]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node136.html#Node136
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node136.html#Node136
   `MPI_Cart_get`]] [unsupported]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node136.html#Node136
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node136.html#Node136
   `MPI_Cart_rank`]] [unsupported]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node136.html#Node136
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node136.html#Node136
   `MPI_Cart_coords`]] [unsupported]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node136.html#Node136
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node136.html#Node136
   `MPI_Graph_neighbors_count`]] [[funcref boost::mpi::out_degree
   `out_degree`]]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node136.html#Node136
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node136.html#Node136
   `MPI_Graph_neighbors`]] [[funcref boost::mpi::out_edges
   `out_edges`], [funcref boost::mpi::adjacent_vertices `adjacent_vertices`]]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node137.html#Node137
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node137.html#Node137
   `MPI_Cart_shift`]] [unsupported]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node138.html#Node138
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node138.html#Node138
   `MPI_Cart_sub`]] [unsupported]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node139.html#Node139
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node139.html#Node139
   `MPI_Cart_map`]] [unsupported]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node139.html#Node139
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node139.html#Node139
   `MPI_Graph_map`]] [unsupported]]
 ]
 
@@ -1699,7 +1699,7 @@ boost::mpi::environment `environment`] class.
   boost::mpi::environment::host_rank `environment::host_rank`]]]
   [[`MPI_IO`] [unnecessary; use [memberref
   boost::mpi::environment::io_rank `environment::io_rank`]]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node143.html#Node147
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node143.html#Node147
   `MPI_Get_processor_name`]] 
   [[memberref boost::mpi::environment::processor_name
   `environment::processor_name`]]]
@@ -1715,21 +1715,21 @@ Boost.MPI translates MPI errors into exceptions, reported via the
   Boost.MPI exceptions]]
   [[`MPI_ERRORS_RETURN`] [unused; errors are translated into
   Boost.MPI exceptions]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node148.html#Node148
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node148.html#Node148
   `MPI_errhandler_create`]] [unused; errors are translated into
   Boost.MPI exceptions]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node148.html#Node148
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node148.html#Node148
   `MPI_errhandler_set`]] [unused; errors are translated into
   Boost.MPI exceptions]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node148.html#Node148
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node148.html#Node148
   `MPI_errhandler_get`]] [unused; errors are translated into
   Boost.MPI exceptions]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node148.html#Node148
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node148.html#Node148
   `MPI_errhandler_free`]] [unused; errors are translated into
   Boost.MPI exceptions]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node148.html#Node148
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node148.html#Node148
   `MPI_Error_string`]] [used internally by Boost.MPI]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node149.html#Node149
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node149.html#Node149
   `MPI_Error_class`]] [[memberref boost::mpi::exception::error_class `exception::error_class`]]]
 ]
 
@@ -1743,11 +1743,11 @@ Timer library].
 
   [[`MPI_WTIME_IS_GLOBAL`] [unnecessary; use [memberref
   boost::mpi::timer::time_is_global `timer::time_is_global`]]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node150.html#Node150
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node150.html#Node150
   `MPI_Wtime`]] [use [memberref boost::mpi::timer::elapsed
   `timer::elapsed`] to determine the time elapsed from some specific
   starting point]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node150.html#Node150
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node150.html#Node150
   `MPI_Wtick`]] [[memberref boost::mpi::timer::elapsed_min `timer::elapsed_min`]]]
 ]
 
@@ -1758,16 +1758,16 @@ descruction of the Boost.MPI [classref boost::mpi::environment
 [table Startup/shutdown facilities
   [[C Function] [Boost.MPI Equivalent]]       
 
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node151.html#Node151
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node151.html#Node151
   `MPI_Init`]] [[classref boost::mpi::environment `environment`]
   constructor]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node151.html#Node151
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node151.html#Node151
   `MPI_Finalize`]] [[classref boost::mpi::environment `environment`]
   destructor]]
- [[[@http://www.mpi-forum.org/docs/mpi-11-html/node151.html#Node151
+ [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node151.html#Node151
   `MPI_Initialized`]] [[memberref boost::mpi::environment::initialized
   `environment::initialized`]]] 
- [[[@http://www.mpi-forum.org/docs/mpi-11-html/node151.html#Node151
+ [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node151.html#Node151
   `MPI_Abort`]] [[memberref boost::mpi::environment::abort
   `environment::abort`]]] 
 ]
@@ -1778,9 +1778,9 @@ MPI 1.1.
 [table Profiling interface
   [[C Function] [Boost.MPI Equivalent]]
   
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node153.html#Node153
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node153.html#Node153
   `PMPI_*` routines]] [unsupported]]
-  [[[@http://www.mpi-forum.org/docs/mpi-11-html/node156.html#Node156
+  [[[@http://www.mpi-forum.org/docs/mpi-1.1//mpi-11-html/node156.html#Node156
   `MPI_Pcontrol`]] [unsupported]]
 ]
 
