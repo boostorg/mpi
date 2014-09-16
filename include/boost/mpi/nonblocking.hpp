@@ -140,10 +140,12 @@ template<typename ForwardIterator>
 optional<std::pair<status, ForwardIterator> >
 test_any(ForwardIterator first, ForwardIterator last)
 {
-  for (ForwardIterator current = first; first != last; ++first) {
+  while (first != last) {
     // Check if we have found a completed request. If so, return it.
-    if (optional<status> result = current->test())
-      return std::make_pair(*result, current);
+    if (optional<status> result = first->test()) {
+      return std::make_pair(*result, first);
+    }
+    ++first;
   }
 
   // We found nothing
