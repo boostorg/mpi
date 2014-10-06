@@ -23,6 +23,7 @@
 #include <vector>
 #include <utility>
 #include <iostream>
+#include <utility>
 
 // Headers required to implement cartesian topologies
 #include <boost/shared_array.hpp>
@@ -66,6 +67,9 @@ operator!=(cartesian_dimension const& d1, cartesian_dimension const& d2) {
   return !(d1 == d2);
 }
 
+/**
+ * @brief Pretty printing of a cartesian dimension (size, periodic)
+ */
 std::ostream& operator<<(std::ostream& out, cartesian_dimension const& d);
 
 /**
@@ -106,6 +110,11 @@ class BOOST_MPI_DECL cartesian_topology
    */
   void split(std::vector<int>& dims, std::vector<bool>& periodics) const;
 };
+
+/**
+ * @brief Pretty printing of a cartesian topology
+ */
+std::ostream& operator<<(std::ostream& out, cartesian_topology const& t);
 
 /**
  * @brief An MPI communicator with a cartesian topology.
@@ -215,6 +224,12 @@ public:
    * @param coords the coordinates. the size must match the communicator's topology.
    */
   int rank(const std::vector<int>& coords) const;
+  /**
+   * Return the rank of the source and targetdestination process through a shift.
+   * @param dim the dimension in which the shift takes place. 0 <= dim <= ndim().
+   * @param disp the shift displacement, can be positive (upward) or negative (downward).
+   */
+  std::pair<int, int> shifted_ranks(int dim, int disp) const;
   /**
    * Provides the coordinates of a process with the given rank.
    * @param rk the rank in this communicator.

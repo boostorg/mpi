@@ -24,6 +24,20 @@ operator<<(std::ostream& out, cartesian_dimension const& d) {
   return out;
 }
 
+std::ostream&
+operator<<(std::ostream& out, cartesian_topology const& topo) {
+  out << '{';
+  int const sz = topo.size();
+  for (int i = 0; i < sz; ++i) {
+    out << topo[i];
+    if ( i < (sz-1) ) {
+      out << ',';
+    }
+  }
+  out << '}';
+  return out;
+}
+
 cartesian_communicator::cartesian_communicator(const communicator&         comm,
                                                const cartesian_topology&   topology,
                                                bool                        reorder )
@@ -31,7 +45,8 @@ cartesian_communicator::cartesian_communicator(const communicator&         comm,
 {
   std::vector<int> dims(topology.size());
   std::vector<int> periodic(topology.size());
-  for(int i = 0; i < topology.size(); ++i) {
+  int tsz = topology.size();
+  for(int i = 0; i < tsz; ++i) {
     dims[i]     = topology[i].size;
     periodic[i] = topology[i].periodic;
   }
@@ -46,6 +61,8 @@ cartesian_communicator::cartesian_communicator(const communicator&         comm,
                           int(reorder), &newcomm));
   if(newcomm != MPI_COMM_NULL) {
     comm_ptr.reset(new MPI_Comm(newcomm), comm_free());
+  } else {
+    comm_ptr.reset(MPI_COMM_NULL);
   }
 }
 
@@ -53,10 +70,11 @@ cartesian_communicator::cartesian_communicator(const cartesian_communicator& com
                                                const std::vector<int>&       keep ) 
   : communicator() 
 {
-  int max_dims = comm.ndims();
-  BOOST_ASSERT(keep.size() <= max_dims);
+  int const max_dims = comm.ndims();
+  int const nbkept = keep.size();
+  BOOST_ASSERT(nbkept <= max_dims);
   std::vector<int> bitset(max_dims, int(false));
-  for(int i = 0; i < keep.size(); ++i) {
+  for(int i = 0; i < nbkept; ++i) {
     BOOST_ASSERT(keep[i] < max_dims);
     bitset[keep[i]] = true;
   }
@@ -80,13 +98,23 @@ cartesian_communicator::ndims() const {
 int
 cartesian_communicator::rank(const std::vector<int>& coords ) const {
   int r = -1;
-  BOOST_ASSERT(coords.size() == ndims());
+  BOOST_ASSERT(int(coords.size()) == ndims());
   BOOST_MPI_CHECK_RESULT(MPI_Cart_rank, 
                          (MPI_Comm(*this), const_cast<std::vector<int>&>(coords).data(), 
                           &r));
   return r;
 }
- 
+
+std::pair<int, int>
+cartesian_communicator::shifted_ranks(int dim, int disp) const {
+  std::pair<int, int> r(-1,-1);
+  assert((0 <= dim && dim < ndims()) || (std::abort(), false));
+  BOOST_ASSERT(0 <= dim && dim < ndims());
+  BOOST_MPI_CHECK_RESULT(MPI_Cart_shift, 
+                         (MPI_Comm(*this), dim, disp, &(r.first), &(r.second)));
+  return r;
+}
+
 std::vector<int>&
 cartesian_communicator::coords(int rk, std::vector<int>& cbuf) const {
   cbuf.resize(ndims());

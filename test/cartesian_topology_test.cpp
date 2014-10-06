@@ -59,6 +59,34 @@ void test_coordinates_consistency( mpi::cartesian_communicator const& cc,
   }
 }
 
+void test_shifted_coords( mpi::cartesian_communicator const& cc, int pos,  mpi::cartesian_dimension desc, int dim )
+{
+  for (int i = -(desc.size); i < desc.size; ++i) {
+    std::pair<int,int> rks = cc.shifted_ranks(pos, i);
+    int src = cc.coords(rks.first)[dim];
+    int dst = cc.coords(rks.second)[dim];
+    if (pos == (dim/2)) {
+      std::ostringstream out;
+      out << "Rank " << cc.rank() << ", dim. " << dim << ", pos " << pos << ", in " << desc << ' ';
+      out << "shifted pos: " << src << ", " << dst << '\n';
+      std::cout << out.str();
+    }
+  }
+}
+
+void test_shifted_coords( mpi::cartesian_communicator const& cc, std::vector<int> const& coords,  mpi::cartesian_topology const& topo )
+{
+  if (cc.rank() == 0) {
+    std::cout << "Testing shifts with topology " << topo << '\n';
+  }
+  for(int i = 0; i < cc.ndims(); ++i) {
+    if (cc.rank() == 0) {
+      std::cout << " for dimension " << i << ' ' << topo[i] << '\n';
+    }
+    test_shifted_coords( cc, coords[i], topo[i], i );
+  }
+}
+
 void test_topology_consistency( mpi::cartesian_communicator const& cc) 
 {
   mpi::cartesian_topology itopo(cc.ndims());
@@ -78,23 +106,11 @@ void test_topology_consistency( mpi::cartesian_communicator const& cc)
   test_coordinates_consistency( cc, coords );
 }
 
-int test_main(int argc, char* argv[])
+void test_cartesian_topology( mpi::communicator const& world, mpi::cartesian_topology const& topo) 
 {
-  mpi::environment env(argc, argv);
-
-  mpi::communicator world;
-  mpi::cartesian_topology topo(3);
-
-  if (world.size() == 24) {
-    topo[0].size = 2; topo[1].size = 3; topo[2].size = 4;
-  } else {
-    topo[0].size = 0; topo[1].size = 3; topo[2].size = 0;
-  }
-  topo[0].periodic = true; topo[1].periodic = false; topo[2].periodic = true;
-  
   mpi::cartesian_communicator cc(world, topo, true);
   BOOST_CHECK(cc.has_cartesian_topology());
-  BOOST_CHECK(cc.ndims() == 3);
+  BOOST_CHECK(cc.ndims() == int(topo.size()));
   for( int r = 0; r < cc.size(); ++r) {
     cc.barrier();
     if (r == cc.rank()) {
@@ -107,10 +123,31 @@ int test_main(int argc, char* argv[])
     }
   }
   test_topology_consistency(cc);
-  std::vector<int> sub02;
-  sub02.push_back(0);
-  sub02.push_back(2);
-  mpi::cartesian_communicator cc02(cc, sub02);
-  test_topology_consistency(cc02);
+  std::vector<int> even;
+  for(int i = 0; i < cc.ndims(); i += 2) {
+    even.push_back(i);
+  }
+  mpi::cartesian_communicator cce(cc, even);
+  test_topology_consistency(cce);
+  test_shifted_coords( cce, cce.coords(cce.rank()),  topo );
+}
+
+int test_main(int argc, char* argv[])
+{
+  mpi::environment env(argc, argv);
+
+  mpi::communicator world;
+  int const ndim = world.size() >= 24 ? 3 : 2;
+  mpi::cartesian_topology topo(ndim);
+  typedef mpi::cartesian_dimension cd;
+  if (topo.size() == 3) {
+    topo[0] = cd(2,true); topo[1] = cd(3,false); topo[2] = cd(4, true);
+  } else if (world.size() >= 6) {
+    topo[0] = cd(0,true); topo[1] = cd(3, false);
+  } else {
+    topo[0] = cd(0,true); topo[1] = cd(0, false);
+  }
+  test_cartesian_topology( world, topo);
+
   return 0;
 }
