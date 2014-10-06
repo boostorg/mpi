@@ -56,8 +56,6 @@ test_skeleton_and_content(const communicator& comm, int root = 0)
   using boost::make_counting_iterator;
   using boost::mpi::broadcast;
 
-  typedef std::list<int>::iterator iterator;
-
   int list_size = comm.size() + 7;
   if (comm.rank() == root) {
     // Fill in the seed data
