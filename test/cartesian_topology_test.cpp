@@ -138,6 +138,8 @@ int test_main(int argc, char* argv[])
 
   mpi::communicator world;
   int const ndim = world.size() >= 24 ? 3 : 2;
+  //std::cout << "Say something:" << std::flush;
+  //std::cin.get();
   mpi::cartesian_topology topo(ndim);
   typedef mpi::cartesian_dimension cd;
   if (topo.size() == 3) {

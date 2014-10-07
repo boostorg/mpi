@@ -163,10 +163,14 @@ optional<intercommunicator> communicator::as_intercommunicator() const
 
 bool communicator::has_graph_topology() const
 {
-  int status;
-  BOOST_MPI_CHECK_RESULT(MPI_Topo_test, ((MPI_Comm)*this, &status));
-
-  return status == MPI_GRAPH;
+  bool is_graph = false;
+  // topology test not allowed on MPI_NULL_COMM
+  if (bool(*this)) {
+    int status;
+    BOOST_MPI_CHECK_RESULT(MPI_Topo_test, ((MPI_Comm)*this, &status));
+    is_graph = status == MPI_GRAPH;
+  }
+  return is_graph;
 }
 
 optional<graph_communicator> communicator::as_graph_communicator() const
@@ -180,17 +184,21 @@ optional<graph_communicator> communicator::as_graph_communicator() const
 
 bool communicator::has_cartesian_topology() const
 {
-  int status;
-  BOOST_MPI_CHECK_RESULT(MPI_Topo_test, ((MPI_Comm)*this, &status));
-
-  return status == MPI_CART;
+  bool is_cart = false;
+  // topology test not allowed on MPI_NULL_COM
+  if (bool(*this)) {
+    int status;
+    BOOST_MPI_CHECK_RESULT(MPI_Topo_test, ((MPI_Comm)*this, &status));
+    is_cart = status == MPI_CART;
+  }
+  return is_cart;
 }
 
 optional<cartesian_communicator> communicator::as_cartesian_communicator() const
 {
   if (has_cartesian_topology()) {
     return cartesian_communicator(comm_ptr);
-      } else {
+  } else {
     return optional<cartesian_communicator>();
   }
 }

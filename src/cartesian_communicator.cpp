@@ -61,8 +61,6 @@ cartesian_communicator::cartesian_communicator(const communicator&         comm,
                           int(reorder), &newcomm));
   if(newcomm != MPI_COMM_NULL) {
     comm_ptr.reset(new MPI_Comm(newcomm), comm_free());
-  } else {
-    comm_ptr.reset(MPI_COMM_NULL);
   }
 }
 
