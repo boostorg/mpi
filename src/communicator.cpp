@@ -44,7 +44,7 @@ communicator::communicator(const MPI_Comm& comm, comm_create_kind kind)
       MPI_Comm newcomm;
       BOOST_MPI_CHECK_RESULT(MPI_Comm_dup, (comm, &newcomm));
       comm_ptr.reset(new MPI_Comm(newcomm), comm_free());
-      MPI_Errhandler_set(newcomm, MPI_ERRORS_RETURN);
+      MPI_Comm_set_errhandler(newcomm, MPI_ERRORS_RETURN);
       break;
     }
 
