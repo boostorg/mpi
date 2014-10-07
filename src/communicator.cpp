@@ -173,7 +173,7 @@ optional<graph_communicator> communicator::as_graph_communicator() const
 {
   if (has_graph_topology()) {
     return graph_communicator(comm_ptr);
-      } else {
+  } else {
     return optional<graph_communicator>();
   }
 }
