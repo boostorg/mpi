@@ -41,7 +41,7 @@ operator<<(std::ostream& out, cartesian_topology const& topo) {
 cartesian_communicator::cartesian_communicator(const communicator&         comm,
                                                const cartesian_topology&   topology,
                                                bool                        reorder )
-  : communicator() 
+  : communicator(MPI_COMM_NULL, comm_attach) 
 {
   std::vector<int> dims(topology.size());
   std::vector<int> periodic(topology.size());
@@ -66,7 +66,7 @@ cartesian_communicator::cartesian_communicator(const communicator&         comm,
 
 cartesian_communicator::cartesian_communicator(const cartesian_communicator& comm,
                                                const std::vector<int>&       keep ) 
-  : communicator() 
+  : communicator(MPI_COMM_NULL, comm_attach) 
 {
   int const max_dims = comm.ndims();
   int const nbkept = keep.size();
@@ -142,6 +142,13 @@ cartesian_communicator::topology(  cartesian_topology&  topo,
   topo.swap(res);
 }
 
+cartesian_topology
+cartesian_communicator::topology() const {
+  cartesian_topology topo(ndims());
+  std::vector<int> coords;
+  topology(topo, coords);
+  return topo;
+}
 void
 cartesian_topology::split(std::vector<int>& dims, std::vector<bool>& periodics) const {
   int ndims = size();
@@ -156,8 +163,17 @@ cartesian_topology::split(std::vector<int>& dims, std::vector<bool>& periodics) 
 
 std::vector<int>&
 cartesian_dimensions(int sz, std::vector<int>&  dims) {
+  int min = 1;
+  int const dimsz = dims.size();
+  for(int i = 0; i < dimsz; ++i) {
+    if (dims[i] > 0) {
+      min *= dims[i];
+    }
+  }
+  int leftover = sz % min;
+  
   BOOST_MPI_CHECK_RESULT(MPI_Dims_create,
-                         (sz, dims.size(), dims.data()));
+                         (sz-leftover, dims.size(), dims.data()));
   return dims;
 }
 

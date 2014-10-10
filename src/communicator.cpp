@@ -206,6 +206,7 @@ optional<cartesian_communicator> communicator::as_cartesian_communicator() const
 void communicator::abort(int errcode) const
 {
   BOOST_MPI_CHECK_RESULT(MPI_Abort, (MPI_Comm(*this), errcode));
+  std::abort();
 }
 
 /*************************************************************

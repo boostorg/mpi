@@ -244,10 +244,15 @@ public:
    */
   std::vector<int> coords(int rk) const;
   /**
-   * Retrieve the topology.
+   * Retrieve the topology and coordinates of this process in the grid.
    *
    */
   void topology( cartesian_topology&  dims, std::vector<int>& coords ) const;
+  /**
+   * Retrieve the topology of the grid.
+   *
+   */
+  cartesian_topology topology() const;
 };
 
 /**

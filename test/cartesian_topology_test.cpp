@@ -74,8 +74,10 @@ void test_shifted_coords( mpi::cartesian_communicator const& cc, int pos,  mpi::
   }
 }
 
-void test_shifted_coords( mpi::cartesian_communicator const& cc, std::vector<int> const& coords,  mpi::cartesian_topology const& topo )
+void test_shifted_coords( mpi::cartesian_communicator const& cc)
 {
+  std::vector<int> coords; mpi::cartesian_topology topo(cc.ndims());
+  cc.topology(topo, coords);
   if (cc.rank() == 0) {
     std::cout << "Testing shifts with topology " << topo << '\n';
   }
@@ -106,17 +108,14 @@ void test_topology_consistency( mpi::cartesian_communicator const& cc)
   test_coordinates_consistency( cc, coords );
 }
 
-void test_cartesian_topology( mpi::communicator const& world, mpi::cartesian_topology const& topo) 
+void test_cartesian_topology( mpi::cartesian_communicator const& cc)
 {
-  mpi::cartesian_communicator cc(world, topo, true);
   BOOST_CHECK(cc.has_cartesian_topology());
-  BOOST_CHECK(cc.ndims() == int(topo.size()));
   for( int r = 0; r < cc.size(); ++r) {
     cc.barrier();
     if (r == cc.rank()) {
       std::vector<int> coords = cc.coords(r);
       std::cout << "Process of cartesian rank " << cc.rank() 
-                << " and global rank " << world.rank() 
                 << " has coordinates (";
       std::copy(coords.begin(), coords.end(), std::ostream_iterator<int>(std::cout,","));
       std::cout << ")\n";
@@ -129,7 +128,24 @@ void test_cartesian_topology( mpi::communicator const& world, mpi::cartesian_top
   }
   mpi::cartesian_communicator cce(cc, even);
   test_topology_consistency(cce);
-  test_shifted_coords( cce, cce.coords(cce.rank()),  topo );
+  test_shifted_coords(cce);
+}
+
+void test_cartesian_topology( mpi::communicator const& world, mpi::cartesian_topology const& topo) 
+{
+  mpi::cartesian_communicator cc(world, topo, true);
+  if (cc) {
+    BOOST_CHECK(cc.has_cartesian_topology());
+    BOOST_CHECK(cc.ndims() == int(topo.size()));
+    if (cc.rank() == 0) {
+      std::cout << "Asked topology " << topo << ", got " << cc.topology() << '\n';
+    }
+    test_cartesian_topology(cc);
+  } else {
+    std::ostringstream out;
+    out << world.rank() << " was left outside the cartesian grid\n";
+    std::cout << out.str();
+  }
 }
 
 int test_main(int argc, char* argv[])
@@ -138,8 +154,6 @@ int test_main(int argc, char* argv[])
 
   mpi::communicator world;
   int const ndim = world.size() >= 24 ? 3 : 2;
-  //std::cout << "Say something:" << std::flush;
-  //std::cin.get();
   mpi::cartesian_topology topo(ndim);
   typedef mpi::cartesian_dimension cd;
   if (topo.size() == 3) {
