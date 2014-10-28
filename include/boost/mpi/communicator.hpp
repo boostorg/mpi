@@ -19,6 +19,7 @@
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/mpi/datatype.hpp>
+#include <boost/mpi/nonblocking.hpp>
 #include <utility>
 #include <iterator>
 #include <stdexcept> // for std::range_error
@@ -1299,8 +1300,8 @@ status communicator::sendrecv_impl(int dest, int stag, const T& sval, int src, i
   int const SEND = 0;
   int const RECV = 1;
   request srrequests[2];
-  srrequests[SEND] = this->isend_impl(dest, stag, sval, mpl::false_);
-  srrequests[RECV] = this->irecv_impl(src,  rtag, rval, mpl::false_);
+  srrequests[SEND] = this->isend_impl(dest, stag, sval, mpl::false_());
+  srrequests[RECV] = this->irecv_impl(src,  rtag, rval, mpl::false_());
   status srstatuses[2];
   wait_all(srrequests, srrequests + 2, srstatuses);
   return srstatuses[RECV];
