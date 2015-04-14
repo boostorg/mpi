@@ -38,18 +38,14 @@ public:
     friend class archive::save_access;
 protected:
 #endif
-
-    // intermediate level to support override of operators
-    // for templates in the absence of partial function 
-    // template ordering
-    template<class T>
-    void save_override(T const& t, BOOST_PFTO int)
-    {
-        archive::save(* this->This(), t);
-    }
+  template<class T>
+  void save_override(T const& t)
+  {
+    archive::save(* this->This(), t);
+  }
 
 #define BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(T) \
-    void save_override(T const & , int)        \
+    void save_override(T const &)              \
     {}
 
 BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(archive::class_id_optional_type)

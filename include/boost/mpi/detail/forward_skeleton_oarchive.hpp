@@ -41,17 +41,14 @@ public:
 protected:
 #endif
 
-    // intermediate level to support override of operators
-    // for templates in the absence of partial function 
-    // template ordering
-    template<class T>
-    void save_override(T const& t, BOOST_PFTO int)
-    {
-        archive::save(* this->This(), t);
-    }
+  template<class T>
+  void save_override(T const& t)
+  {
+    archive::save(* this->This(), t);
+  }
 
 #define BOOST_ARCHIVE_FORWARD_IMPLEMENTATION(T) \
-    void save_override(T const & t , int)       \
+    void save_override(T const & t)             \
     {                                           \
       implementation_archive << t;              \
     }
