@@ -112,8 +112,8 @@ public:
     save_override(x, use_optimized());
   }
 
-  // input archives need to ignore  the optional information
-  void save_override(const archive::class_id_optional_type & /*t*/, int){}
+  // output archives need to ignore  the optional information
+  void save_override(const archive::class_id_optional_type & ){}
 
   // explicitly convert to char * to avoid compile ambiguities
   void save_override(const archive::class_name_type & t){
