@@ -135,7 +135,7 @@ public:
     load_override(static_cast<archive::class_id_type &>(t));
   }
 
-  void load_override(archive::class_name_type & t, int)
+  void load_override(archive::class_name_type & t)
   {
     std::string cn;
     cn.reserve(BOOST_SERIALIZATION_MAX_KEY_SIZE);
