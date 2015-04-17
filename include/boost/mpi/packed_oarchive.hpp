@@ -113,20 +113,20 @@ public:
   }
 
   // input archives need to ignore  the optional information
-  void save_override(const archive::class_id_optional_type & /*t*/, int){}
+  void save_override(archive::class_id_optional_type const& /*t*/, int){}
 
   // explicitly convert to char * to avoid compile ambiguities
-  void save_override(const archive::class_name_type & t, int){
+  void save_override(archive::class_name_type const& t, int){
       const std::string s(t);
       * this->This() << s;
   }
 
-  void save_override(archive::class_id_type & t, int version){
+  void save_override(archive::class_id_type const& t, int version){
     const boost::int_least16_t x = t;
     * this->This() << x;
   }
 
-  void save_override(archive::version_type & t, int version){
+  void save_override(archive::version_type const& t, int version){
     const boost::int_least8_t x = t;
     * this->This() << x;
   }
