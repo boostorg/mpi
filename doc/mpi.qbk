@@ -178,7 +178,7 @@ For many users using _LAM_, _MPICH_, or _OpenMPI_, configuration is
 almost automatic. If you don't already have a file `user-config.jam`
 in your home directory, copy `tools/build/user-config.jam`
 there. For many users, MPI support can be enabled simply by adding the
-following line to your user-config.jam file, which is used to configure
+following line to your `user-config.jam` file, which is used to configure
 Boost.Build version 2. 
 
   using mpi ;
@@ -532,13 +532,14 @@ _Serialization_ library already contains all of the required
 serialization code. In these cases, you need only include the
 appropriate header from the `boost/serialization` directory. 
 
+[def _gps_position_ [link gps_position `gps_position`]]
 For types that do not already have a serialization header, you will
 first need to implement serialization code before the types can be
-transmitted using Boost.MPI. Consider a simple class `gps_position`
+transmitted using Boost.MPI. Consider a simple class _gps_position_
 that contains members `degrees`, `minutes`, and `seconds`. This class
 is made serializable by making it a friend of
 `boost::serialization::access` and introducing the templated
-`serialize()` function, as follows:
+`serialize()` function, as follows:[#gps_position]
 
   class gps_position
   {
@@ -568,13 +569,15 @@ scope of this tutorial. For more information, please see the
 _Serialization_ library tutorial from which the above example was
 extracted. One important side benefit of making types serializable for
 Boost.MPI is that they become serializable for any other usage, such
-as storing the objects to disk to manipulated them in XML.
+as storing the objects to disk and manipulated them in XML.
 
-Some serializable types, like `gps_position` above, have a fixed
-amount of data stored at fixed field positions. When this is the case,
-Boost.MPI can optimize their serialization and transmission to avoid
-extraneous copy operations. To enable this optimization, users should
-specialize the type trait [classref
+
+Some serializable types, like _gps_position_ above, have a fixed
+amount of data stored at fixed offsets and are fully defined by
+the values of their data member (most POD with no pointers are a good example).
+When this is the case, Boost.MPI can optimize their serialization and 
+transmission by avoiding extraneous copy operations. 
+To enable this optimization, users must specialize the type trait [classref
 boost::mpi::is_mpi_datatype `is_mpi_datatype`], e.g.:
 
   namespace boost { namespace mpi {
@@ -1111,9 +1114,6 @@ programs.
 
 [endsect]
 
-
-
-
 [section:performance_optimizations Performance optimizations]
 [section:serialization_optimizations Serialization optimizations]
 
@@ -1146,8 +1146,10 @@ using the traits classes or helper macros of Boost.Serialization:
 [section:homogeneous_machines Homogeneous machines]
 
 More optimizations are possible on homogeneous machines, by avoiding
-MPI_Pack/MPI_Unpack calls but using direct bitwise copy. This feature can be
-enabled by defining the macro BOOST_MPI_HOMOGENEOUS when building Boost.MPI and
+MPI_Pack/MPI_Unpack calls but using direct bitwise copy. This feature is 
+enabled by default by defining the macro BOOST_MPI_HOMOGENEOUS in the include 
+file  `boost/mpi/config.hpp`.
+That definition must be consistent when building Boost.MPI and
 when building the application.
 
 In addition all classes need to be marked both as is_mpi_datatype and
