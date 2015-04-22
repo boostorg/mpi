@@ -9,8 +9,6 @@
 #ifndef BOOST_MPI_DETAIL_FORWARD_SKELETON_OARCHIVE_HPP
 #define BOOST_MPI_DETAIL_FORWARD_SKELETON_OARCHIVE_HPP
 
-#include <boost/serialization/pfto.hpp>
-
 #include <boost/archive/detail/auto_link_archive.hpp>
 #include <boost/archive/detail/oserializer.hpp>
 #include <boost/archive/detail/interface_oarchive.hpp>
