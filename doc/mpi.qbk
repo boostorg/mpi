@@ -21,7 +21,7 @@
 [def _MPI_implementations_ 
    [@http://www-unix.mcs.anl.gov/mpi/implementations.html
     MPI implementations]]
-[def _Serialization_ [@http://www.boost.org/libs/serialization/doc
+[def _Serialization_ [@boost:/libs/serialization/doc
                       Boost.Serialization]]
 [def _BoostPython_ [@http://www.boost.org/libs/python/doc
                       Boost.Python]]
@@ -187,7 +187,13 @@ Alternatively, you can provided explicitly the list of Boost libraries you want 
 Please refer to the `--help` option` of the `bootstrap` script.
 [endsect]
 
-[section:mpi_setup Setting up You MPI Implementation]
+[section:mpi_setup Setting up your MPI Implementation]
+
+First, you need to scan the =include/boost/mpi/config.hpp= file and check if some 
+settings needs to be modified for your MPI implementation or preferences. 
+
+In particular, the [macroref BOOST_MPI_HOMOGENEOUS] macro, that you will need to comment out 
+if you plan tu run on an heterogeneous set of macines. See the [link mpi.homogeneous_machines optimization] notes below.
 
 Most MPI implementations requires specific compilation and link options. 
 In order to mask theses options to the user, most MPI implementations provides 
@@ -1222,11 +1228,11 @@ using the traits classes or helper macros of Boost.Serialization:
 
 [endsect]
   
-[section:homogeneous_machines Homogeneous machines]
+[section:homogeneous_machines Homogeneous Machines]
 
 More optimizations are possible on homogeneous machines, by avoiding
 MPI_Pack/MPI_Unpack calls but using direct bitwise copy. This feature is 
-enabled by default by defining the macro BOOST_MPI_HOMOGENEOUS in the include 
+enabled by default by defining the macro [macroref BOOST_MPI_HOMOGENEOUS] in the include 
 file  `boost/mpi/config.hpp`.
 That definition must be consistent when building Boost.MPI and
 when building the application.
