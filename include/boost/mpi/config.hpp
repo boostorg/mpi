@@ -20,8 +20,16 @@
 #include <mpi.h>
 #include <boost/config.hpp>
 
-// Comment this macro is you are running in an heterogeneous environement.
-//
+/** @brief Comment this macro is you are running in an heterogeneous environement.
+ *
+ * When this flags is enabled, we assume some simple, POD like, type can be 
+ * transmited without paying the cost of portable serialization. 
+ *
+ * Comment this if your platform is not homogeneous and that portable 
+ * serialization/deserialization must be performed.
+ *
+ * It you do so, check that you MPI implementation supports thats kind of environement.
+ */
 #define BOOST_MPI_HOMOGENEOUS
 
 // If this is an MPI-2 implementation, define configuration macros for
