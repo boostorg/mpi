@@ -1727,7 +1727,7 @@ algorithms.
 [table Process topologies
   [[C Function/Constant] [Boost.MPI Equivalent]]
   
-  [[`MPI_GRAPH`] [unnecessary; use [memberref boost::mpi::communicator::has_graph_topology `communicator::has_graph_topology`]]]
+  [[`MPI_GRAPH`] [unnecessary; use [memberref boost::mpi::communicator::as_graph_communicator `communicator::as_graph_communicator`]]]
   [[`MPI_CART`] [unnecessary; use [memberref boost::mpi::communicator::has_cartesian_topology `communicator::has_cartesian_topology`]]]
 
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node133.html#Node133
@@ -1740,8 +1740,8 @@ algorithms.
   `communicator::with_graph_topology`]]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node136.html#Node136
   `MPI_Topo_test`]] [[memberref
-  boost::mpi::communicator::has_graph_topology
-  `communicator::has_graph_topology`], [memberref
+  boost::mpi::communicator::as_graph_communicator
+  `communicator::as_graph_communicator`], [memberref
   boost::mpi::communicator::has_cartesian_topology
   `communicator::has_cartesian_topology`]]] 
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node136.html#Node136
