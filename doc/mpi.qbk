@@ -1735,9 +1735,9 @@ algorithms.
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node134.html#Node134
   `MPI_Dims_create`]] [unsupported]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node135.html#Node135
-  `MPI_Graph_create`]] [[memberref
-  boost::mpi::communicator::with_graph_topology
-  `communicator::with_graph_topology`]]]
+  `MPI_Graph_create`]] [[classref
+  boost::mpi::graph_communicator
+  `graph_communicator ctors`]]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node136.html#Node136
   `MPI_Topo_test`]] [[memberref
   boost::mpi::communicator::as_graph_communicator
@@ -2141,7 +2141,7 @@ There are an increasing number of hybrid parrallel applications that mix
 distributed and shared memory parallelism. To know how to support that model,
 one need to know what level of threading support is guaranteed by the MPI 
 implementation. There are 4 ordered level of possible threading support described
-by [classref boost::mpi::threading::level mpi::threading::level].
+by [enumref boost::mpi::threading::level mpi::threading::level].
 At the lowest level, you should not use threads at all, at the highest level, any 
 thread can perform MPI call.
 
