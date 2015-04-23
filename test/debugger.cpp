@@ -3,9 +3,19 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost/mpi/debugger.hpp"
+#include <cstdlib>
 
-void wait_for_debugger(std::vector<int> const& processes, boost::mpi::communicator comm)
+#include "debugger.hpp"
+
+std::vector<int> extract_paused_ranks(int argc, char** argv) {
+  std::vector<int> paused;
+  for (int i=1; i < argc; ++i) {
+    paused.push_back(std::atoi(argv[i]));
+  }
+  return paused;
+}
+
+void wait_for_debugger(std::vector<int> const& processes, boost::mpi::communicator const& comm)
 {
   int i = 1;
   for (int r = 0; r < comm.size(); ++r) {
