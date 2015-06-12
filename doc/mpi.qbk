@@ -21,14 +21,14 @@
 [def _MPI_implementations_ 
    [@http://www-unix.mcs.anl.gov/mpi/implementations.html
     MPI implementations]]
-[def _Serialization_ [@http://www.boost.org/libs/serialization/doc
+[def _Serialization_ [@boost:/libs/serialization/doc
                       Boost.Serialization]]
 [def _BoostPython_ [@http://www.boost.org/libs/python/doc
                       Boost.Python]]
 [def _Python_      [@http://www.python.org Python]]
-[def _LAM_          [@http://www.lam-mpi.org/ LAM/MPI]]
 [def _MPICH_        [@http://www-unix.mcs.anl.gov/mpi/mpich/ MPICH2]]
 [def _OpenMPI_      [@http://www.open-mpi.org OpenMPI]]
+[def _IntelMPI_     [@https://software.intel.com/en-us/intel-mpi-library Intel MPI]]
 [def _accumulate_   [@http://www.sgi.com/tech/stl/accumulate.html
                      `accumulate`]]
 
@@ -100,8 +100,8 @@ available. Boost.MPI should work with any of the
 implementations, although it has only been tested extensively with:
 
 * [@http://www.open-mpi.org Open MPI]
-* [@http://www.lam-mpi.org LAM/MPI ]
 * [@http://www-unix.mcs.anl.gov/mpi/mpich/ MPICH2]
+* [@https://software.intel.com/en-us/intel-mpi-library Intel MPI]
 
 You can test your implementation using the following simple program,
 which passes a message from one processor to another. Each processor
@@ -110,7 +110,7 @@ prints a message to standard output.
   #include <mpi.h>
   #include <iostream>
 
-  int main()
+  int main(int argc, char* argv[])
   {
     MPI_Init(&argc, &argv);
 
@@ -133,7 +133,7 @@ prints a message to standard output.
   } 
 
 You should compile and run this program on two processors. To do this,
-consult the documentation for your MPI implementation. With _LAM_, for
+consult the documentation for your MPI implementation. With _OpenMPI_, for
 instance, you compile with the `mpiCC` or `mpic++` compiler, boot the
 LAM/MPI daemon, and run your program via `mpirun`. For instance, if
 your program is called `mpi-test.cpp`, use the following commands:
@@ -161,60 +161,121 @@ appears to be working with a C++ compiler and we're ready to move on.
 
 [section:config Configure and Build]
 
-Boost.MPI uses version 2 of the
+[section:bjam Build Environement]
+
+As the rest of Boost, Boost.MPI uses version 2 of the
 [@http://www.boost.org/doc/html/bbv2.html Boost.Build] system for
-configuring and building the library binary. You will need a very new
-version of [@http://www.boost.org/tools/build/jam_src/index.html
-Boost.Jam] (3.1.12 or later). If you already have Boost.Jam, run `bjam
--v` to determine what version you are using.
+configuring and building the library binary.
 
-Information about building Boost.Jam is
-[@http://www.boost.org/tools/build/jam_src/index.html#building_bjam
-available here]. However, most users need only run `build.sh` in the
-`tools/build/jam_src` subdirectory of Boost. Then,
-copy the resulting `bjam` executable some place convenient.
+Please refer to the general Boost installation instructions for
+[@http://www.boost.org/doc/libs/release/more/getting_started/unix-variants.html#prepare-to-use-a-boost-library-binary Unix Variant]
+(including Unix, Linux and MacOS) or
+[@http://www.boost.org/doc/libs/1_58_0/more/getting_started/windows.html#prepare-to-use-a-boost-library-binary Windows]. 
+The simplified build instructions should apply on most platforms with a few specific modifications described below.
+[endsect]
 
-For many users using _LAM_, _MPICH_, or _OpenMPI_, configuration is
-almost automatic. If you don't already have a file `user-config.jam`
-in your home directory, copy `tools/build/user-config.jam`
-there. For many users, MPI support can be enabled simply by adding the
-following line to your user-config.jam file, which is used to configure
-Boost.Build version 2. 
+[section:bootstraping Bootstrap]
+
+As described in the boost installation instructions, go to to root of your Boost source distribution 
+and run the `bootstrap` script (`./bootstrap.sh` for unix variants or `bootstrap.bat` for Windows).
+That will generate a 'project-config.jam` file in the root directory.
+Use your favourite text editor and add the following line:
 
   using mpi ;
 
-This should auto-detect MPI settings based on the MPI wrapper compiler in 
-your path, e.g., `mpic++`. If the wrapper compiler is not in your
-path, see below.
+Alternatively, you can provided explicitly the list of Boost libraries you want to build.
+Please refer to the `--help` option` of the `bootstrap` script.
+[endsect]
 
-To actually build the MPI library, go into the top-level Boost
-directory and execute the command:
+[section:mpi_setup Setting up your MPI Implementation]
+
+First, you need to scan the =include/boost/mpi/config.hpp= file and check if some 
+settings needs to be modified for your MPI implementation or preferences. 
+
+In particular, the [macroref BOOST_MPI_HOMOGENEOUS] macro, that you will need to comment out 
+if you plan tu run on an heterogeneous set of macines. See the [link mpi.homogeneous_machines optimization] notes below.
+
+Most MPI implementations requires specific compilation and link options. 
+In order to mask theses options to the user, most MPI implementations provides 
+wrappers which silently pass those options to the compiler.
+
+Depending on your MPI implementation, some work might be needed to tell Boost which 
+specific MPI option to use. This is done through the `using mpi ;` directive of the `project-config.jam` file.
+
+The general form is the following (do not forget to leave spaces around *:* and before *;*):
 
 [pre
-bjam --with-mpi
+using mpi 
+   : \[<MPI compiler wrapper>\] 
+   : \[<compilation and link options>\] 
+   : \[<mpi runner>\] ;
 ]
 
-If your MPI wrapper compiler has a different name from the default,
-you can pass the name of the wrapper compiler as the first argument to
-the mpi module:
+* [* If you're lucky]
 
-  using mpi : /opt/mpich2-1.0.4/bin/mpiCC ;
+For those who uses _MPICH_, _OpenMPI_ or some of their derivatives,  configuration can be
+almost automatic. In fact, if your `mpicxx` command is in your path, you just need to use:
 
-If your MPI implementation does not have a wrapper compiler, or the MPI 
-auto-detection code does not work with your MPI's wrapper compiler,
-you can pass MPI-related options explicitly via the second parameter to the 
-`mpi` module:
+[pre
+using mpi ;
+]
+ 
+The directive will find the wrapper and deduce the options to use.
 
-   using mpi : : <find-shared-library>lammpio <find-shared-library>lammpi++
-                 <find-shared-library>mpi <find-shared-library>lam 
-                 <find-shared-library>dl ;
+* [*If your wrapper is not in your path]
+
+...or if it does not have a usual wrapper name, you will need to tell the build system where to find it:
+
+[pre
+using mpi : /opt/mpi/bullxmpi/1.2.8.3/bin/mpicc ;
+]
+
+* [*If your wrapper is really excentric]
+
+or does not exist at all (it happens), you need to 
+provide the compilation and build options to the build environement using `jam` directives.
+For example, the following could be used for a specific Intel MPI implementation:
+
+[pre
+using mpi : mpiicc : 
+      <library-path>/softs/intel/impi/5.0.1.035/intel64/lib
+      <library-path>/softs/intel/impi/5.0.1.035/intel64/lib/release_mt
+      <include>/softs/intel/impi/5.0.1.035/intel64/include
+      <find-shared-library>mpifort
+      <find-shared-library>mpi_mt
+      <find-shared-library>mpigi
+      <find-shared-library>dl
+      <find-shared-library>rt ;
+]
+
+To do that, you need to guess the libraries and include directories associated with your environement.
+You can refer to the your specific MPI environement documentation. 
+Most of the time thoug, your wrapper have an option that provide that information, it usually starts with `--show`:
+[pre
+$ mpiicc -show
+icc -I/softs/intel//impi/5.0.3.048/intel64/include -L/softs/intel//impi/5.0.3.048/intel64/lib/release_mt -L/softs/intel//impi/5.0.3.048/intel64/lib -Xlinker --enable-new-dtags -Xlinker -rpath -Xlinker /softs/intel//impi/5.0.3.048/intel64/lib/release_mt -Xlinker -rpath -Xlinker /softs/intel//impi/5.0.3.048/intel64/lib -Xlinker -rpath -Xlinker /opt/intel/mpi-rt/5.0/intel64/lib/release_mt -Xlinker -rpath -Xlinker /opt/intel/mpi-rt/5.0/intel64/lib -lmpifort -lmpi -lmpigi -ldl -lrt -lpthread
+$ 
+]
+[
+$ mpicc --showme
+icc -I/opt/mpi/bullxmpi/1.2.8.3/include -pthread -L/opt/mpi/bullxmpi/1.2.8.3/lib -lmpi -ldl -lm -lnuma -Wl,--export-dynamic -lrt -lnsl -lutil -lm -ldl
+$ mpicc --showme:compile
+-I/opt/mpi/bullxmpi/1.2.8.3/include -pthread
+$ mpicc --showme:link
+-pthread -L/opt/mpi/bullxmpi/1.2.8.3/lib -lmpi -ldl -lm -lnuma -Wl,--export-dynamic -lrt -lnsl -lutil -lm -ldl
+$ 
+]
 
 To see the results of MPI auto-detection, pass `--debug-configuration` on
 the bjam command line.
 
+* [*If you want to run the regression tests]
+
+...Which is a good thing.
+
 The (optional) third argument configures Boost.MPI for running
 regression tests. These parameters specify the executable used to
-launch jobs (default: "mpirun") followed by any necessary arguments
+launch jobs (the default is "mpirun") followed by any necessary arguments
 to this to run tests and tell the program to expect the number of
 processors to follow (default: "-np").  With the default parameters,
 for instance, the test harness will execute, e.g.,
@@ -223,21 +284,59 @@ for instance, the test harness will execute, e.g.,
 mpirun -np 4 all_gather_test
 ]
 
-[endsect]
+Some implementations provides alternative launcher that can be more convenient. For exemple, Intel's MPI provides the `mpiexec.hydra`:
 
-[section:installation Installing and Using Boost.MPI]
+[pre
+$mpiexec.hydra -np 4 all_gather_test
+]
+
+which does not requires any daemon to be running (as opposed to their `mpirun` command). Such a launcher need to be specified though:
+
+[pre
+using mpi : mpiicc : 
+      .....
+ : mpiexec.hydra -n  ;
+]
+
+[endsect]
+[section:installation Build and Install]
+
+To build the whole Boost ditribution:
+[pre
+$cd <boost distribution>
+$./b2 install
+]
+
+[tip
+Or, if you have a multi-cpu machine (say 24):
+
+[pre
+$cd <boost distribution>
+$./b2 -j24 install
+]
+]
 
 Installation of Boost.MPI can be performed in the build step by
 specifying `install` on the command line and (optionally) providing an
 installation location, e.g.,
 
 [pre
-bjam --with-mpi install
+$./b2 install
 ]
 
 This command will install libraries into a default system location. To
 change the path where libraries will be installed, add the option
 `--prefix=PATH`.
+
+Then, you can run the regression tests with:
+[pre
+$cd <boost distribution/lib/mpi/test
+$../../../b2
+]
+
+[endsect]
+[endsect]
+[section:using Using Boost.MPI]
 
 To build applications based on Boost.MPI, compile and link them as you
 normally would for MPI programs, but remember to link against the
@@ -247,7 +346,6 @@ normally would for MPI programs, but remember to link against the
 mpic++ -I/path/to/boost/mpi my_application.cpp -Llibdir \
   -lboost_mpi-gcc-mt-1_35 -lboost_serialization-gcc-d-1_35.a
 ]
-[endsect]
 
 If you plan to use the [link mpi.python Python bindings] for
 Boost.MPI in conjunction with the C++ Boost.MPI, you will also need to
@@ -257,19 +355,6 @@ only be necessary if you intend to [link mpi.python_user_data
 register C++ types] or use the [link
 mpi.python_skeleton_content skeleton/content mechanism] from
 within Python.
-
-[section:testing Testing Boost.MPI] 
-
-If you would like to verify that Boost.MPI is working properly with
-your compiler, platform, and MPI implementation, a self-contained test
-suite is available. To use this test suite, you will need to first
-configure Boost.Build for your MPI environment and then run `bjam` in
-`libs/mpi/test` (possibly with some extra options). For 
-_LAM_, you will need to run `lamboot` before running `bjam`. For
-_MPICH_, you may need to create a machine file and pass
-`-sMPIRUN_FLAGS="-machinefile <filename>"` to Boost.Jam; see the
-section on [link mpi.config configuration] for more
-information. If testing succeeds, `bjam` will exit without errors.
 
 [endsect]
 
@@ -532,13 +617,14 @@ _Serialization_ library already contains all of the required
 serialization code. In these cases, you need only include the
 appropriate header from the `boost/serialization` directory. 
 
+[def _gps_position_ [link gps_position `gps_position`]]
 For types that do not already have a serialization header, you will
 first need to implement serialization code before the types can be
-transmitted using Boost.MPI. Consider a simple class `gps_position`
+transmitted using Boost.MPI. Consider a simple class _gps_position_
 that contains members `degrees`, `minutes`, and `seconds`. This class
 is made serializable by making it a friend of
 `boost::serialization::access` and introducing the templated
-`serialize()` function, as follows:
+`serialize()` function, as follows:[#gps_position]
 
   class gps_position
   {
@@ -568,13 +654,15 @@ scope of this tutorial. For more information, please see the
 _Serialization_ library tutorial from which the above example was
 extracted. One important side benefit of making types serializable for
 Boost.MPI is that they become serializable for any other usage, such
-as storing the objects to disk to manipulated them in XML.
+as storing the objects to disk and manipulated them in XML.
 
-Some serializable types, like `gps_position` above, have a fixed
-amount of data stored at fixed field positions. When this is the case,
-Boost.MPI can optimize their serialization and transmission to avoid
-extraneous copy operations. To enable this optimization, users should
-specialize the type trait [classref
+
+Some serializable types, like _gps_position_ above, have a fixed
+amount of data stored at fixed offsets and are fully defined by
+the values of their data member (most POD with no pointers are a good example).
+When this is the case, Boost.MPI can optimize their serialization and 
+transmission by avoiding extraneous copy operations. 
+To enable this optimization, users must specialize the type trait [classref
 boost::mpi::is_mpi_datatype `is_mpi_datatype`], e.g.:
 
   namespace boost { namespace mpi {
@@ -1111,9 +1199,6 @@ programs.
 
 [endsect]
 
-
-
-
 [section:performance_optimizations Performance optimizations]
 [section:serialization_optimizations Serialization optimizations]
 
@@ -1143,11 +1228,13 @@ using the traits classes or helper macros of Boost.Serialization:
 
 [endsect]
   
-[section:homogeneous_machines Homogeneous machines]
+[section:homogeneous_machines Homogeneous Machines]
 
 More optimizations are possible on homogeneous machines, by avoiding
-MPI_Pack/MPI_Unpack calls but using direct bitwise copy. This feature can be
-enabled by defining the macro BOOST_MPI_HOMOGENEOUS when building Boost.MPI and
+MPI_Pack/MPI_Unpack calls but using direct bitwise copy. This feature is 
+enabled by default by defining the macro [macroref BOOST_MPI_HOMOGENEOUS] in the include 
+file  `boost/mpi/config.hpp`.
+That definition must be consistent when building Boost.MPI and
 when building the application.
 
 In addition all classes need to be marked both as is_mpi_datatype and
@@ -1455,7 +1542,8 @@ boost::mpi::communicator::barrier `communicator::barrier`]]]
 `MPI_Gather`]] [[funcref boost::mpi::gather `gather`]]]
 
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node69.html#Node69
-`MPI_Gatherv`]] [most uses supported by [funcref boost::mpi::gather `gather`]]]
+`MPI_Gatherv`]] [most uses supported by [funcref boost::mpi::gather `gather`],
+other usages supported by [funcref boost::mpi::gatherv `gatherv`]]]
 
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node77.html#Node77
 `MPI_Reduce`]] [[funcref boost::mpi::reduce `reduce`]]]
@@ -1470,7 +1558,8 @@ boost::mpi::communicator::barrier `communicator::barrier`]]]
 `MPI_Scatter`]] [[funcref boost::mpi::scatter `scatter`]]]
 
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node71.html#Node71
-`MPI_Scatterv`]] [most uses supported by [funcref boost::mpi::scatter `scatter`]]]
+`MPI_Scatterv`]] [most uses supported by [funcref boost::mpi::scatter `scatter`], 
+other uses supported by [funcref boost::mpi::scatterv `scatterv`]]]
 
   [[[@http://www.mpi-forum.org/docs/mpi-20-html/node145.htm#Node145
 `MPI_IN_PLACE`]] [supported implicitly by [funcref boost::mpi::all_reduce 
@@ -1640,7 +1729,7 @@ algorithms.
 [table Process topologies
   [[C Function/Constant] [Boost.MPI Equivalent]]
   
-  [[`MPI_GRAPH`] [unnecessary; use [memberref boost::mpi::communicator::has_graph_topology `communicator::has_graph_topology`]]]
+  [[`MPI_GRAPH`] [unnecessary; use [memberref boost::mpi::communicator::as_graph_communicator `communicator::as_graph_communicator`]]]
   [[`MPI_CART`] [unnecessary; use [memberref boost::mpi::communicator::has_cartesian_topology `communicator::has_cartesian_topology`]]]
 
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node133.html#Node133
@@ -1648,13 +1737,13 @@ algorithms.
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node134.html#Node134
   `MPI_Dims_create`]] [unsupported]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node135.html#Node135
-  `MPI_Graph_create`]] [[memberref
-  boost::mpi::communicator::with_graph_topology
-  `communicator::with_graph_topology`]]]
+  `MPI_Graph_create`]] [[classref
+  boost::mpi::graph_communicator
+  `graph_communicator ctors`]]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node136.html#Node136
   `MPI_Topo_test`]] [[memberref
-  boost::mpi::communicator::has_graph_topology
-  `communicator::has_graph_topology`], [memberref
+  boost::mpi::communicator::as_graph_communicator
+  `communicator::as_graph_communicator`], [memberref
   boost::mpi::communicator::has_cartesian_topology
   `communicator::has_cartesian_topology`]]] 
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node136.html#Node136
@@ -2054,7 +2143,7 @@ There are an increasing number of hybrid parrallel applications that mix
 distributed and shared memory parallelism. To know how to support that model,
 one need to know what level of threading support is guaranteed by the MPI 
 implementation. There are 4 ordered level of possible threading support described
-by [classref boost::mpi::threading::level mpi::threading::level].
+by [enumref boost::mpi::threading::level mpi::threading::level].
 At the lowest level, you should not use threads at all, at the highest level, any 
 thread can perform MPI call.
 
