@@ -187,6 +187,16 @@ template<typename T> MPI_Datatype get_mpi_datatype(const T& x)
   return detail::mpi_datatype_cache().datatype(x);
 }
 
+tuple<const void*, int, MPI_Datatype> get_datatype(const int& x)
+{
+  return make_tuple((const void*) &x, 1, MPI_INT);
+}
+
+tuple<const void*, int, MPI_Datatype> get_datatype(const std::vector<int>& x)
+{
+  return make_tuple((const void*) x.data(), x.size(), MPI_INT);
+}
+
 // Don't parse this part when we're generating Doxygen documentation.
 #ifndef BOOST_MPI_DOXYGEN
 
