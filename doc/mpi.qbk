@@ -161,7 +161,7 @@ appears to be working with a C++ compiler and we're ready to move on.
 
 [section:config Configure and Build]
 
-[section:bjam Build Environement]
+[section:bjam Build Environment]
 
 As the rest of Boost, Boost.MPI uses version 2 of the
 [@http://www.boost.org/doc/html/bbv2.html Boost.Build] system for
