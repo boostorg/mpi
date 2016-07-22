@@ -16,38 +16,44 @@ using std::vector;
 
 namespace mpi = boost::mpi;
 
-struct blob : array<int, 9>, array<double, 3>, array<char, 5> {
+struct blob : array<int, 9>, array<double, 3>, array<char, 8> {
 };
 
-template <>
-struct mpi::is_mpi_datatype<blob> : mpl::true_ {
-};
+namespace boost {
+  namespace mpi {
 
-template <>
-MPI_Datatype
-mpi::get_mpi_datatype<blob>(const blob& b)
-{
-  const array<unsigned long, 3> block_lengths{
-    { 9, 3, 5 }
-  };
+    template <>
+    struct is_mpi_datatype<blob> : mpl::true_ {
+    };
 
-  const array<MPI_Aint, 3> displacements{
-    { 0, 40, 64 }
-  };
+    template <>
+    MPI_Datatype get_mpi_datatype<blob>(const blob& b) {
+      array<unsigned long, 3> block_lengths{
+        { 9, 3, 8 }
+      };
 
-  const array<MPI_Datatype, 3> datatypes{
-    { MPI_INT, MPI_DOUBLE, MPI_CHAR }
-  };
+      array<MPI_Aint, 3> displacements{
+        { 0, 40, 64 }
+      };
 
-  MPI_Datatype blob_type;
-  MPI_Type_create_struct(block_lengths.size()
-    , (const int *)block_lengths.data(), displacements.data(),
-      datatypes.data(), &blob_type);
+      array<MPI_Datatype, 3> datatypes{
+        { MPI_INT, MPI_DOUBLE, MPI_CHAR }
+      };
 
-  MPI_Type_commit(&blob_type);
-  return blob_type;
+      MPI_Datatype blob_type;
+      MPI_Type_create_struct(
+          block_lengths.size()
+        , reinterpret_cast<int*>(block_lengths.data())
+        , displacements.data()
+        , datatypes.data()
+        , &blob_type);
 
-}
+      MPI_Type_commit(&blob_type);
+      return blob_type;
+    }
+
+  } // namespace mpi
+} // namespace boost
 
 int main(int argc, char* argv[]) {
   mpi::environment env(argc, argv);
@@ -62,11 +68,9 @@ int main(int argc, char* argv[]) {
     blob& b1= data[0];
     array<int, 9>& i = b1;
     i[0] = -1;
-#if 0
     blob& b2= data[size-1];
-    array<char, 5>& c = b2;
-    c[4] = 'a';
-#endif
+    array<int, 9>& d = b2;
+    d[2] = -17;
     world.send(1, 0, data);
   } 
   else {
@@ -75,11 +79,9 @@ int main(int argc, char* argv[]) {
     blob& b1 = data[0];
     array<int, 9>& i = b1;
     assert(i[0] == -1);
-#if 0
     blob& b2 = data[data.size()-1];
-    array<char, 5>& c = b2;
-    assert(c[4] == 'a');
-#endif
+    array<int, 9>& d = b2;
+    assert(d[2] == -17);
   }
 
   return 0;
