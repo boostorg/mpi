@@ -1,0 +1,86 @@
+// Author: K. Noel Belcourt <kbelco -at- sandia.gov>
+
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+
+#include <array>
+#include <cassert>
+#include <vector>
+
+#include "boost/mpi/environment.hpp"
+#include "boost/mpi/communicator.hpp"
+
+using std::array;
+using std::vector;
+
+namespace mpi = boost::mpi;
+
+struct blob : array<int, 9>, array<double, 3>, array<char, 5> {
+};
+
+template <>
+struct mpi::is_mpi_datatype<blob> : mpl::true_ {
+};
+
+template <>
+MPI_Datatype
+mpi::get_mpi_datatype<blob>(const blob& b)
+{
+  const array<unsigned long, 3> block_lengths{
+    { 9, 3, 5 }
+  };
+
+  const array<MPI_Aint, 3> displacements{
+    { 0, 40, 64 }
+  };
+
+  const array<MPI_Datatype, 3> datatypes{
+    { MPI_INT, MPI_DOUBLE, MPI_CHAR }
+  };
+
+  MPI_Datatype blob_type;
+  MPI_Type_create_struct(block_lengths.size()
+    , (const int *)block_lengths.data(), displacements.data(),
+      datatypes.data(), &blob_type);
+
+  MPI_Type_commit(&blob_type);
+  return blob_type;
+
+}
+
+int main(int argc, char* argv[]) {
+  mpi::environment env(argc, argv);
+  mpi::communicator world;
+
+  vector<blob> data;
+
+  if (world.rank() == 0) {
+    int size = 10000000;
+    data.resize(size);
+    // initialize data at vector ends
+    blob& b1= data[0];
+    array<int, 9>& i = b1;
+    i[0] = -1;
+#if 0
+    blob& b2= data[size-1];
+    array<char, 5>& c = b2;
+    c[4] = 'a';
+#endif
+    world.send(1, 0, data);
+  } 
+  else {
+    world.recv(0, 0, data);
+    // check data at vector ends
+    blob& b1 = data[0];
+    array<int, 9>& i = b1;
+    assert(i[0] == -1);
+#if 0
+    blob& b2 = data[data.size()-1];
+    array<char, 5>& c = b2;
+    assert(c[4] == 'a');
+#endif
+  }
+
+  return 0;
+}

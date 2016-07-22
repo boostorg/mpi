@@ -41,5 +41,6 @@ test-suite mpi
   [ mpi-test graph_topology_test : : : 2 7 13 ]
   [ mpi-test pointer_test : : : 2 ]
   [ mpi-test groups_test  ]
+  [ mpi-test sendrecv_vector : : : 2 ]
   ;
 }
