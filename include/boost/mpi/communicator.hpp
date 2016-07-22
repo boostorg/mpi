@@ -272,6 +272,15 @@ class BOOST_MPI_DECL communicator
   template<typename T>
   void send(int dest, int tag, const T& value) const;
 
+  template<typename T>
+  void send(int dest, int tag, const std::vector<T>& value) const;
+
+  template<typename T>
+  void send_vector(int dest, int tag, const std::vector<T>& value, mpl::true_) const;
+
+  template<typename T>
+  void send_vector(int dest, int tag, const std::vector<T>& value, mpl::false_) const;
+
   /**
    *  @brief Send the skeleton of an object.
    *
@@ -383,6 +392,17 @@ class BOOST_MPI_DECL communicator
    */
   template<typename T>
   status recv(int source, int tag, T& value) const;
+
+  template<typename T>
+  status recv(int source, int tag, std::vector<T>& value) const;
+
+  template<typename T>
+  status recv_vector(int source, int tag, std::vector<T>& value
+  , mpl::true_) const;
+
+  template<typename T>
+  status recv_vector(int source, int tag, std::vector<T>& value
+  , mpl::false_) const;
 
   /**
    *  @brief Receive a skeleton from a remote process.
@@ -1187,6 +1207,30 @@ communicator::array_send_impl(int dest, int tag, const T* values, int n,
   send(dest, tag, oa);
 }
 
+template<typename T>
+void communicator::send_vector(int dest, int tag, const std::vector<T>& value
+  , mpl::true_ true_type) const
+{
+  // send the vector size
+  typename std::vector<T>::size_type size = value.size();
+  send(dest, tag, size);
+  // send the data
+  this->array_send_impl(dest, tag, value.data(), size, true_type);
+}
+
+template<typename T>
+void communicator::send_vector(int dest, int tag, const std::vector<T>& value
+  , mpl::false_ false_type) const
+{
+  this->send_impl(dest, tag, value, false_type);
+}
+
+template<typename T>
+void communicator::send(int dest, int tag, const std::vector<T>& value) const
+{
+  send_vector(dest, tag, value, is_mpi_datatype<T>());
+}
+
 // Array send must send the elements directly
 template<typename T>
 void communicator::send(int dest, int tag, const T* values, int n) const
@@ -1267,6 +1311,32 @@ communicator::array_recv_impl(int source, int tag, T* values, int n,
 
   stat.m_count = count;
   return stat;
+}
+
+template<typename T>
+status communicator::recv_vector(int source, int tag, std::vector<T>& value
+  , mpl::true_ true_type) const
+{
+  // receive the vector size
+  typename std::vector<T>::size_type size = 0;
+  recv(source, tag, size);
+  // size the vector
+  value.resize(size);
+  // receive the data
+  return this->array_recv_impl(source, tag, value.data(), size, true_type);
+}
+
+template<typename T>
+status communicator::recv_vector(int source, int tag, std::vector<T>& value
+  , mpl::false_ false_type) const
+{
+  return this->recv_impl(source, tag, value, false_type);
+}
+
+template<typename T>
+status communicator::recv(int source, int tag, std::vector<T>& value) const
+{
+  return recv_vector(source, tag, value, is_mpi_datatype<T>());
 }
 
 // Array receive must receive the elements directly into a buffer.
