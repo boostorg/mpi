@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
   vector<blob> data;
 
   if (world.rank() == 0) {
-    int size = 10;
+    int size = 10000000;
     data.resize(size);
     // initialize data at vector ends
     blob& b1= data[0];
