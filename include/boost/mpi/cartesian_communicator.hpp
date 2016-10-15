@@ -225,7 +225,7 @@ public:
    */
   int rank(const std::vector<int>& coords) const;
   /**
-   * Return the rank of the source and targetdestination process through a shift.
+   * Return the rank of the source and target destination process through a shift.
    * @param dim the dimension in which the shift takes place. 0 <= dim <= ndim().
    * @param disp the shift displacement, can be positive (upward) or negative (downward).
    */
