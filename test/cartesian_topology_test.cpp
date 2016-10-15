@@ -42,14 +42,19 @@ std::string topology_description( mpi::cartesian_topology const&  topo ) {
 void test_coordinates_consistency( mpi::cartesian_communicator const& cc,
                                    std::vector<int> const& coords )
 {
+  cc.barrier(); // flush IOs for nice printing
+  bool master = cc.rank() == 0;
+  if (master) {
+    std::cout << "Test coordinates consistency.\n";
+  }
   for(int p = 0; p < cc.size(); ++p) {
     std::vector<int> min(cc.ndims());
     std::vector<int> local(cc.coords(p));
     mpi::reduce(cc, local.data(), local.size(),
                 min.data(), mpi::minimum<int>(), p);
+    cc.barrier();
     if (p == cc.rank()) {
-      BOOST_CHECK(std::equal(coords.begin(), coords.end(), 
-                             min.begin()));
+      BOOST_CHECK(std::equal(coords.begin(), coords.end(), min.begin()));
       std::ostringstream out;
       out << "proc " << p << " at (";
       std::copy(min.begin(), min.end(), std::ostream_iterator<int>(out, " "));
@@ -61,29 +66,34 @@ void test_coordinates_consistency( mpi::cartesian_communicator const& cc,
 
 void test_shifted_coords( mpi::cartesian_communicator const& cc, int pos,  mpi::cartesian_dimension desc, int dim )
 {
-  for (int i = -(desc.size); i < desc.size; ++i) {
-    std::pair<int,int> rks = cc.shifted_ranks(pos, i);
-    int src = cc.coords(rks.first)[dim];
-    int dst = cc.coords(rks.second)[dim];
-    if (pos == (dim/2)) {
-      std::ostringstream out;
-      out << "Rank " << cc.rank() << ", dim. " << dim << ", pos " << pos << ", in " << desc << ' ';
-      out << "shifted pos: " << src << ", " << dst << '\n';
-      std::cout << out.str();
+  if (desc.periodic) {
+    for (int i = -(desc.size); i < desc.size; ++i) {
+      std::pair<int,int> rks = cc.shifted_ranks(dim, i);
+      int src = cc.coords(rks.first)[dim];
+      int dst = cc.coords(rks.second)[dim];
+      if (pos == (dim/2)) {
+        std::ostringstream out;
+        out << "Rank " << cc.rank() << ", dim. " << dim << ", pos " << pos << ", in " << desc << ' ';
+        out << "shifted pos: " << src << ", " << dst << '\n';
+        std::cout << out.str();
+      }
     }
   }
 }
 
 void test_shifted_coords( mpi::cartesian_communicator const& cc)
 {
-  std::vector<int> coords; mpi::cartesian_topology topo(cc.ndims());
+  cc.barrier(); // flush IOs for nice printing
+  std::vector<int> coords; 
+  mpi::cartesian_topology topo(cc.ndims());
   cc.topology(topo, coords);
-  if (cc.rank() == 0) {
+  bool master = cc.rank() == 0;
+  if (master) {
     std::cout << "Testing shifts with topology " << topo << '\n';
   }
   for(int i = 0; i < cc.ndims(); ++i) {
-    if (cc.rank() == 0) {
-      std::cout << " for dimension " << i << ' ' << topo[i] << '\n';
+    if (master) {
+      std::cout << " for dimension " << i << ": " << topo[i] << '\n';
     }
     test_shifted_coords( cc, coords[i], topo[i], i );
   }
@@ -91,19 +101,22 @@ void test_shifted_coords( mpi::cartesian_communicator const& cc)
 
 void test_topology_consistency( mpi::cartesian_communicator const& cc) 
 {
+  cc.barrier(); // flush IOs for nice printing
   mpi::cartesian_topology itopo(cc.ndims());
   mpi::cartesian_topology otopo(cc.ndims());
   std::vector<int>  coords(cc.ndims());
   cc.topology(itopo, coords);
-
-  // Check that everyone agrees on the dimensions
+  bool master = cc.rank() == 0;
+  if (master) {
+    std::cout << "Test topology consistency of" << itopo << "(on master)\n";
+    std::cout << "Check that everyone agrees on the dimensions.\n";
+  }
   mpi::all_reduce(cc, 
                   &(itopo[0]), itopo.size(), &(otopo[0]),
                   topo_minimum());
-  BOOST_CHECK(std::equal(itopo.begin(), itopo.end(), 
-                         otopo.begin()));
-  if (cc.rank() == 0) {
-    std::cout << topology_description(otopo) << '\n';
+  BOOST_CHECK(std::equal(itopo.begin(), itopo.end(), otopo.begin()));
+  if (master) {
+    std::cout << "We agree on " << topology_description(otopo) << '\n';
   }
   test_coordinates_consistency( cc, coords );
 }
@@ -117,18 +130,18 @@ void test_cartesian_topology( mpi::cartesian_communicator const& cc)
       std::vector<int> coords = cc.coords(r);
       std::cout << "Process of cartesian rank " << cc.rank() 
                 << " has coordinates (";
-      std::copy(coords.begin(), coords.end(), std::ostream_iterator<int>(std::cout,","));
+      std::copy(coords.begin(), coords.end(), std::ostream_iterator<int>(std::cout," "));
       std::cout << ")\n";
     }
   }
   test_topology_consistency(cc);
+  test_shifted_coords(cc);
   std::vector<int> even;
   for(int i = 0; i < cc.ndims(); i += 2) {
     even.push_back(i);
   }
+  cc.barrier();
   mpi::cartesian_communicator cce(cc, even);
-  test_topology_consistency(cce);
-  test_shifted_coords(cce);
 }
 
 void test_cartesian_topology( mpi::communicator const& world, mpi::cartesian_topology const& topo) 
@@ -157,11 +170,17 @@ int test_main(int argc, char* argv[])
   mpi::cartesian_topology topo(ndim);
   typedef mpi::cartesian_dimension cd;
   if (topo.size() == 3) {
-    topo[0] = cd(2,true); topo[1] = cd(3,false); topo[2] = cd(4, true);
-  } else if (world.size() >= 6) {
-    topo[0] = cd(0,true); topo[1] = cd(3, false);
+    topo[0] = cd(2,true);
+    topo[1] = cd(3,false);
+    topo[2] = cd(4, true);
   } else {
-    topo[0] = cd(0,true); topo[1] = cd(0, false);
+    if (world.size() >= 6) {
+      topo[0] = cd(2,true);
+      topo[1] = cd(3, false);
+    } else {
+      topo[0] = cd(1,true);
+      topo[1] = cd(1, false);
+    }
   }
   test_cartesian_topology( world, topo);
 
