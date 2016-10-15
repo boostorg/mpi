@@ -68,7 +68,7 @@ int test_main(int argc, char* argv[])
               << "process." << std::endl;
     comm.abort(-1);
   }
-
+  
   sparse s;
   s.resize(2);
   s[0][12] = 0.12;
