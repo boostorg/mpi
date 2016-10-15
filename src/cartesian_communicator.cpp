@@ -7,6 +7,7 @@
 // Authors: Alain Miniussi
 
 #include <algorithm>
+#include <cassert>
 
 #include <boost/mpi/cartesian_communicator.hpp>
 
@@ -70,10 +71,10 @@ cartesian_communicator::cartesian_communicator(const cartesian_communicator& com
 {
   int const max_dims = comm.ndims();
   int const nbkept = keep.size();
-  BOOST_ASSERT(nbkept <= max_dims);
+  assert(nbkept <= max_dims);
   std::vector<int> bitset(max_dims, int(false));
   for(int i = 0; i < nbkept; ++i) {
-    BOOST_ASSERT(keep[i] < max_dims);
+    assert(keep[i] < max_dims);
     bitset[keep[i]] = true;
   }
   
@@ -96,7 +97,7 @@ cartesian_communicator::ndims() const {
 int
 cartesian_communicator::rank(const std::vector<int>& coords ) const {
   int r = -1;
-  BOOST_ASSERT(int(coords.size()) == ndims());
+  assert(int(coords.size()) == ndims());
   BOOST_MPI_CHECK_RESULT(MPI_Cart_rank, 
                          (MPI_Comm(*this), const_cast<std::vector<int>&>(coords).data(), 
                           &r));
@@ -106,8 +107,7 @@ cartesian_communicator::rank(const std::vector<int>& coords ) const {
 std::pair<int, int>
 cartesian_communicator::shifted_ranks(int dim, int disp) const {
   std::pair<int, int> r(-1,-1);
-  assert((0 <= dim && dim < ndims()) || (std::abort(), false));
-  BOOST_ASSERT(0 <= dim && dim < ndims());
+  assert(0 <= dim && dim < ndims());
   BOOST_MPI_CHECK_RESULT(MPI_Cart_shift, 
                          (MPI_Comm(*this), dim, disp, &(r.first), &(r.second)));
   return r;
