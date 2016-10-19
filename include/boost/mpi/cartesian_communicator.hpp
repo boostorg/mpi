@@ -85,6 +85,8 @@ std::ostream& operator<<(std::ostream& out, cartesian_dimension const& d);
  * 
  * Behave mostly like a sequence of @c cartesian_dimension with the notable 
  * exception that its size is fixed.
+ * This is a lightweight object, so that any constructor that could be considered 
+ * missing could be replaced with a function (move constructor provided when supported).
  */
 class BOOST_MPI_DECL cartesian_topology 
   : private std::vector<cartesian_dimension> {
@@ -103,6 +105,22 @@ class BOOST_MPI_DECL cartesian_topology
   using super::end;
   using super::swap;
 
+#if !defined(BOOST_NO_CXX11_DELETED_FUNCTIONS)
+  cartesian_topology() = delete;
+#endif
+#if !defined(BOOST_NO_CXX11_DEFAULTED_FUNCTIONS)
+  cartesian_topology(cartesian_topology const&) = default;
+  cartesian_topology& operator=(cartesian_topology const&) = default;
+  // There is apparently no macro for checking the support of move constructor.
+  // Assume that defaulted function is close enough.
+  cartesian_topology(cartesian_topology const&& other) : super(other) {}
+  cartesian_topology& operator=(cartesian_topology const&& other) { 
+    (*this) = std::move(other.stl()); 
+    return *this;
+  }
+
+  ~cartesian_topology() = default;
+#endif
   /**
    * @brief Create a N dimension space.
    * Each dimension is initialized as non periodic of size 0.
