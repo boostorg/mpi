@@ -356,19 +356,6 @@ public:
  */
 std::vector<int>& cartesian_dimensions(int nb_proc, std::vector<int>&  dims);
 
-/**
- * Given en communicator and a partially filled sequence 
- * of dimension, try to complete the dimension sequence to produce an acceptable
- * cartesian topology.
- * @param comm the prospective parent communicator.
- * @param dims a sequence of positive or null dimensions. Non zero dimension 
- *  will be left untouched.
- */
-inline
-std::vector<int>& cartesian_dimensions(const communicator& comm, std::vector<int>&  dims) {
-  return cartesian_dimensions(comm.size(), dims);
-}
-
 } } // end namespace boost::mpi
 
 #endif // BOOST_MPI_CARTESIAN_COMMUNICATOR_HPP
