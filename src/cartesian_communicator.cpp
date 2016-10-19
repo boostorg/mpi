@@ -113,19 +113,12 @@ cartesian_communicator::shifted_ranks(int dim, int disp) const {
   return r;
 }
 
-std::vector<int>&
-cartesian_communicator::coords(int rk, std::vector<int>& cbuf) const {
-  cbuf.resize(ndims());
+std::vector<int>
+cartesian_communicator::coordinates(int rk) const {
+  std::vector<int> cbuf(ndims());
   BOOST_MPI_CHECK_RESULT(MPI_Cart_coords, 
                          (MPI_Comm(*this), rk, cbuf.size(), cbuf.data() ));
   return cbuf;
-}
- 
-std::vector<int>
-cartesian_communicator::coords(int rk) const {
-  std::vector<int> coords;
-  this->coords(rk, coords);
-  return coords;
 }
 
 void
@@ -149,6 +142,7 @@ cartesian_communicator::topology() const {
   topology(topo, coords);
   return topo;
 }
+
 void
 cartesian_topology::split(std::vector<int>& dims, std::vector<bool>& periodics) const {
   int ndims = size();

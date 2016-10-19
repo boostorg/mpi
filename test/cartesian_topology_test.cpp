@@ -49,7 +49,7 @@ void test_coordinates_consistency( mpi::cartesian_communicator const& cc,
   }
   for(int p = 0; p < cc.size(); ++p) {
     std::vector<int> min(cc.ndims());
-    std::vector<int> local(cc.coords(p));
+    std::vector<int> local(cc.coordinates(p));
     mpi::reduce(cc, local.data(), local.size(),
                 min.data(), mpi::minimum<int>(), p);
     cc.barrier();
@@ -69,8 +69,8 @@ void test_shifted_coords( mpi::cartesian_communicator const& cc, int pos,  mpi::
   if (desc.periodic) {
     for (int i = -(desc.size); i < desc.size; ++i) {
       std::pair<int,int> rks = cc.shifted_ranks(dim, i);
-      int src = cc.coords(rks.first)[dim];
-      int dst = cc.coords(rks.second)[dim];
+      int src = cc.coordinates(rks.first)[dim];
+      int dst = cc.coordinates(rks.second)[dim];
       if (pos == (dim/2)) {
         std::ostringstream out;
         out << "Rank " << cc.rank() << ", dim. " << dim << ", pos " << pos << ", in " << desc << ' ';
@@ -127,7 +127,7 @@ void test_cartesian_topology( mpi::cartesian_communicator const& cc)
   for( int r = 0; r < cc.size(); ++r) {
     cc.barrier();
     if (r == cc.rank()) {
-      std::vector<int> coords = cc.coords(r);
+      std::vector<int> coords = cc.coordinates(r);
       std::cout << "Process of cartesian rank " << cc.rank() 
                 << " has coordinates (";
       std::copy(coords.begin(), coords.end(), std::ostream_iterator<int>(std::cout," "));

@@ -330,18 +330,11 @@ public:
    */
   std::pair<int, int> shifted_ranks(int dim, int disp) const;
   /**
-   * Provides the coordinates of a process with the given rank.
-   * @param rk the rank in this communicator.
-   * @param cbuf a buffer were to store the coordinates.
-   * @returns a reference to cbuf.
-   */
-  std::vector<int>& coords(int rk, std::vector<int>& cbuf) const;
-  /**
    * Provides the coordinates of the process with the given rank.
    * @param rk the ranks in this communicator.
    * @returns the coordinates.
    */
-  std::vector<int> coords(int rk) const;
+  std::vector<int> coordinates(int rk) const;
   /**
    * Retrieve the topology and coordinates of this process in the grid.
    *
