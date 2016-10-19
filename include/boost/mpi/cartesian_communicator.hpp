@@ -24,10 +24,12 @@
 #include <utility>
 #include <iostream>
 #include <utility>
+#include <initializer_list>
 
 // Headers required to implement cartesian topologies
 #include <boost/shared_array.hpp>
 #include <boost/assert.hpp>
+#include <boost/foreach.hpp>
 
 namespace boost { namespace mpi {
 
@@ -55,12 +57,18 @@ private:
 template <>
 struct is_mpi_datatype<cartesian_dimension> : mpl::true_ { };
 
+/**
+ * @brief Test if the dimensions values are identical.
+ */
 inline
 bool
 operator==(cartesian_dimension const& d1, cartesian_dimension const& d2) {
-  return d1.size == d2.size && d1.periodic == d2.periodic;
+  return &d1 == &d2 || (d1.size == d2.size && d1.periodic == d2.periodic);
 }
 
+/**
+ * @brief Test if the dimension values are different.
+ */
 inline
 bool
 operator!=(cartesian_dimension const& d1, cartesian_dimension const& d2) {
@@ -83,33 +91,124 @@ class BOOST_MPI_DECL cartesian_topology
   friend class cartesian_communicator;
   typedef std::vector<cartesian_dimension> super;
  public:
+  /** 
+   * Retrieve a specific dimension.
+   */
   using super::operator[];
+  /** 
+   * @brief Topology dimentionality.
+   */
   using super::size;
   using super::begin;
   using super::end;
   using super::swap;
 
-  cartesian_topology(int sz) 
-    : super(sz) {}
-
-  template<int NDIM>
-  explicit cartesian_topology(array<cartesian_dimension, NDIM> const& dims)
-    : super(NDIM) {
-    std::copy(dims.begin(), dims.end(), begin());
-  }
+  /**
+   * @brief Create a N dimension space.
+   * Each dimension is initialized as non periodic of size 0.
+   */
+  cartesian_topology(int ndim) 
+    : super(ndim) {}
   
-  template<class DimIter, class PerIter>
-  cartesian_topology(DimIter dim_iter, PerIter period_iter, int ndim) 
-    : super(ndim) {
-    for(int i = 0; i < ndim; ++i) {
-      (*this)[i] = cartesian_dimension(*dim_iter++, *period_iter++);
+  /**
+   * @brief Use the provided dimensions specification as initial values.
+   */
+  cartesian_topology(std::vector<cartesian_dimension> const& dims) 
+    : super(dims) {}
+
+  /**
+   * @brief Use dimensions specification provided in the sequence container as initial values.
+   * #param dims must be a sequence container.
+   */  
+  template<class InitArr>
+  explicit cartesian_topology(InitArr dims)
+    : super(0) {
+    BOOST_FOREACH(cartesian_dimension const& d, dims) {
+      push_back(d);
     }
   }
+#if !defined(BOOST_NO_CXX11_HDR_INITIALIZER_LIST)
+  /**
+   * @brief Use dimensions specification provided in the initialization list as initial values.
+   * #param dims can be of the form { dim_1, false}, .... {dim_n, true}
+   */    
+  explicit cartesian_topology(std::initializer_list<cartesian_dimension> dims)
+    : super(dims) {}
+#endif
+  /**
+   * @brief Use dimensions specification provided in the array.
+   * #param dims can be of the form { dim_1, false}, .... {dim_n, true}
+   */    
+  template<int NDIM>
+  explicit cartesian_topology(cartesian_dimension (&dims)[NDIM])
+    : super(dims, dims+NDIM) {}
+
+  /**
+   * @brief Use dimensions specification provided in the input ranges
+   * The ranges do not need to be the same size. If the sizes are different, 
+   * the missing values will be complete with zeros of the dim and assumed non periodic.
+   * @param dim_rg     the dimensions, values must convert to integers.
+   * @param period_rg  the periodicities, values must convert to booleans.
+   * #param dims can be of the form { dim_1, false}, .... {dim_n, true}
+   */    
+  template<class DimRg, class PerRg>
+  cartesian_topology(DimRg const& dim_rg, PerRg const& period_rg) 
+    : super(0) {
+    BOOST_FOREACH(int d, dim_rg) {
+      super::push_back(cartesian_dimension(d));
+    }
+    super::iterator it = begin();
+    BOOST_FOREACH(bool p, period_rg) {
+      if (it < end()) {
+        it->periodic = p;
+      } else {
+        push_back(cartesian_dimension(0,p));
+      }
+      ++it;
+    }
+  }
+
+  
+  /**
+   * @brief Iterator based initializer.
+   * Will use the first n iterated values. 
+   * Both iterators can be single pass.
+   * @param dit dimension iterator, value must convert to integer type.
+   * @param pit periodicity iterator, value must convert to booleans..
+   */
+  template<class DimIter, class PerIter>
+  cartesian_topology(DimIter dit, PerIter pit, int n) 
+    : super(n) {
+    for(int i = 0; i < n; ++i) {
+      (*this)[i] = cartesian_dimension(*dit++, *pit++);
+    }
+  }
+  
+  /**
+   * Export as an stl sequence.
+   */
+  std::vector<cartesian_dimension>& stl() { return *this; }
+  /**
+   * Export as an stl sequence.
+   */
+  std::vector<cartesian_dimension> const& stl() const{ return *this; }
   /** 
    * Split the topology in two sequences of sizes and periodicities.
    */
   void split(std::vector<int>& dims, std::vector<bool>& periodics) const;
 };
+
+inline
+bool
+operator==(cartesian_topology const& t1, cartesian_topology const& t2) {
+  return t1.stl() == t2.stl();
+}
+
+inline
+bool
+operator!=(cartesian_topology const& t1, cartesian_topology const& t2) {
+  return t1.stl() != t2.stl();
+}
 
 /**
  * @brief Pretty printing of a cartesian topology
