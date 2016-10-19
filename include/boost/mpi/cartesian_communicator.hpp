@@ -34,7 +34,9 @@
 namespace boost { namespace mpi {
 
 /**
- * Specify the size and periodicity of the grid in a single dimension.
+ * @brief Specify the size and periodicity of the grid in a single dimension.
+ *
+ * POD lightweight object.
  */
 struct cartesian_dimension {
   /** The size of the grid n this dimension. */
