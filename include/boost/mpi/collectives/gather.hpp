@@ -19,6 +19,7 @@
 #include <boost/mpi/detail/point_to_point.hpp>
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
+#include <boost/mpi/detail/offsets.hpp>
 #include <boost/assert.hpp>
 
 namespace boost { namespace mpi {
@@ -48,19 +49,6 @@ gather_impl(const communicator& comm, const T* in_values, int n, int root,
   BOOST_MPI_CHECK_RESULT(MPI_Gather,
                          (const_cast<T*>(in_values), n, type,
                           0, n, type, root, comm));
-}
-
-// Convert a sequence of sizes [S0..Sn] to a sequence displacement 
-// [O0..On] where O[0] = 0 and O[k+1] = O[k]+S[k]
-template<class Alloc1, class Alloc2>
-void
-sizes2offset(std::vector<int, Alloc1> const& sizes, std::vector<int, Alloc2>& offsets) 
-{
-  assert(offsets.size() == sizes.size());
-  offsets[0] = 0;
-  for(int i = 0; i < sizes.size()-1; ++i) {
-    offsets[i+1] = offsets[i] + sizes[i];
-  }
 }
 
 // We're gathering at the root for a type that does not have an
