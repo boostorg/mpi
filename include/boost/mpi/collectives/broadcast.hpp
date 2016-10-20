@@ -106,16 +106,31 @@ namespace detail {
   template<typename T>
   void
   broadcast_impl(const communicator& comm, T* values, int n, int root, 
-                 mpl::false_)
+                 mpl::false_ non_mpi_datatype)
   {
+    // Implementation proposed by Lorenz Hübschle-Schneider
     if (comm.rank() == root) {
       packed_oarchive oa(comm);
-      for (int i = 0; i < n; ++i)
+      for (int i = 0; i < n; ++i) {
         oa << values[i];
-      broadcast(comm, oa, root);
+      }
+      std::size_t asize = oa.size();
+      broadcast(comm, asize, root);
+      void const* aptr = oa.address();
+      BOOST_MPI_CHECK_RESULT(MPI_Bcast,
+                             (const_cast<void*>(aptr), asize,
+                              MPI_BYTE,
+                              root, MPI_Comm(comm)));
     } else {
       packed_iarchive ia(comm);
-      broadcast(comm, ia, root);
+      std::size_t asize;
+      broadcast(comm, asize, root);
+      ia.resize(asize);
+      void* aptr = ia.address();
+      BOOST_MPI_CHECK_RESULT(MPI_Bcast,
+                             (aptr, asize,
+                              MPI_BYTE,
+                              root, MPI_Comm(comm)));
       for (int i = 0; i < n; ++i)
         ia >> values[i];
     }
