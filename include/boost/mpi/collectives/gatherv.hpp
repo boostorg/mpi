@@ -66,7 +66,7 @@ namespace detail {
         // Our own values will never be transmitted: just copy them.
         std::copy(in_values, in_values + in_size, out_values + displs[src]);
       else {
-//        comm.recv(src, tag, out_values + displs[src], sizes[src]);
+        // comm.recv(src, tag, out_values + displs[src], sizes[src]);
         // Receive archive
         packed_iarchive ia(comm);
         MPI_Status status;
