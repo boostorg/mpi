@@ -5,20 +5,24 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 #include <boost/mpi/request.hpp>
 #include <boost/mpi/status.hpp>
+#include <boost/foreach.hpp>
 
 namespace boost { namespace mpi {
 
+typedef std::vector<request::impl>::iterator request_iter;
 /***************************************************************************
  * request                                                                 *
  ***************************************************************************/
-request::request()
-  : m_handler(0), m_data()
+request::request(int nb)
+  : m_impl(nb)
 {
-  m_requests[0] = MPI_REQUEST_NULL;
-  m_requests[1] = MPI_REQUEST_NULL;
+  for (request_iter it = m_impl.begin(); it != m_impl.end(); ++ it) {
+    it->m_requests[0] = MPI_REQUEST_NULL;
+    it->m_requests[1] = MPI_REQUEST_NULL;
+  }
 }
 
-status request::wait()
+status request::impl::wait()
 {
   if (m_handler) {
     // This request is a receive for a serialized type. Use the
@@ -58,7 +62,16 @@ status request::wait()
   }
 }
 
-optional<status> request::test()
+status request::wait() {
+  status s;
+  // will return the last status
+  for (request_iter it = m_impl.begin(); it != m_impl.end(); ++ it) {
+    s = it->wait();
+  }
+  return s;
+}
+
+optional<status> request::impl::test()
 {
   if (m_handler) {
     // This request is a receive for a serialized type. Use the
@@ -106,7 +119,38 @@ optional<status> request::test()
   }
 }
 
-void request::cancel()
+optional<status> request::test()
+{
+  if (m_impl.size() == 1) {
+    return m_impl.front().test();
+  } else {
+    std::vector<impl> incomplete;
+    optional<status> res, s;
+    // if we need to arbitraly choose one request, it
+    // is more efficient to pick the first.
+    // So we scan in reverser order to end up on that one.
+    typedef std::vector<impl>::reverse_iterator riter;
+    for (riter it = m_impl.rbegin(); it != m_impl.rend(); ++it) {
+      s = it->test();
+      if (!s) { // not completed, keep it
+        incomplete.push_back(*it);
+        res = s;
+      }
+    }
+    if (incomplete.empty()) {
+      // they all completed, keep the first one for 
+      // future calls.
+      m_impl.resize(1);
+      return s;
+    } else {
+      m_impl.swap(incomplete);
+      return res;
+    }
+    return s;
+  }
+}
+
+void request::impl::cancel()
 {
   if (m_handler) {
     m_handler(this, ra_cancel);
@@ -114,6 +158,12 @@ void request::cancel()
     BOOST_MPI_CHECK_RESULT(MPI_Cancel, (&m_requests[0]));
     if (m_requests[1] != MPI_REQUEST_NULL)
       BOOST_MPI_CHECK_RESULT(MPI_Cancel, (&m_requests[1]));
+  }
+}
+
+void request::cancel() {
+  for (request_iter it = m_impl.begin(); it != m_impl.end(); ++ it) {
+    it->cancel();
   }
 }
 

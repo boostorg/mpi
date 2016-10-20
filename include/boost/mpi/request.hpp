@@ -32,10 +32,11 @@ class communicator;
 class BOOST_MPI_DECL request 
 {
  public:
+  struct impl;
   /**
    *  Constructs a NULL request.
    */
-  request();
+  request(int nb = 1);
 
   /**
    *  Wait until the communication associated with this request has
@@ -62,7 +63,7 @@ class BOOST_MPI_DECL request
 
  private:
   enum request_action { ra_wait, ra_test, ra_cancel };
-  typedef optional<status> (*handler_type)(request* self, 
+  typedef optional<status> (*handler_type)(request::impl* self, 
                                            request_action action);
 
   /**
@@ -72,7 +73,7 @@ class BOOST_MPI_DECL request
    */
   template<typename T>
   static optional<status> 
-  handle_serialized_irecv(request* self, request_action action);
+    handle_serialized_irecv(request::impl* self, request_action action);
 
   /**
    * INTERNAL ONLY
@@ -81,19 +82,21 @@ class BOOST_MPI_DECL request
    */
   template<typename T>
   static optional<status> 
-  handle_serialized_array_irecv(request* self, request_action action);
+    handle_serialized_array_irecv(request::impl* self, request_action action);
 
  public: // template friends are not portable
 
+  struct impl {
+    MPI_Request      m_requests[2];
+    handler_type     m_handler;
+    shared_ptr<void> m_data;
+    
+    status wait();
+    optional<status> test();
+    void cancel();
+  };
   /// INTERNAL ONLY
-  MPI_Request m_requests[2];
-
-  /// INTERNAL ONLY
-  handler_type m_handler;
-
-  /// INTERNAL ONLY
-  shared_ptr<void> m_data;
-
+  std::vector<impl> m_impl;
   friend class communicator;
 };
 

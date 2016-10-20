@@ -26,7 +26,6 @@
 #include <utility>
 #include <initializer_list>
 
-// Headers required to implement cartesian topologies
 #include <boost/shared_array.hpp>
 #include <boost/assert.hpp>
 #include <boost/foreach.hpp>
