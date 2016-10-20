@@ -100,9 +100,7 @@ namespace detail {
   }
 
   // We're sending a type that does not have an associated MPI
-  // datatype, so we'll need to serialize it. Unfortunately, this
-  // means that we cannot use MPI_Bcast, so we'll just send from the
-  // root to everyone else.
+  // datatype, so we'll need to serialize it.
   template<typename T>
   void
   broadcast_impl(const communicator& comm, T* values, int n, int root, 
