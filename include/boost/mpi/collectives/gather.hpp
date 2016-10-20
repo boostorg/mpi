@@ -23,9 +23,6 @@
 
 namespace boost { namespace mpi {
 
-template<typename T> 
-void gather(const communicator& comm, const T& in_value, std::vector<T>& out_values, int root);
-
 namespace detail {
 // We're gathering at the root for a type that has an associated MPI
 // datatype, so we'll use MPI_Gather to do all of the work.
@@ -82,18 +79,22 @@ gather_impl(const communicator& comm, const T* in_values, int n,
   for (int i = 0; i < n; ++i) {
     oa << in_values[i];
   }
-  std::vector<int> asizes;
-  gather(comm, int(oa.size()), asizes, root);
+  std::vector<int> oasizes(nproc);
+  int oasize = oa.size();
+  BOOST_MPI_CHECK_RESULT(MPI_Gather,
+                         (&oasize, 1, MPI_INTEGER,
+                          oasizes.data(), 1, MPI_INTEGER, 
+                          root, MPI_Comm(comm)));
   // Gather the archives, which can be of different sizes, so
   // we need to use gatherv.
   // Every thing is contiguous, so the offsets can be
   // deduced from the collected sizes.
   std::vector<int> offsets(nproc);
-  if (comm.rank() == root) sizes2offset(asizes, offsets);
-  packed_iarchive::buffer_type recv_buffer(std::accumulate(asizes.begin(), asizes.end(), 0));
+  if (comm.rank() == root) sizes2offset(oasizes, offsets);
+  packed_iarchive::buffer_type recv_buffer(std::accumulate(oasizes.begin(), oasizes.end(), 0));
   BOOST_MPI_CHECK_RESULT(MPI_Gatherv,
                          (const_cast<void*>(oa.address()), int(oa.size()), MPI_BYTE,
-                          recv_buffer.data(), asizes.data(), offsets.data(), MPI_BYTE, 
+                          recv_buffer.data(), oasizes.data(), offsets.data(), MPI_BYTE, 
                           root, MPI_Comm(comm)));
   if (comm.rank() == root) {
     for (int src = 0; src < nproc; ++src) {
