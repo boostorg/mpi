@@ -16,7 +16,7 @@ template<class Alloc1, class Alloc2>
 void
 sizes2offset(std::vector<int, Alloc1> const& sizes, std::vector<int, Alloc2>& offsets) 
 {
-  assert(offsets.size() == sizes.size());
+  offsets.resize(sizes.size());
   offsets[0] = 0;
   for(int i = 0; i < sizes.size()-1; ++i) {
     offsets[i+1] = offsets[i] + sizes[i];
