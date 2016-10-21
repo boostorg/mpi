@@ -49,6 +49,28 @@ scatter_impl(const communicator& comm, T* out_values, int n, int root,
                           root, comm));
 }
 
+// Fill the sendbuf while keeping trac of the slot sizes
+// Used in the first steps of both scatter and scatterv
+template<typename T>
+void
+fill_scatter_sendbuf(const communicator& comm, T const* values, int n,
+                     packed_oarchive::buffer_type& sendbuf, std::vector<int>& archsizes) {
+  int nproc = comm.size();
+  archsizes.resize(nproc);
+  
+  for (int dest = 0; dest < nproc; ++dest) {
+    packed_oarchive procarchive(comm);
+    for (int i = dest*n; i < (dest+1)*n; ++i) {
+      procarchive << values[i];
+    }
+    int archsize = procarchive.size();
+    sendbuf.resize(sendbuf.size() + archsize);
+    archsizes[dest] = archsize;
+    char const* aptr = static_cast<char const*>(procarchive.address());
+    std::copy(aptr, aptr+archsize, sendbuf.end()-archsize);
+  }
+}
+
 // We're scattering from the root for a type that does not have an
 // associated MPI datatype, so we'll need to serialize
 // it.
@@ -61,22 +83,9 @@ scatter_impl(const communicator& comm, const T* in_values, T* out_values,
   int nproc = comm.size();
   packed_oarchive::buffer_type sendbuf;
   std::vector<int> slotsizes;
-
+  
   if (root == comm.rank()) {
-    // fill the sendbuf while keeping trac of the slot sizes
-    slotsizes.resize(nproc);
-    for (int dest = 0; dest < nproc; ++dest) {
-      packed_oarchive slotarchive(comm);
-      for (int i = dest*n; i < (dest+1)*n; ++i) {
-        slotarchive << in_values[i];
-      }
-      std::cout << '\n';
-      int slotsize = slotarchive.size();
-      sendbuf.resize(sendbuf.size() + slotsize);
-      slotsizes[dest] = slotsize;
-      char const* aptr = static_cast<char const*>(slotarchive.address());
-      std::copy(aptr, aptr+slotsize, sendbuf.end()-slotsize);
-    }
+    fill_scatter_sendbuf(comm, in_values, n, sendbuf, slotsizes);
   }
   // Distribute the sizes
   int myslotsize;
