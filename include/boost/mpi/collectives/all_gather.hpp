@@ -97,7 +97,7 @@ void
 all_gather(const communicator& comm, const T& in_value, std::vector<T>& out_values)
 {
   out_values.resize(comm.size());
-  ::boost::mpi::all_gather(comm, in_value, &out_values[0]);
+  ::boost::mpi::all_gather(comm, in_value, out_values.data());
 }
 
 template<typename T>
@@ -112,7 +112,7 @@ void
 all_gather(const communicator& comm, const T* in_values, int n, std::vector<T>& out_values)
 {
   out_values.resize(comm.size() * n);
-  ::boost::mpi::all_gather(comm, in_values, n, &out_values[0]);
+  ::boost::mpi::all_gather(comm, in_values, n, out_values.data());
 }
 
 } } // end namespace boost::mpi
