@@ -16,6 +16,7 @@
 #include <boost/mpi/detail/point_to_point.hpp>
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
+#include <boost/mpi/detail/offsets.hpp>
 #include <boost/assert.hpp>
 
 namespace boost { namespace mpi {
@@ -50,48 +51,66 @@ scatter_impl(const communicator& comm, T* out_values, int n, int root,
 
 // We're scattering from the root for a type that does not have an
 // associated MPI datatype, so we'll need to serialize
-// it. Unfortunately, this means that we cannot use MPI_Scatter, so
-// we'll just have the root send individual messages to the other
-// processes.
+// it.
 template<typename T>
 void
 scatter_impl(const communicator& comm, const T* in_values, T* out_values, 
              int n, int root, mpl::false_)
 {
   int tag = environment::collectives_tag();
-  int size = comm.size();
+  int nproc = comm.size();
+  packed_oarchive::buffer_type sendbuf;
+  std::vector<int> slotsizes;
 
-  for (int dest = 0; dest < size; ++dest) {
-    if (dest == root) {
-      // Our own values will never be transmitted: just copy them.
-      std::copy(in_values + dest * n, in_values + (dest + 1) * n, out_values);
-    } else {
-      // Send archive
-      packed_oarchive oa(comm);
-      for (int i = 0; i < n; ++i)
-        oa << in_values[dest * n + i];
-      detail::packed_archive_send(comm, dest, tag, oa);
+  if (root == comm.rank()) {
+    // fill the sendbuf while keeping trac of the slot sizes
+    slotsizes.resize(nproc);
+    for (int dest = 0; dest < nproc; ++dest) {
+      packed_oarchive slotarchive(comm);
+      for (int i = dest*n; i < (dest+1)*n; ++i) {
+        slotarchive << in_values[i];
+      }
+      std::cout << '\n';
+      int slotsize = slotarchive.size();
+      sendbuf.resize(sendbuf.size() + slotsize);
+      slotsizes[dest] = slotsize;
+      char const* aptr = static_cast<char const*>(slotarchive.address());
+      std::copy(aptr, aptr+slotsize, sendbuf.end()-slotsize);
+    }
+  }
+  // Distribute the sizes
+  int myslotsize;
+  BOOST_MPI_CHECK_RESULT(MPI_Scatter,
+                         (slotsizes.data(), 1, MPI_INTEGER,
+                          &myslotsize, 1, MPI_INTEGER, root, comm));
+  std::vector<int> offsets;
+  if (root == comm.rank()) {
+    sizes2offsets(slotsizes, offsets);
+  }
+  packed_iarchive::buffer_type recvbuf;
+  recvbuf.resize(myslotsize);
+  BOOST_MPI_CHECK_RESULT(MPI_Scatterv,
+                         (sendbuf.data(), slotsizes.data(), offsets.data(), MPI_BYTE,
+                          recvbuf.data(), recvbuf.size(), MPI_BYTE,
+                          root, MPI_Comm(comm)));
+  if (root == comm.rank()) {
+    // Our own local values are already here: just copy them.
+    std::copy(in_values + root * n, in_values + (root + 1) * n, out_values);
+  } else {
+    // Otherwise deserialize:
+    packed_iarchive iarchv(comm, recvbuf);
+    for (int i = 0; i < n; ++i) {
+      iarchv >> out_values[i];
     }
   }
 }
 
-// We're scattering to a non-root for a type that does not have an
-// associated MPI datatype, so we'll need to de-serialize
-// it. Unfortunately, this means that we cannot use MPI_Scatter, so
-// we'll just have all of the non-root nodes send individual
-// messages to the root.
 template<typename T>
 void
 scatter_impl(const communicator& comm, T* out_values, int n, int root, 
-             mpl::false_)
-{
-  int tag = environment::collectives_tag();
-
-  packed_iarchive ia(comm);
-  MPI_Status status;
-  detail::packed_archive_recv(comm, root, tag, ia, status);
-  for (int i = 0; i < n; ++i)
-    ia >> out_values[i];
+             mpl::false_ is_mpi_type)
+{ 
+  scatter_impl(comm, (T const*)0, out_values, n, root, is_mpi_type);
 }
 } // end namespace detail
 
@@ -99,11 +118,7 @@ template<typename T>
 void
 scatter(const communicator& comm, const T* in_values, T& out_value, int root)
 {
-  if (comm.rank() == root)
-    detail::scatter_impl(comm, in_values, &out_value, 1, root, 
-                         is_mpi_datatype<T>());
-  else
-    detail::scatter_impl(comm, &out_value, 1, root, is_mpi_datatype<T>());
+  detail::scatter_impl(comm, in_values, &out_value, 1, root, is_mpi_datatype<T>());
 }
 
 template<typename T>
@@ -111,11 +126,7 @@ void
 scatter(const communicator& comm, const std::vector<T>& in_values, T& out_value,
         int root)
 {
-  if (comm.rank() == root)
-    ::boost::mpi::scatter<T>(comm, &in_values[0], out_value, root);
-  else
-    ::boost::mpi::scatter<T>(comm, static_cast<const T*>(0), out_value, 
-                             root);
+  ::boost::mpi::scatter<T>(comm, &in_values[0], out_value, root);
 }
 
 template<typename T>
@@ -130,11 +141,7 @@ void
 scatter(const communicator& comm, const T* in_values, T* out_values, int n,
         int root)
 {
-  if (comm.rank() == root)
-    detail::scatter_impl(comm, in_values, out_values, n, root,
-                         is_mpi_datatype<T>());
-  else
-    detail::scatter_impl(comm, out_values, n, root, is_mpi_datatype<T>());
+  detail::scatter_impl(comm, in_values, out_values, n, root, is_mpi_datatype<T>());
 }
 
 template<typename T>
@@ -142,11 +149,7 @@ void
 scatter(const communicator& comm, const std::vector<T>& in_values, 
         T* out_values, int n, int root)
 {
-  if (comm.rank() == root)
-    ::boost::mpi::scatter(comm, &in_values[0], out_values, n, root);
-  else
-    ::boost::mpi::scatter(comm, static_cast<const T*>(0), out_values, 
-                          n, root);
+  ::boost::mpi::scatter(comm, &in_values[0], out_values, n, root);
 }
 
 template<typename T>
