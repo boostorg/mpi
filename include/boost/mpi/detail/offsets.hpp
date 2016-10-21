@@ -11,10 +11,10 @@ namespace boost { namespace mpi {
 namespace detail {
 
 // Convert a sequence of sizes [S0..Sn] to a sequence displacement 
-// [O0..On] where O[0] = 0 and O[k+1] = O[k]+S[k]
+// [O0..On] where O[0] = 0 and O[k+1] = O[k]+S[k].
 template<class Alloc1, class Alloc2>
 void
-sizes2offset(std::vector<int, Alloc1> const& sizes, std::vector<int, Alloc2>& offsets) 
+sizes2offsets(std::vector<int, Alloc1> const& sizes, std::vector<int, Alloc2>& offsets) 
 {
   offsets.resize(sizes.size());
   offsets[0] = 0;
@@ -26,4 +26,4 @@ sizes2offset(std::vector<int, Alloc1> const& sizes, std::vector<int, Alloc2>& of
 
 }
 }}
-#endif // BOOST_MPI_ALLGATHER_HPP
+#endif // BOOST_MPI_OFFSETS_HPP
