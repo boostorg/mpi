@@ -77,7 +77,7 @@ gather_impl(const communicator& comm, const T* in_values, int n,
   // we need to use gatherv.
   // Every thing is contiguous, so the offsets can be
   // deduced from the collected sizes.
-  std::vector<int> offsets(nproc);
+  std::vector<int> offsets;
   if (comm.rank() == root) sizes2offset(oasizes, offsets);
   packed_iarchive::buffer_type recv_buffer(std::accumulate(oasizes.begin(), oasizes.end(), 0));
   BOOST_MPI_CHECK_RESULT(MPI_Gatherv,
