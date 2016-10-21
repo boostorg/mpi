@@ -25,7 +25,7 @@
 namespace boost { namespace mpi {
 
 namespace detail {
-// We're gathering at the root for a type that has an associated MPI
+// We're all-gathering for a type that has an associated MPI
 // datatype, so we'll use MPI_Gather to do all of the work.
 template<typename T>
 void
@@ -38,7 +38,7 @@ all_gather_impl(const communicator& comm, const T* in_values, int n,
                           out_values, n, type, comm));
 }
 
-// We're gathering for a type that does not have an
+// We're all-gathering for a type that does not have an
 // associated MPI datatype, so we'll need to serialize
 // it.
 template<typename T>
@@ -112,7 +112,7 @@ void
 all_gather(const communicator& comm, const T* in_values, int n, std::vector<T>& out_values)
 {
   out_values.resize(comm.size() * n);
-  ::boost::mpi::gather(comm, in_values, n, &out_values[0]);
+  ::boost::mpi::all_gather(comm, in_values, n, &out_values[0]);
 }
 
 } } // end namespace boost::mpi
