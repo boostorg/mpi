@@ -73,38 +73,33 @@ fill_scatter_sendbuf(const communicator& comm, T const* values, std::vector<int>
   }
 }
 
-// We're scattering from the root for a type that does not have an
-// associated MPI datatype, so we'll need to serialize it.
+// Dispatch the sendbuf among proc.
+// Used in the second steps of both scatter and scatterv
 template<typename T>
 void
-scatter_impl(const communicator& comm, const T* in_values, T* out_values, 
-             int n, int root, mpl::false_)
-{
-  int tag = environment::collectives_tag();
-  int nproc = comm.size();
-  packed_oarchive::buffer_type sendbuf;
-  std::vector<int> slotsizes;
-  
-  if (root == comm.rank()) {
-    std::vector<int> nslots(nproc, n);
-    fill_scatter_sendbuf(comm, in_values, nslots, sendbuf, slotsizes);
-  }
+dispatch_scatter_sendbuf(const communicator& comm, 
+                         packed_oarchive::buffer_type const& sendbuf, std::vector<int> const& archsizes,
+                         T const* in_values,
+                         T* out_values, int n, int root) {
   // Distribute the sizes
-  int myslotsize;
+  int myarchsize;
   BOOST_MPI_CHECK_RESULT(MPI_Scatter,
-                         (slotsizes.data(), 1, MPI_INTEGER,
-                          &myslotsize, 1, MPI_INTEGER, root, comm));
+                         (archsizes.data(), 1, MPI_INTEGER,
+                          &myarchsize, 1, MPI_INTEGER, root, comm));
   std::vector<int> offsets;
   if (root == comm.rank()) {
-    sizes2offsets(slotsizes, offsets);
+    sizes2offsets(archsizes, offsets);
   }
+  // Get my proc archive
   packed_iarchive::buffer_type recvbuf;
-  recvbuf.resize(myslotsize);
+  recvbuf.resize(myarchsize);
   BOOST_MPI_CHECK_RESULT(MPI_Scatterv,
-                         (sendbuf.data(), slotsizes.data(), offsets.data(), MPI_BYTE,
+                         (sendbuf.data(), archsizes.data(), offsets.data(), MPI_BYTE,
                           recvbuf.data(), recvbuf.size(), MPI_BYTE,
                           root, MPI_Comm(comm)));
+  // Unserialize
   if (root == comm.rank()) {
+    assert(in_values);
     // Our own local values are already here: just copy them.
     std::copy(in_values + root * n, in_values + (root + 1) * n, out_values);
   } else {
@@ -114,6 +109,23 @@ scatter_impl(const communicator& comm, const T* in_values, T* out_values,
       iarchv >> out_values[i];
     }
   }
+}
+
+// We're scattering from the root for a type that does not have an
+// associated MPI datatype, so we'll need to serialize it.
+template<typename T>
+void
+scatter_impl(const communicator& comm, const T* in_values, T* out_values, 
+             int n, int root, mpl::false_)
+{
+  packed_oarchive::buffer_type sendbuf;
+  std::vector<int> slotsizes;
+  
+  if (root == comm.rank()) {
+    std::vector<int> nslots(comm.size(), n);
+    fill_scatter_sendbuf(comm, in_values, nslots, sendbuf, slotsizes);
+  }
+  dispatch_scatter_sendbuf(comm, sendbuf, slotsizes, in_values, out_values, n, root);
 }
 
 template<typename T>
