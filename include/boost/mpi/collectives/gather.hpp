@@ -56,7 +56,8 @@ gather_impl(const communicator& comm, const T* in_values, int n, int root,
 // it.
 template<typename T>
 void
-gather_impl(const communicator& comm, const T* in_values, int n, 
+gather_impl(const communicator& comm,
+            const T* in_values, int n, 
             T* out_values, int root, mpl::false_)
 {
   int tag = environment::collectives_tag();
@@ -75,8 +76,8 @@ gather_impl(const communicator& comm, const T* in_values, int n,
                           root, MPI_Comm(comm)));
   // Gather the archives, which can be of different sizes, so
   // we need to use gatherv.
-  // Every thing is contiguous, so the offsets can be
-  // deduced from the collected sizes.
+  // Everything is contiguous (in the transmitted archive), so 
+  // the offsets can be deduced from the collected sizes.
   std::vector<int> offsets;
   if (comm.rank() == root) sizes2offsets(oasizes, offsets);
   packed_iarchive::buffer_type recv_buffer(std::accumulate(oasizes.begin(), oasizes.end(), 0));
@@ -87,11 +88,13 @@ gather_impl(const communicator& comm, const T* in_values, int n,
   if (comm.rank() == root) {
     for (int src = 0; src < nproc; ++src) {
       if (src == root) {
-        std::copy(in_values, in_values + n, out_values + n * src);
+        for (int i = 0; i < n; ++i) {
+          *out_values++ = *in_values++;
+        }
       } else {
         packed_iarchive ia(comm,  recv_buffer, boost::archive::no_header, offsets[src]);
         for (int i = 0; i < n; ++i) {
-          ia >> out_values[n*src + i];
+          ia >> *out_values++;
         }
       }
     }
@@ -114,11 +117,8 @@ template<typename T>
 void
 gather(const communicator& comm, const T& in_value, T* out_values, int root)
 {
-  if (comm.rank() == root)
-    detail::gather_impl(comm, &in_value, 1, out_values, root, 
-                        is_mpi_datatype<T>());
-  else
-    detail::gather_impl(comm, &in_value, 1, root, is_mpi_datatype<T>());
+  BOOST_ASSERT(out_values || (comm.rank() != root));
+  detail::gather_impl(comm, &in_value, 1, out_values, root, is_mpi_datatype<T>());
 }
 
 template<typename T>
