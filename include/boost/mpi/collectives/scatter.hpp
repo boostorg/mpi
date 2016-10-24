@@ -156,7 +156,7 @@ void
 scatter(const communicator& comm, const std::vector<T>& in_values, T& out_value,
         int root)
 {
-  ::boost::mpi::scatter<T>(comm, &in_values[0], out_value, root);
+  ::boost::mpi::scatter<T>(comm, in_values.data(), out_value, root);
 }
 
 template<typename T>

@@ -18,6 +18,7 @@ if [ mpi.configured ]
 test-suite mpi
   :
   [ mpi-test random_gather : ../example/random_gather.cpp : : 2 ]
+  [ mpi-test random_scatter : ../example/random_scatter.cpp : : 2 ]
   [ mpi-test cartesian_communicator : ../example/cartesian_communicator.cpp : : 24 ]
   [ mpi-test cartesian_topology_init_test : : : 1 ]
   [ mpi-test broadcast_stl_test  : : : 2 ]
