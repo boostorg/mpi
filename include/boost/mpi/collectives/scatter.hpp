@@ -49,18 +49,25 @@ scatter_impl(const communicator& comm, T* out_values, int n, int root,
                           root, comm));
 }
 
-// Fill the sendbuf while keeping trac of the slot sizes
+// Fill the sendbuf while keeping trac of the slot's footprints
 // Used in the first steps of both scatter and scatterv
 // Nslots contains the number of slots being sent 
 // to each process (identical values for scatter).
+// skiped_slots, if present, is deduced from the 
+// displacement array authorised be the MPI API, 
+// for some yet to be determined reason.
 template<typename T>
 void
-fill_scatter_sendbuf(const communicator& comm, T const* values, std::vector<int> const& nslots,
+fill_scatter_sendbuf(const communicator& comm, T const* values, 
+                     int const* nslots, int const* skipped_slots,
                      packed_oarchive::buffer_type& sendbuf, std::vector<int>& archsizes) {
   int nproc = comm.size();
   archsizes.resize(nproc);
   
   for (int dest = 0; dest < nproc; ++dest) {
+    if (skipped_slots) { // wee need to keep this for backward compatibility
+      for(int k= 0; k < skipped_slots[dest]; ++k) ++values;
+    }
     packed_oarchive procarchive(comm);
     for (int i = 0; i < nslots[dest]; ++i) {
       procarchive << *values++;
@@ -75,6 +82,7 @@ fill_scatter_sendbuf(const communicator& comm, T const* values, std::vector<int>
 
 // Dispatch the sendbuf among proc.
 // Used in the second steps of both scatter and scatterv
+// in_value is only provide in the non variadic case.
 template<typename T>
 void
 dispatch_scatter_sendbuf(const communicator& comm, 
@@ -98,8 +106,7 @@ dispatch_scatter_sendbuf(const communicator& comm,
                           recvbuf.data(), recvbuf.size(), MPI_BYTE,
                           root, MPI_Comm(comm)));
   // Unserialize
-  if (root == comm.rank()) {
-    assert(in_values);
+  if ( in_values != 0 && root == comm.rank()) {
     // Our own local values are already here: just copy them.
     std::copy(in_values + root * n, in_values + (root + 1) * n, out_values);
   } else {
@@ -119,13 +126,13 @@ scatter_impl(const communicator& comm, const T* in_values, T* out_values,
              int n, int root, mpl::false_)
 {
   packed_oarchive::buffer_type sendbuf;
-  std::vector<int> slotsizes;
+  std::vector<int> archsizes;
   
   if (root == comm.rank()) {
     std::vector<int> nslots(comm.size(), n);
-    fill_scatter_sendbuf(comm, in_values, nslots, sendbuf, slotsizes);
+    fill_scatter_sendbuf(comm, in_values, nslots.data(), (int const*)0, sendbuf, archsizes);
   }
-  dispatch_scatter_sendbuf(comm, sendbuf, slotsizes, in_values, out_values, n, root);
+  dispatch_scatter_sendbuf(comm, sendbuf, archsizes, in_values, out_values, n, root);
 }
 
 template<typename T>
