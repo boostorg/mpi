@@ -67,5 +67,29 @@ make_scatter_offsets(communicator const& comm, int const* sizes, int const* disp
     return 0;    
   }
 }
+
+// Reconstruct skip slots from sizes and offsets.
+// Only takes place if on the root process and if 
+// displs are provided.
+// If memory was allocated, returns a pointer to it
+// otherwise null.
+int*
+make_gather_skipped(communicator const& comm, int const* sizes, int const* displs, int root)
+{
+  if (root == comm.rank()) {
+    assert(sizes);
+    if (displs) {
+      int nproc = comm.size();
+      int* skipped = new int[nproc];
+      std::copy(displs, displs+nproc, skipped);
+      offsets2skipped(sizes, displs, skipped, nproc);
+      return skipped;
+    } else {
+      return 0;
+    }
+  } else {
+    return 0;    
+  }
+}
 }
 }}

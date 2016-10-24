@@ -31,6 +31,14 @@ void offsets2skipped(int const* sizes, int const* offsets, int* skipped, int n);
 // otherwise null.
 int* make_scatter_offsets(communicator const& comm, int const* sizes, int const* displs, int root);
 
+// Reconstruct skip slots from sizes and offsets.
+// Only takes place if on the root process and if 
+// displs are provided.
+// If memory was allocated, returns a pointer to it
+// otherwise null.
+int*
+make_gather_skipped(communicator const& comm, int const* sizes, int const* displs, int root);
+
 }
 }}
 
