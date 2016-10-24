@@ -1758,7 +1758,7 @@ algorithms.
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node136.html#Node136
   `MPI_Cart_rank`]] [[memberref boost::mpi::cartesian_communicator::rank `cartesian_communicator::rank` ]]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node136.html#Node136
-  `MPI_Cart_coords`]] [[memberref boost::mpi::cartesian_communicator::coords `cartesian_communicator::coords` ]]]
+  `MPI_Cart_coords`]] [[memberref boost::mpi::cartesian_communicator::coordinates `cartesian_communicator::coordinates` ]]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node136.html#Node136
   `MPI_Graph_neighbors_count`]] [[funcref boost::mpi::out_degree
   `out_degree`]]]
