@@ -56,9 +56,8 @@ gather_impl(const communicator& comm, const T* in_values, int n, int root,
 // it.
 template<typename T>
 void
-gather_impl(const communicator& comm,
-            const T* in_values, int n, 
-            T* out_values, int root, mpl::false_)
+gather_impl(const communicator& comm, const T* in_values, int n, T* out_values, 
+            int const* nslot, int const* nskip, int root, mpl::false_)
 {
   int tag = environment::collectives_tag();
   int nproc = comm.size();
@@ -87,13 +86,18 @@ gather_impl(const communicator& comm,
                           root, MPI_Comm(comm)));
   if (comm.rank() == root) {
     for (int src = 0; src < nproc; ++src) {
+      // handle variadic case
+      int nb = nslot ? nslot[src] : n;
+      int skip = nskip ? nskip[src] : 0;
+      std::advance(out_values, skip);
       if (src == root) {
-        for (int i = 0; i < n; ++i) {
+        BOOST_ASSERT(nb == n);
+        for (int i = 0; i < nb; ++i) {
           *out_values++ = *in_values++;
         }
       } else {
         packed_iarchive ia(comm,  recv_buffer, boost::archive::no_header, offsets[src]);
-        for (int i = 0; i < n; ++i) {
+        for (int i = 0; i < nb; ++i) {
           ia >> *out_values++;
         }
       }
@@ -106,10 +110,10 @@ gather_impl(const communicator& comm,
 // it.
 template<typename T>
 void
-gather_impl(const communicator& comm, const T* in_values, int n, int root, 
+gather_impl(const communicator& comm, const T* in_values, int n, T* out_values,int root, 
             mpl::false_ is_mpi_type)
 {
-  gather_impl(comm, in_values, n, (T*)0, root, is_mpi_type);
+  gather_impl(comm, in_values, n, out_values, (int const*)0, (int const*)0, root, is_mpi_type);
 }
 } // end namespace detail
 
@@ -135,10 +139,8 @@ gather(const communicator& comm, const T& in_value, std::vector<T>& out_values,
 {
   if (comm.rank() == root) {
     out_values.resize(comm.size());
-    ::boost::mpi::gather(comm, in_value, &out_values[0], root);
-  } else {
-    ::boost::mpi::gather(comm, in_value, root);
   }
+  ::boost::mpi::gather(comm, in_value, out_values.data(), root);
 }
 
 template<typename T>
@@ -146,11 +148,8 @@ void
 gather(const communicator& comm, const T* in_values, int n, T* out_values, 
        int root)
 {
-  if (comm.rank() == root)
-    detail::gather_impl(comm, in_values, n, out_values, root, 
-                        is_mpi_datatype<T>());
-  else
-    detail::gather_impl(comm, in_values, n, root, is_mpi_datatype<T>());
+  detail::gather_impl(comm, in_values, n, out_values, root, 
+                      is_mpi_datatype<T>());
 }
 
 template<typename T>
@@ -160,10 +159,8 @@ gather(const communicator& comm, const T* in_values, int n,
 {
   if (comm.rank() == root) {
     out_values.resize(comm.size() * n);
-    ::boost::mpi::gather(comm, in_values, n, &out_values[0], root);
-  } 
-  else
-    ::boost::mpi::gather(comm, in_values, n, root);
+  }
+  ::boost::mpi::gather(comm, in_values, n, out_values.data(), root);
 }
 
 template<typename T>
