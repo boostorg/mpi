@@ -765,7 +765,7 @@ The [funcref boost::mpi::gather `gather`] collective gathers
 the values produced by every process in a communicator into a vector
 of values on the "root" process (specified by an argument to
 `gather`). The /i/th element in the vector will correspond to the
-value gathered fro mthe /i/th process. For instance, in the following
+value gathered from the /i/th process. For instance, in the following
 program each process computes its own random number. All of these
 random numbers are gathered at process 0 (the "root" in this case),
 which prints out the values that correspond to each processor. 
@@ -818,6 +818,62 @@ to be collected into identical vectors on every process, use the
 [funcref boost::mpi::all_gather `all_gather`] algorithm,
 which is semantically equivalent to calling `gather` followed by a
 `broadcast` of the resulting vector.
+
+[endsect]
+
+[section:scatter Scatter]
+The [funcref boost::mpi::scatter `scatter`] collective scatters
+the values from a vector in the "root" process in a communicator into 
+values in all the processes of the communicator.
+ The /i/th element in the vector will correspond to the
+value received by the /i/th process. For instance, in the following
+program, the root process produces a vector of random nomber and send 
+one value to each process that will print it. (`random_scatter.cpp`)
+
+  #include <boost/mpi.hpp>
+  #include <boost/mpi/collectives.hpp>
+  #include <iostream>
+  #include <cstdlib>
+  #include <vector>
+  
+  namespace mpi = boost::mpi;
+  
+  int main(int argc, char* argv[])
+  {
+    mpi::environment env(argc, argv);
+    mpi::communicator world;
+    
+    std::srand(time(0) + world.rank());
+    std::vector<int> all;
+    int mine = -1;
+    if (world.rank() == 0) {
+      all.resize(world.size());
+      std::generate(all.begin(), all.end(), std::rand);
+    }
+    mpi::scatter(world, all, mine, 0);
+    for (int r = 0; r < world.size(); ++r) {
+      world.barrier();
+      if (r == world.rank()) {
+        std::cout << "Rank " << r << " got " << mine << '\n';
+      }
+    }
+    return 0;
+  }
+
+Executing this program with seven processes will result in output such
+as the following. Although the random values will change from one run
+to the next, the order of the processes in the output will remain the
+same because of the barrier.
+
+[pre
+Rank 0 got 1409381269
+Rank 1 got 17045268
+Rank 2 got 440120016
+Rank 3 got 936998224
+Rank 4 got 1827129182
+Rank 5 got 1951746047
+Rank 6 got 2117359639
+]
 
 [endsect]
 
