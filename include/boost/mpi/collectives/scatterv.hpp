@@ -8,7 +8,9 @@
 #ifndef BOOST_MPI_SCATTERV_HPP
 #define BOOST_MPI_SCATTERV_HPP
 
+#include <boost/scoped_array.hpp>
 #include <boost/mpi/collectives/scatter.hpp>
+#include <boost/mpi/detail/offsets.hpp>
 
 namespace boost { namespace mpi {
 
@@ -25,19 +27,11 @@ void
 scatterv_impl(const communicator& comm, const T* in_values, T* out_values, int out_size,
               const int* sizes, const int* displs, int root, mpl::true_)
 {
-  std::vector<int> offsets;
-  if (sizes) {
-    assert(out_size == sizes[comm.rank()]);
-    assert(in_values);
-    if (!displs) {
-      int nproc = comm.size();
-      offsets.resize(nproc);
-      sizes2offsets(sizes, offsets.data(), nproc);
-      displs = offsets.data();
-    }
-  } else {
-    assert(comm.rank() != root);
-  }
+  assert(!sizes || out_size == sizes[comm.rank()]);
+  assert(bool(sizes) == bool(in_values));
+  
+  scoped_array<int> new_offsets_mem(make_scatter_offsets(comm, sizes, displs, root));
+  if (new_offsets_mem) displs = new_offsets_mem.get();
   MPI_Datatype type = get_mpi_datatype<T>(*in_values);
   BOOST_MPI_CHECK_RESULT(MPI_Scatterv,
                          (const_cast<T*>(in_values), const_cast<int*>(sizes),
