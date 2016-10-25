@@ -129,7 +129,7 @@ template<typename T>
 void gather(const communicator& comm, const T& in_value, int root)
 {
   BOOST_ASSERT(comm.rank() != root);
-  detail::gather_impl(comm, &in_value, 1, root, is_mpi_datatype<T>());
+  detail::gather_impl(comm, &in_value, 1, (T*)0, root, is_mpi_datatype<T>());
 }
 
 template<typename T>
