@@ -30,7 +30,7 @@ scatterv_impl(const communicator& comm, const T* in_values, T* out_values, int o
   assert(!sizes || out_size == sizes[comm.rank()]);
   assert(bool(sizes) == bool(in_values));
   
-  scoped_array<int> new_offsets_mem(make_scatter_offsets(comm, sizes, displs, root));
+  scoped_array<int> new_offsets_mem(make_offsets(comm, sizes, displs, root));
   if (new_offsets_mem) displs = new_offsets_mem.get();
   MPI_Datatype type = get_mpi_datatype<T>(*in_values);
   BOOST_MPI_CHECK_RESULT(MPI_Scatterv,

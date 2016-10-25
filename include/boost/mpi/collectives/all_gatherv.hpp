@@ -35,7 +35,7 @@ all_gatherv_impl(const communicator& comm, const T* in_values,
                  T* out_values, int const* sizes, int const* displs, mpl::true_)
 {
   // Make displacements if not provided
-  scoped_array<int> new_offsets_mem(make_scatter_offsets(comm, sizes, displs, -1));
+  scoped_array<int> new_offsets_mem(make_offsets(comm, sizes, displs, -1));
   if (new_offsets_mem) displs = new_offsets_mem.get();
   MPI_Datatype type = get_mpi_datatype<T>(*in_values);
   BOOST_MPI_CHECK_RESULT(MPI_Allgatherv,

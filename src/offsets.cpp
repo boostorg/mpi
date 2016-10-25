@@ -50,7 +50,7 @@ offsets2skipped(int const* sizes, int const* offsets, int* skipped, int n)
 // If memory was allocated, returns a pointer to it
 // otherwise null.
 int*
-make_scatter_offsets(communicator const& comm, int const* sizes, int const* displs, int root)
+make_offsets(communicator const& comm, int const* sizes, int const* displs, int root)
 {
   if (root == -1 || root == comm.rank()) {
     assert(sizes);
