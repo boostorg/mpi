@@ -43,12 +43,10 @@ gather_impl(const communicator& comm, const T* in_values, int n,
 template<typename T>
 void
 gather_impl(const communicator& comm, const T* in_values, int n, int root, 
-            mpl::true_)
+            mpl::true_ is_mpi_type)
 {
-  MPI_Datatype type = get_mpi_datatype<T>(*in_values);
-  BOOST_MPI_CHECK_RESULT(MPI_Gather,
-                         (const_cast<T*>(in_values), n, type,
-                          0, n, type, root, comm));
+  assert(comm.rank() != root);
+  gather_impl(comm, in_values, n, (T*)0, root, is_mpi_type);
 }
 
 // We're gathering at the root for a type that does not have an
