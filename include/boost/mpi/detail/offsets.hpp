@@ -39,7 +39,7 @@ int* make_scatter_offsets(communicator const& comm, int const* sizes, int const*
 // displs are provided.
 // If memory was allocated, returns a pointer to it
 // otherwise null.
-int* make_gather_skipped(communicator const& comm, int const* sizes, int const* displs, int root = -1);
+int* make_skipped_slots(communicator const& comm, int const* sizes, int const* displs, int root = -1);
 
 }
 }}// end namespace boost::mpi

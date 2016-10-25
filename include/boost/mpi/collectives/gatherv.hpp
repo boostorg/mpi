@@ -62,7 +62,7 @@ namespace detail {
                T* out_values, const int* sizes, const int* displs, int root, mpl::false_)
   {
     // convert displacement to offsets to skip
-    scoped_array<int> skipped(make_gather_skipped(comm, sizes, displs, root));
+    scoped_array<int> skipped(make_skipped_slots(comm, sizes, displs, root));
     gather_impl(comm, in_values, in_size, out_values, sizes, skipped.get(), root, mpl::false_());
   }
 

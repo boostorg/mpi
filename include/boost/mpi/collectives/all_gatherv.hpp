@@ -57,7 +57,7 @@ all_gatherv_impl(const communicator& comm, const T* in_values,
                  mpl::false_ isnt_mpi_type)
 { 
   // convert displacement to offsets to skip
-  scoped_array<int> skipped(make_gather_skipped(comm, sizes, displs));
+  scoped_array<int> skipped(make_skipped_slots(comm, sizes, displs));
   all_gather_impl(comm, in_values, sizes[comm.rank()], out_values, 
                   sizes, skipped.get(), isnt_mpi_type);
 }

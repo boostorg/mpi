@@ -74,7 +74,7 @@ make_scatter_offsets(communicator const& comm, int const* sizes, int const* disp
 // If memory was allocated, returns a pointer to it
 // otherwise null.
 int*
-make_gather_skipped(communicator const& comm, int const* sizes, int const* displs, int root)
+make_skipped_slots(communicator const& comm, int const* sizes, int const* displs, int root)
 {
   if (root == -1 || root == comm.rank()) {
     assert(sizes);
