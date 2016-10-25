@@ -73,11 +73,13 @@ all_gather_impl(const communicator& comm, const T* in_values, int n,
                           MPI_Comm(comm)));
   for (int src = 0; src < nproc; ++src) {
     if (src == comm.rank()) { // this is our local data
-      std::copy(in_values, in_values + n, out_values + n * src);
+      for (int i = 0; i < n; ++i) {
+        *out_values++ = *in_values++;
+      }
     } else {
       packed_iarchive ia(comm,  recv_buffer, boost::archive::no_header, offsets[src]);
       for (int i = 0; i < n; ++i) {
-        ia >> out_values[n*src + i];
+        ia >> *out_values++;
       }
     }
   }
