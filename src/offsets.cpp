@@ -52,7 +52,7 @@ offsets2skipped(int const* sizes, int const* offsets, int* skipped, int n)
 int*
 make_scatter_offsets(communicator const& comm, int const* sizes, int const* displs, int root)
 {
-  if (root == comm.rank()) {
+  if (root == -1 || root == comm.rank()) {
     assert(sizes);
     if (!displs) {
       int nproc = comm.size();
@@ -76,7 +76,7 @@ make_scatter_offsets(communicator const& comm, int const* sizes, int const* disp
 int*
 make_gather_skipped(communicator const& comm, int const* sizes, int const* displs, int root)
 {
-  if (root == comm.rank()) {
+  if (root == -1 || root == comm.rank()) {
     assert(sizes);
     if (displs) {
       int nproc = comm.size();
