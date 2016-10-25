@@ -5,6 +5,9 @@
 
 // Authors: Alain Miniussi
 
+#ifndef BOOST_MPI_OFFSETS_HPP
+#define BOOST_MPI_OFFSETS_HPP
+
 #include <vector>
 #include <boost/mpi/communicator.hpp>
 
@@ -15,7 +18,7 @@ namespace detail {
 // [O0..On] where O[0] = 0 and O[k+1] = O[k]+S[k].
 void sizes2offsets(int const* sizes, int* offsets, int n);
 
-// Same as size2convert(sizes.data(), offsets.data(), sizes.size())
+// Same as size2offset(sizes.data(), offsets.data(), sizes.size())
 void sizes2offsets(std::vector<int> const& sizes, std::vector<int>& offsets);
 
 // Given a sequence of sizes (typically the number of records dispatched
@@ -36,9 +39,9 @@ int* make_scatter_offsets(communicator const& comm, int const* sizes, int const*
 // displs are provided.
 // If memory was allocated, returns a pointer to it
 // otherwise null.
-int*
-make_gather_skipped(communicator const& comm, int const* sizes, int const* displs, int root);
+int* make_gather_skipped(communicator const& comm, int const* sizes, int const* displs, int root = -1);
 
 }
-}}
+}}// end namespace boost::mpi
 
+#endif // BOOST_MPI_OFFSETS_HPP
