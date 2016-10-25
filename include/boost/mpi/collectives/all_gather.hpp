@@ -44,7 +44,7 @@ all_gather_impl(const communicator& comm, const T* in_values, int n,
 template<typename T>
 void
 all_gather_impl(const communicator& comm, const T* in_values, int n, 
-               T* out_values, mpl::false_)
+                T* out_values, int const* sizes, int const* skips, mpl::false_)
 {
   int tag = environment::collectives_tag();
   int nproc = comm.size();
@@ -72,19 +72,32 @@ all_gather_impl(const communicator& comm, const T* in_values, int n,
                           recv_buffer.data(), oasizes.data(), offsets.data(), MPI_BYTE, 
                           MPI_Comm(comm)));
   for (int src = 0; src < nproc; ++src) {
+    int nb   = sizes ? sizes[src] : n;
+    int skip = skips ? skips[src] : 0;
+    std::advance(out_values, skip);
     if (src == comm.rank()) { // this is our local data
-      for (int i = 0; i < n; ++i) {
+      for (int i = 0; i < nb; ++i) {
         *out_values++ = *in_values++;
       }
     } else {
       packed_iarchive ia(comm,  recv_buffer, boost::archive::no_header, offsets[src]);
-      for (int i = 0; i < n; ++i) {
+      for (int i = 0; i < nb; ++i) {
         ia >> *out_values++;
       }
     }
   }
 }
 
+// We're all-gathering for a type that does not have an
+// associated MPI datatype, so we'll need to serialize
+// it.
+template<typename T>
+void
+all_gather_impl(const communicator& comm, const T* in_values, int n, 
+                T* out_values, mpl::false_ isnt_mpi_type)
+{
+  all_gather_impl(comm, in_values, n, out_values, (int const*)0, (int const*)0, isnt_mpi_type);
+}
 } // end namespace detail
 
 template<typename T>
