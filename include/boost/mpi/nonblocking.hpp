@@ -59,9 +59,7 @@ wait_any(ForwardIterator first, ForwardIterator last)
   ForwardIterator current = first;
   while (true) {
     // Check if we have found a completed request. If so, return it.
-    if (current->m_requests[0] != MPI_REQUEST_NULL &&
-        (current->m_requests[1] != MPI_REQUEST_NULL ||
-         current->m_handler)) {
+    if (current->m_requests[0] != MPI_REQUEST_NULL && !current->trivial()) {
       if (optional<status> result = current->test())
         return std::make_pair(*result, current);
     }
