@@ -105,6 +105,11 @@ public:
     m_archive = shared_ptr<Archive>(&archive);
     std::copy(requests, requests + 2, m_requests);
   }
+  
+  virtual status wait();
+  virtual optional<status> test();
+  virtual void cancel();
+
 };
 
 inline bool

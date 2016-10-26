@@ -32,14 +32,41 @@ request::request(handler* h)
 status
 request::handler::wait()
 {
+  assert(m_requests[1] == MPI_REQUEST_NULL);
+  // This request is either a send or a receive for a type with an
+  // associated MPI datatype
+  status result;
+  BOOST_MPI_CHECK_RESULT(MPI_Wait, (&m_requests[0], &result.m_status));
+  return result;
+}
+
+optional<status> 
+request::handler::test()
+{
+  assert(m_requests[1] == MPI_REQUEST_NULL);
+  status result;
+  int flag = 0;
+  BOOST_MPI_CHECK_RESULT(MPI_Test, 
+                         (&m_requests[0], &flag, &result.m_status));
+  return flag != 0? optional<status>(result) : optional<status>();
+}
+
+void
+request::handler::cancel()
+{
+  BOOST_MPI_CHECK_RESULT(MPI_Cancel, (&m_requests[0]));
+  if (m_requests[1] != MPI_REQUEST_NULL)
+    BOOST_MPI_CHECK_RESULT(MPI_Cancel, (&m_requests[1]));
+}
+
+status
+request::archive_handler::wait() 
+{
   if (m_requests[1] == MPI_REQUEST_NULL) {
-    // This request is either a send or a receive for a type with an
-    // associated MPI datatype, or a serialized datatype that has been
+    // This request could be a serialized datatype that has been
     // packed into a single message. Just wait on the one receive/send
     // and return the status to the user.
-    status result;
-    BOOST_MPI_CHECK_RESULT(MPI_Wait, (&m_requests[0], &result.m_status));
-    return result;
+    return this->handler::wait();
   } else {
     // This request is a send of a serialized type, broken into two
     // separate messages. Complete both sends at once.
@@ -66,19 +93,14 @@ request::handler::wait()
   }
 }
 
-optional<status> 
-request::handler::test()
-{
+optional<status>
+request::archive_handler::test()
+{ 
   if (m_requests[1] == MPI_REQUEST_NULL) {
-    // This request is either a send or a receive for a type with an
-    // associated MPI datatype, or a serialized datatype that has been
+    // This request could be a serialized datatype that has been
     // packed into a single message. Just test the one receive/send
     // and return the status to the user if it has completed.
-    status result;
-    int flag = 0;
-    BOOST_MPI_CHECK_RESULT(MPI_Test, 
-                           (&m_requests[0], &flag, &result.m_status));
-    return flag != 0? optional<status>(result) : optional<status>();
+    return this->handler::test();
   } else {
     // This request is a send of a serialized type, broken into two
     // separate messages. We only get a result if both complete.
@@ -98,7 +120,7 @@ request::handler::test()
       // an exception for it.
       boost::throw_exception(exception("MPI_Testall", error_code));
     }
-
+    
     // No errors. Returns the second status structure if the send has
     // completed.
     if (flag != 0) {
@@ -112,11 +134,9 @@ request::handler::test()
 }
 
 void
-request::handler::cancel()
+request::archive_handler::cancel() 
 {
-  BOOST_MPI_CHECK_RESULT(MPI_Cancel, (&m_requests[0]));
-  if (m_requests[1] != MPI_REQUEST_NULL)
-    BOOST_MPI_CHECK_RESULT(MPI_Cancel, (&m_requests[1]));
+  this->handler::cancel();
 }
 
 } } // end namespace boost::mpi
