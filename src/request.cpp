@@ -32,11 +32,7 @@ request::request(handler* h)
 status
 request::handler::wait()
 {
-  if (m_handler) {
-    // This request is a receive for a serialized type. Use the
-    // handler to wait for completion.
-    return *m_handler(this, ra_wait);
-  } else if (m_requests[1] == MPI_REQUEST_NULL) {
+  if (m_requests[1] == MPI_REQUEST_NULL) {
     // This request is either a send or a receive for a type with an
     // associated MPI datatype, or a serialized datatype that has been
     // packed into a single message. Just wait on the one receive/send
@@ -73,11 +69,7 @@ request::handler::wait()
 optional<status> 
 request::handler::test()
 {
-  if (m_handler) {
-    // This request is a receive for a serialized type. Use the
-    // handler to test for completion.
-    return m_handler(this, ra_test);
-  } else if (m_requests[1] == MPI_REQUEST_NULL) {
+  if (m_requests[1] == MPI_REQUEST_NULL) {
     // This request is either a send or a receive for a type with an
     // associated MPI datatype, or a serialized datatype that has been
     // packed into a single message. Just test the one receive/send
@@ -122,13 +114,9 @@ request::handler::test()
 void
 request::handler::cancel()
 {
-  if (m_handler) {
-    m_handler(this, ra_cancel);
-  } else {
-    BOOST_MPI_CHECK_RESULT(MPI_Cancel, (&m_requests[0]));
-    if (m_requests[1] != MPI_REQUEST_NULL)
-      BOOST_MPI_CHECK_RESULT(MPI_Cancel, (&m_requests[1]));
-  }
+  BOOST_MPI_CHECK_RESULT(MPI_Cancel, (&m_requests[0]));
+  if (m_requests[1] != MPI_REQUEST_NULL)
+    BOOST_MPI_CHECK_RESULT(MPI_Cancel, (&m_requests[1]));
 }
 
 } } // end namespace boost::mpi
