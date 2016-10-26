@@ -276,7 +276,7 @@ communicator::isend<packed_oarchive>(int dest, int tag,
 {
   request req;
   detail::packed_archive_isend(MPI_Comm(*this), dest, tag, ar,
-                               &req.m_requests[0] ,2);
+                               &req.m_handler->m_requests[0] ,2);
   return req;
 }
 
@@ -294,7 +294,7 @@ request communicator::isend<content>(int dest, int tag, const content& c) const
   request req;
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
                          (MPI_BOTTOM, 1, c.get_mpi_datatype(),
-                          dest, tag, MPI_Comm(*this), &req.m_requests[0]));
+                          dest, tag, MPI_Comm(*this), &req.m_handler->m_requests[0]));
   return req;
 }
 
@@ -303,7 +303,7 @@ request communicator::isend(int dest, int tag) const
   request req;
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
                          (MPI_BOTTOM, 0, MPI_PACKED,
-                          dest, tag, MPI_Comm(*this), &req.m_requests[0]));
+                          dest, tag, MPI_Comm(*this), &req.m_handler->m_requests[0]));
   return req;
 }
 
@@ -323,7 +323,7 @@ communicator::irecv<const content>(int source, int tag,
   request req;
   BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                          (MPI_BOTTOM, 1, c.get_mpi_datatype(),
-                          source, tag, MPI_Comm(*this), &req.m_requests[0]));
+                          source, tag, MPI_Comm(*this), &req.m_handler->m_requests[0]));
   return req;
 }
 
@@ -332,7 +332,7 @@ request communicator::irecv(int source, int tag) const
   request req;
   BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                          (MPI_BOTTOM, 0, MPI_PACKED,
-                          source, tag, MPI_Comm(*this), &req.m_requests[0]));
+                          source, tag, MPI_Comm(*this), &req.m_handler->m_requests[0]));
   return req;
 }
 

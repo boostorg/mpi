@@ -8,17 +8,24 @@
 
 namespace boost { namespace mpi {
 
-/***************************************************************************
- * request                                                                 *
- ***************************************************************************/
-request::request()
-  : m_handler(0), m_data()
+request::handler::handler()
+  : m_handler(), m_data()
 {
   m_requests[0] = MPI_REQUEST_NULL;
   m_requests[1] = MPI_REQUEST_NULL;
 }
 
-status request::wait()
+request::handler::~handler()
+{
+}
+
+request::request()
+  : m_handler(new handler()) 
+{
+}
+
+status
+request::handler::wait()
 {
   if (m_handler) {
     // This request is a receive for a serialized type. Use the
@@ -58,7 +65,8 @@ status request::wait()
   }
 }
 
-optional<status> request::test()
+optional<status> 
+request::handler::test()
 {
   if (m_handler) {
     // This request is a receive for a serialized type. Use the
@@ -106,7 +114,8 @@ optional<status> request::test()
   }
 }
 
-void request::cancel()
+void
+request::handler::cancel()
 {
   if (m_handler) {
     m_handler(this, ra_cancel);

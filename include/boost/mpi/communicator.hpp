@@ -1424,7 +1424,7 @@ communicator::isend_impl(int dest, int tag, const T& value, mpl::true_) const
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
                          (const_cast<T*>(&value), 1, 
                           get_mpi_datatype<T>(value),
-                          dest, tag, MPI_Comm(*this), &req.m_requests[0]));
+                          dest, tag, MPI_Comm(*this), req.m_handler->m_requests));
   return req;
 }
 
@@ -1438,7 +1438,7 @@ communicator::isend_impl(int dest, int tag, const T& value, mpl::false_) const
   shared_ptr<packed_oarchive> archive(new packed_oarchive(*this));
   *archive << value;
   request result = isend(dest, tag, *archive);
-  result.m_data = archive;
+  result.m_handler->m_data = archive;
   return result;
 }
 
@@ -1459,7 +1459,7 @@ communicator::array_isend_impl(int dest, int tag, const T* values, int n,
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
                          (const_cast<T*>(values), n, 
                           get_mpi_datatype<T>(*values),
-                          dest, tag, MPI_Comm(*this), &req.m_requests[0]));
+                          dest, tag, MPI_Comm(*this), req.m_handler->m_requests));
   return req;
 }
 
@@ -1471,7 +1471,7 @@ communicator::array_isend_impl(int dest, int tag, const T* values, int n,
   shared_ptr<packed_oarchive> archive(new packed_oarchive(*this));
   *archive << n << boost::serialization::make_array(values, n);
   request result = isend(dest, tag, *archive);
-  result.m_data = archive;
+  result.m_handler->m_data = archive;
   return result;
 }
 
@@ -1573,7 +1573,7 @@ namespace detail {
 
 template<typename T>
 optional<status> 
-request::handle_serialized_irecv(request* self, request_action action)
+request::handle_serialized_irecv(request::handler* self, request_action action)
 {
   typedef detail::serialized_irecv_data<T> data_t;
   shared_ptr<data_t> data = static_pointer_cast<data_t>(self->m_data);
@@ -1632,7 +1632,7 @@ request::handle_serialized_irecv(request* self, request_action action)
 
 template<typename T>
 optional<status> 
-request::handle_serialized_array_irecv(request* self, request_action action)
+request::handle_serialized_array_irecv(request::handler* self, request_action action)
 {
   typedef detail::serialized_array_irecv_data<T> data_t;
   shared_ptr<data_t> data = static_pointer_cast<data_t>(self->m_data);
@@ -1699,7 +1699,7 @@ communicator::irecv_impl(int source, int tag, T& value, mpl::true_) const
   BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                          (const_cast<T*>(&value), 1, 
                           get_mpi_datatype<T>(value),
-                          source, tag, MPI_Comm(*this), &req.m_requests[0]));
+                          source, tag, MPI_Comm(*this), req.m_handler->m_requests));
   return req;
 }
 
@@ -1710,13 +1710,13 @@ communicator::irecv_impl(int source, int tag, T& value, mpl::false_) const
   typedef detail::serialized_irecv_data<T> data_t;
   shared_ptr<data_t> data(new data_t(*this, source, tag, value));
   request req;
-  req.m_data = data;
-  req.m_handler = request::handle_serialized_irecv<T>;
+  req.m_handler->m_data = data;
+  req.m_handler->m_handler = request::handle_serialized_irecv<T>;
 
   BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                          (&data->count, 1, 
                           get_mpi_datatype<std::size_t>(data->count),
-                          source, tag, MPI_Comm(*this), &req.m_requests[0]));
+                          source, tag, MPI_Comm(*this), req.m_handler->m_requests));
   
   return req;
 }
@@ -1737,7 +1737,7 @@ communicator::array_irecv_impl(int source, int tag, T* values, int n,
   BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                          (const_cast<T*>(values), n, 
                           get_mpi_datatype<T>(*values),
-                          source, tag, MPI_Comm(*this), &req.m_requests[0]));
+                          source, tag, MPI_Comm(*this), &req.m_handler->m_requests[0]));
   return req;
 }
 
@@ -1749,13 +1749,13 @@ communicator::array_irecv_impl(int source, int tag, T* values, int n,
   typedef detail::serialized_array_irecv_data<T> data_t;
   shared_ptr<data_t> data(new data_t(*this, source, tag, values, n));
   request req;
-  req.m_data = data;
-  req.m_handler = request::handle_serialized_array_irecv<T>;
+  req.m_handler->m_data = data;
+  req.m_handler->m_handler = request::handle_serialized_array_irecv<T>;
 
   BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                          (&data->count, 1, 
                           get_mpi_datatype<std::size_t>(data->count),
-                          source, tag, MPI_Comm(*this), &req.m_requests[0]));
+                          source, tag, MPI_Comm(*this), &req.m_handler->m_requests[0]));
 
   return req;
 }

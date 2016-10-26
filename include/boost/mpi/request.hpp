@@ -16,6 +16,7 @@
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/mpi/packed_iarchive.hpp>
+#include <boost/mpi/status.hpp>
 
 namespace boost { namespace mpi {
 
@@ -61,11 +62,11 @@ class BOOST_MPI_DECL request
    */
   void cancel();
 
-  bool trivial() const { return !m_handler && m_requests[1] == MPI_REQUEST_NULL; }
+  bool trivial() const;
   
  private:
   enum request_action { ra_wait, ra_test, ra_cancel };
-  typedef optional<status> (*handler_type)(request* self, 
+  typedef optional<status> (*handler_type)(request::handler* self, 
                                            request_action action);
 
   /**
@@ -75,7 +76,7 @@ class BOOST_MPI_DECL request
    */
   template<typename T>
   static optional<status> 
-  handle_serialized_irecv(request* self, request_action action);
+    handle_serialized_irecv(request::handler* self, request_action action);
 
   /**
    * INTERNAL ONLY
@@ -84,21 +85,53 @@ class BOOST_MPI_DECL request
    */
   template<typename T>
   static optional<status> 
-  handle_serialized_array_irecv(request* self, request_action action);
+    handle_serialized_array_irecv(request::handler* self, request_action action);
 
  public: // template friends are not portable
-
-  /// INTERNAL ONLY
-  MPI_Request m_requests[2];
-
-  /// INTERNAL ONLY
-  handler_type m_handler;
-
-  /// INTERNAL ONLY
-  shared_ptr<void> m_data;
-
+  shared_ptr<handler> m_handler;
   friend class communicator;
 };
+
+class request::handler {
+public:
+  handler();
+  virtual ~handler();
+  friend class communicator;
+  friend class request;
+
+  virtual status wait();
+  virtual optional<status> test();
+  virtual void cancel();
+  
+  bool trivial() const { return !m_handler && m_requests[1] == MPI_REQUEST_NULL; }
+  
+  MPI_Request m_requests[2];
+  handler_type m_handler;
+  shared_ptr<void> m_data;
+};
+
+inline bool
+request::trivial() const { 
+  return m_handler->trivial();
+}
+
+inline status
+request::wait() 
+{
+  return m_handler->wait();
+}
+
+inline optional<status> 
+request::test() 
+{
+  return m_handler->test();  
+}
+
+inline void 
+request::cancel()
+{
+  m_handler->cancel();
+}
 
 } } // end namespace boost::mpi
 
