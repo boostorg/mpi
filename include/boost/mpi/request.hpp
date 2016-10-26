@@ -68,7 +68,7 @@ class BOOST_MPI_DECL request
   void cancel();
 
   bool trivial() const;
-  
+
  public:
   shared_ptr<handler> m_handler;
   friend class communicator;
@@ -86,10 +86,14 @@ public:
   virtual void cancel();
   
   bool trivial() const { return m_simple && m_requests[1] == MPI_REQUEST_NULL; }
+
+  template<class Archive>
+  void preserve(shared_ptr<Archive>& archive) { m_archive = archive; }
   
   MPI_Request m_requests[2];
-  bool        m_simple;
-  shared_ptr<void> m_data;
+private:
+  shared_ptr<void> m_archive;
+  bool             m_simple;
 };
 
 inline bool

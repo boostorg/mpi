@@ -1438,7 +1438,7 @@ communicator::isend_impl(int dest, int tag, const T& value, mpl::false_) const
   shared_ptr<packed_oarchive> archive(new packed_oarchive(*this));
   *archive << value;
   request result = isend(dest, tag, *archive);
-  result.m_handler->m_data = archive;
+  result.m_handler->preserve(archive);
   return result;
 }
 
@@ -1471,7 +1471,7 @@ communicator::array_isend_impl(int dest, int tag, const T* values, int n,
   shared_ptr<packed_oarchive> archive(new packed_oarchive(*this));
   *archive << n << boost::serialization::make_array(values, n);
   request result = isend(dest, tag, *archive);
-  result.m_handler->m_data = archive;
+  result.m_handler->preserve(archive);
   return result;
 }
 
