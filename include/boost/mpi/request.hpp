@@ -35,9 +35,14 @@ class BOOST_MPI_DECL request
  public:
   class handler;
   /**
-   *  Constructs a NULL request.
+   *  Constructs a trivial request.
    */
   request();
+
+  /**
+   *  Constructs a less trivial request.
+   */
+  request(handler* h);
 
   /**
    *  Wait until the communication associated with this request has

@@ -24,6 +24,11 @@ request::request()
 {
 }
 
+request::request(handler* h) 
+  : m_handler(h) 
+{
+}
+
 status
 request::handler::wait()
 {
