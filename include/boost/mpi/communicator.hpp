@@ -1536,7 +1536,7 @@ namespace detail {
   public:
     serialized_irecv_handler(const communicator& comm, int source, int tag, 
                              T& value)
-      : handler(), serialized_irecv_data<T>(comm, source, tag, value) {}
+      : handler(false), serialized_irecv_data<T>(comm, source, tag, value) {}
    
     virtual status wait() 
     {
@@ -1646,7 +1646,7 @@ namespace detail {
     friend class communicator;
     serialized_array_irecv_handler(const communicator& comm, int source, int tag, 
                                    T* values, int n)
-      : handler(), serialized_array_irecv_data<T>(comm, source, tag, values, n) {}
+      : handler(false), serialized_array_irecv_data<T>(comm, source, tag, values, n) {}
  
     virtual status wait() 
     {
@@ -1705,34 +1705,6 @@ namespace detail {
   };
 }
 
-template<typename T>
-optional<status> 
-request::handle_serialized_irecv(request::handler* self, request_action action)
-{
-  if (action == ra_wait) {
-    return optional<status>(self->wait());
-  } else if (action == ra_test) {
-    return self->test();
-  } else {
-    self->cancel();
-    return optional<status>();
-  }
-}
-
-template<typename T>
-optional<status> 
-request::handle_serialized_array_irecv(request::handler* self, request_action action)
-{
-  if (action == ra_wait) {
-    return optional<status>(self->wait());
-  } else if (action == ra_test) {
-    return self->test();
-  } else {
-    self->cancel();
-    return optional<status>();
-  }
-}
-
 // We're receiving a type that has an associated MPI datatype, so we
 // map directly to that datatype.
 template<typename T>
@@ -1754,7 +1726,6 @@ communicator::irecv_impl(int source, int tag, T& value, mpl::false_) const
   typedef detail::serialized_irecv_handler<T> handler_t;
   handler_t* handler = new handler_t(*this, source, tag, value);
   request req(handler);
-  req.m_handler->m_handler = request::handle_serialized_irecv<T>;
 
   BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                          (&handler->count, 1, 
@@ -1792,7 +1763,6 @@ communicator::array_irecv_impl(int source, int tag, T* values, int n,
   typedef detail::serialized_array_irecv_handler<T> handler_t;
   handler_t* handler = new handler_t(*this, source, tag, values, n);
   request req(handler);
-  req.m_handler->m_handler = request::handle_serialized_array_irecv<T>;
 
   BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                          (&handler->count, 1, 

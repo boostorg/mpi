@@ -8,8 +8,8 @@
 
 namespace boost { namespace mpi {
 
-request::handler::handler()
-  : m_handler(), m_data()
+request::handler::handler(bool simple)
+  : m_simple(simple), m_data()
 {
   m_requests[0] = MPI_REQUEST_NULL;
   m_requests[1] = MPI_REQUEST_NULL;
@@ -20,7 +20,7 @@ request::handler::~handler()
 }
 
 request::request()
-  : m_handler(new handler()) 
+  : m_handler(new handler(true)) 
 {
 }
 

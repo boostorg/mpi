@@ -69,37 +69,14 @@ class BOOST_MPI_DECL request
 
   bool trivial() const;
   
- private:
-  enum request_action { ra_wait, ra_test, ra_cancel };
-  typedef optional<status> (*handler_type)(request::handler* self, 
-                                           request_action action);
-
-  /**
-   * INTERNAL ONLY
-   *
-   * Handles the non-blocking receive of a serialized value.
-   */
-  template<typename T>
-  static optional<status> 
-    handle_serialized_irecv(request::handler* self, request_action action);
-
-  /**
-   * INTERNAL ONLY
-   *
-   * Handles the non-blocking receive of an array of  serialized values.
-   */
-  template<typename T>
-  static optional<status> 
-    handle_serialized_array_irecv(request::handler* self, request_action action);
-
- public: // template friends are not portable
+ public:
   shared_ptr<handler> m_handler;
   friend class communicator;
 };
 
 class request::handler {
 public:
-  handler();
+  handler(bool simple);
   virtual ~handler();
   friend class communicator;
   friend class request;
@@ -108,10 +85,10 @@ public:
   virtual optional<status> test();
   virtual void cancel();
   
-  bool trivial() const { return !m_handler && m_requests[1] == MPI_REQUEST_NULL; }
+  bool trivial() const { return m_simple && m_requests[1] == MPI_REQUEST_NULL; }
   
   MPI_Request m_requests[2];
-  handler_type m_handler;
+  bool        m_simple;
   shared_ptr<void> m_data;
 };
 
