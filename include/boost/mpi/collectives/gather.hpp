@@ -65,8 +65,8 @@ gather_impl(const communicator& comm, const T* in_values, int n, T* out_values,
   for (int i = 0; i < n; ++i) {
     oa << in_values[i];
   }
-  bool on_root = comm.rank() == root;
-  std::vector<int> oasizes(on_root ? nproc : 0);
+  bool is_root = comm.rank() == root;
+  std::vector<int> oasizes(is_root ? nproc : 0);
   int oasize = oa.size();
   BOOST_MPI_CHECK_RESULT(MPI_Gather,
                          (&oasize, 1, MPI_INTEGER,
@@ -77,13 +77,13 @@ gather_impl(const communicator& comm, const T* in_values, int n, T* out_values,
   // Everything is contiguous (in the transmitted archive), so 
   // the offsets can be deduced from the collected sizes.
   std::vector<int> offsets;
-  if (on_root) sizes2offsets(oasizes, offsets);
-  packed_iarchive::buffer_type recv_buffer(on_root ? std::accumulate(oasizes.begin(), oasizes.end(), 0) : 0);
+  if (is_root) sizes2offsets(oasizes, offsets);
+  packed_iarchive::buffer_type recv_buffer(is_root ? std::accumulate(oasizes.begin(), oasizes.end(), 0) : 0);
   BOOST_MPI_CHECK_RESULT(MPI_Gatherv,
                          (const_cast<void*>(oa.address()), int(oa.size()), MPI_BYTE,
                           recv_buffer.data(), oasizes.data(), offsets.data(), MPI_BYTE, 
                           root, MPI_Comm(comm)));
-  if (on_root) {
+  if (is_root) {
     for (int src = 0; src < nproc; ++src) {
       // handle variadic case
       int nb = nslot ? nslot[src] : n;
