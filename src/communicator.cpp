@@ -276,7 +276,7 @@ communicator::isend<packed_oarchive>(int dest, int tag,
 {
   request req;
   detail::packed_archive_isend(MPI_Comm(*this), dest, tag, ar,
-                               &req.m_handler->m_requests[0] ,2);
+                               req.m_handler->m_requests, 2);
   return req;
 }
 

@@ -34,6 +34,7 @@ class BOOST_MPI_DECL request
 {
  public:
   class handler;
+  class archive_handler;
   /**
    *  Constructs a trivial request.
    */
@@ -94,6 +95,16 @@ public:
 private:
   shared_ptr<void> m_archive;
   bool             m_simple;
+};
+
+class request::archive_handler : public request::handler {
+public:
+  template<class Archive>
+  archive_handler(Archive& archive, MPI_Request* requests) 
+    : handler(true) {
+    m_archive = shared_ptr<Archive>(&archive);
+    std::copy(requests, requests + 2, m_requests);
+  }
 };
 
 inline bool
