@@ -32,6 +32,7 @@ class communicator;
 class BOOST_MPI_DECL request 
 {
  public:
+  class handler;
   /**
    *  Constructs a NULL request.
    */
@@ -60,6 +61,8 @@ class BOOST_MPI_DECL request
    */
   void cancel();
 
+  bool trivial() const { return !m_handler && m_requests[1] == MPI_REQUEST_NULL; }
+  
  private:
   enum request_action { ra_wait, ra_test, ra_cancel };
   typedef optional<status> (*handler_type)(request* self, 
