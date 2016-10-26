@@ -67,11 +67,7 @@ wait_any(ForwardIterator first, ForwardIterator last)
     // Check if this request (and all others before it) are "trivial"
     // requests, e.g., they can be represented with a single
     // MPI_Request.
-    all_trivial_requests = 
-      all_trivial_requests
-      && !current->m_handler 
-      && current->m_requests[1] == MPI_REQUEST_NULL;
-
+    if (!current->trivial()) all_trivial_requests = false;
     // Move to the next request.
     ++n;
     if (++current == last) {
@@ -201,10 +197,7 @@ wait_all(ForwardIterator first, ForwardIterator last, OutputIterator out)
           // Check if this request (and all others before it) are "trivial"
           // requests, e.g., they can be represented with a single
           // MPI_Request.
-          all_trivial_requests = 
-            all_trivial_requests
-            && !current->m_handler 
-            && current->m_requests[1] == MPI_REQUEST_NULL;          
+          if (!current->trivial()) all_trivial_requests = false;
         }
       }
     }
@@ -272,10 +265,7 @@ wait_all(ForwardIterator first, ForwardIterator last)
           // Check if this request (and all others before it) are "trivial"
           // requests, e.g., they can be represented with a single
           // MPI_Request.
-          all_trivial_requests = 
-            all_trivial_requests
-            && !current->m_handler 
-            && current->m_requests[1] == MPI_REQUEST_NULL;          
+          if (!current->trivial()) all_trivial_requests = false;
         }
       }
     }
@@ -340,9 +330,9 @@ test_all(ForwardIterator first, ForwardIterator last, OutputIterator out)
   for (; first != last; ++first) {
     // If we have a non-trivial request, then no requests can be
     // completed.
-    if (first->m_handler || first->m_requests[1] != MPI_REQUEST_NULL)
+    if (!first->trivial()) {
       return optional<OutputIterator>();
-
+    }
     requests.push_back(first->m_requests[0]);
   }
 
@@ -373,7 +363,7 @@ test_all(ForwardIterator first, ForwardIterator last)
   for (; first != last; ++first) {
     // If we have a non-trivial request, then no requests can be
     // completed.
-    if (first->m_handler || first->m_requests[1] != MPI_REQUEST_NULL)
+    if (!first->trivial())
       return false;
 
     requests.push_back(first->m_requests[0]);
@@ -459,11 +449,7 @@ wait_some(BidirectionalIterator first, BidirectionalIterator last,
     // Check if this request (and all others before it) are "trivial"
     // requests, e.g., they can be represented with a single
     // MPI_Request.
-    all_trivial_requests = 
-      all_trivial_requests
-      && !current->m_handler 
-      && current->m_requests[1] == MPI_REQUEST_NULL;
-
+    if (!current->trivial()) all_trivial_requests = false;
     // Move to the next request.
     ++n;
     if (++current == start_of_completed) {
@@ -575,10 +561,7 @@ wait_some(BidirectionalIterator first, BidirectionalIterator last)
     // Check if this request (and all others before it) are "trivial"
     // requests, e.g., they can be represented with a single
     // MPI_Request.
-    all_trivial_requests = 
-      all_trivial_requests
-      && !current->m_handler 
-      && current->m_requests[1] == MPI_REQUEST_NULL;
+    if (!current->trivial()) all_trivial_requests = false;
 
     // Move to the next request.
     ++n;
