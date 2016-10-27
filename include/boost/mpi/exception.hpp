@@ -45,6 +45,18 @@ class BOOST_MPI_DECL exception : public std::exception
    */
   exception(const char* routine, int result_code);
 
+  /**
+   * Build a new @c exception exception.
+   *
+   *   @param routine The MPI routine in which the error
+   *   occurred. This should be a pointer to a string constant: it
+   *   will not be copied.
+   *
+   *   @param result_code The result code returned from the MPI
+   *   routine that aborted with an error.
+   */
+  exception(std::string const& routine, int result_code);
+
   virtual ~exception() throw();
 
   /**
@@ -56,7 +68,7 @@ class BOOST_MPI_DECL exception : public std::exception
   }
 
   /** Retrieve the name of the MPI routine that reported the error. */
-  const char* routine() const { return routine_; }
+  const char* routine() const { return routine_.c_str(); }
 
   /**
    * @brief Retrieve the result code returned from the MPI routine
@@ -77,13 +89,15 @@ class BOOST_MPI_DECL exception : public std::exception
 
  protected:
   /// The MPI routine that triggered the error
-  const char* routine_;
+  std::string routine_;
 
   /// The failed result code reported by the MPI implementation.
   int result_code_;
 
   /// The formatted error message
   std::string message;
+ private:
+  void init();
 };
 
 /**
