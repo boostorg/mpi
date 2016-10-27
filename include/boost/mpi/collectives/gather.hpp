@@ -57,7 +57,6 @@ void
 gather_impl(const communicator& comm, const T* in_values, int n, T* out_values, 
             int const* nslot, int const* nskip, int root, mpl::false_)
 {
-  int tag = environment::collectives_tag();
   int nproc = comm.size();
   // first, gather all size, these size can be different for
   // each process

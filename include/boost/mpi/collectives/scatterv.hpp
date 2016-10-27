@@ -99,7 +99,7 @@ scatterv(const communicator& comm, const T* in_values,
          const std::vector<int>& sizes, const std::vector<int>& displs,
          T* out_values, int out_size, int root)
 {
-  scatterv_impl(comm, in_values, out_values, out_sizes, sizes.data(), displs.data(), 
+  scatterv_impl(comm, in_values, out_values, out_size, sizes.data(), displs.data(), 
                 root, is_mpi_datatype<T>());
 }
 
@@ -146,7 +146,7 @@ void
 scatterv(const communicator& comm, const T* in_values,
          T* out_values, int n, int root)
 {
-  detail::scatterv_impl(comm, in_values, out_values, out_sizes, sizes.data(), (it const*)0,
+  detail::scatterv_impl(comm, in_values, out_values, n, (int const*)0, (int const*)0,
                 root, is_mpi_datatype<T>());
 }
 
