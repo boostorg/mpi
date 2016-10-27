@@ -9,7 +9,7 @@
 namespace boost { namespace mpi {
 
 request::handler::handler(bool simple)
-  : m_simple(simple), m_archive()
+  : m_simple(simple)
 {
   m_requests[0] = MPI_REQUEST_NULL;
   m_requests[1] = MPI_REQUEST_NULL;

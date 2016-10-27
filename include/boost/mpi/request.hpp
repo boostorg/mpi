@@ -88,12 +88,8 @@ public:
   
   bool trivial() const { return m_simple && m_requests[1] == MPI_REQUEST_NULL; }
 
-  template<class Archive>
-  void preserve(shared_ptr<Archive>& archive) { m_archive = archive; }
-  
   MPI_Request m_requests[2];
 private:
-  shared_ptr<void> m_archive;
   bool             m_simple;
 };
 
@@ -101,15 +97,15 @@ class request::archive_handler : public request::handler {
 public:
   template<class Archive>
   archive_handler(Archive& archive, MPI_Request* requests) 
-    : handler(true) {
-    m_archive = shared_ptr<Archive>(&archive);
+    : handler(true), m_archive(shared_ptr<Archive>(&archive)) {
     std::copy(requests, requests + 2, m_requests);
   }
   
   virtual status wait();
   virtual optional<status> test();
   virtual void cancel();
-
+private:
+  shared_ptr<void> m_archive;
 };
 
 inline bool
