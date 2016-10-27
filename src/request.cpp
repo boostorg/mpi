@@ -48,7 +48,7 @@ request::handler::test()
   int flag = 0;
   BOOST_MPI_CHECK_RESULT(MPI_Test, 
                          (&m_requests[0], &flag, &result.m_status));
-  return flag != 0? optional<status>(result) : optional<status>();
+  return bool(flag) ? optional<status>(result) : optional<status>();
 }
 
 void
@@ -59,6 +59,29 @@ request::handler::cancel()
     BOOST_MPI_CHECK_RESULT(MPI_Cancel, (&m_requests[1]));
 }
 
+namespace detail {
+MPI_Status
+report_test_wait_error(std::string fname, int error_code, MPI_Status* stats, int n) {
+  MPI_Status res = stats[0];
+  if (error_code != MPI_SUCCESS) {
+    if (error_code == MPI_ERR_IN_STATUS) {
+      // some specific request went wrong, signal the first failed one.
+      for (int i = 0; i < n; ++i) {
+        int err = stats[i].MPI_ERROR;
+        if (err != MPI_SUCCESS && err != MPI_ERR_PENDING) {
+          res = stats[i];
+          boost::throw_exception(exception(fname, err));
+        }
+      }
+      boost::throw_exception(exception(fname + " -- intenal error", error_code));
+    }
+    // something else went wrong
+    boost::throw_exception(exception(fname, error_code));
+  }
+  return res;
+}
+}
+
 status
 request::archive_handler::wait() 
 {
@@ -66,30 +89,16 @@ request::archive_handler::wait()
     // This request could be a serialized datatype that has been
     // packed into a single message. Just wait on the one receive/send
     // and return the status to the user.
+    // This is very unlikely though.
     return this->handler::wait();
   } else {
     // This request is a send of a serialized type, broken into two
     // separate messages. Complete both sends at once.
     MPI_Status stats[2];
     int error_code = MPI_Waitall(2, m_requests, stats);
-    if (error_code == MPI_ERR_IN_STATUS) {
-      // Dig out which status structure has the error, and use that
-      // one when throwing the exception.
-      if (stats[0].MPI_ERROR == MPI_SUCCESS 
-          || stats[0].MPI_ERROR == MPI_ERR_PENDING)
-        boost::throw_exception(exception("MPI_Waitall", stats[1].MPI_ERROR));
-      else
-        boost::throw_exception(exception("MPI_Waitall", stats[0].MPI_ERROR));
-    } else if (error_code != MPI_SUCCESS) {
-      // There was an error somewhere in the MPI_Waitall call; throw
-      // an exception for it.
-      boost::throw_exception(exception("MPI_Waitall", error_code));
-    } 
-
-    // No errors. Returns the first status structure.
-    status result;
-    result.m_status = stats[0];
-    return result;
+    return status(error_code == MPI_SUCCESS
+                  ? stats[0]
+                  : detail::report_test_wait_error("MPI_Waitall", error_code, stats, 2));
   }
 }
 
@@ -100,6 +109,7 @@ request::archive_handler::test()
     // This request could be a serialized datatype that has been
     // packed into a single message. Just test the one receive/send
     // and return the status to the user if it has completed.
+    // This is very unlikely though.
     return this->handler::test();
   } else {
     // This request is a send of a serialized type, broken into two
@@ -107,29 +117,11 @@ request::archive_handler::test()
     MPI_Status stats[2];
     int flag = 0;
     int error_code = MPI_Testall(2, m_requests, &flag, stats);
-    if (error_code == MPI_ERR_IN_STATUS) {
-      // Dig out which status structure has the error, and use that
-      // one when throwing the exception.
-      if (stats[0].MPI_ERROR == MPI_SUCCESS 
-          || stats[0].MPI_ERROR == MPI_ERR_PENDING)
-        boost::throw_exception(exception("MPI_Testall", stats[1].MPI_ERROR));
-      else
-        boost::throw_exception(exception("MPI_Testall", stats[0].MPI_ERROR));
-    } else if (error_code != MPI_SUCCESS) {
-      // There was an error somewhere in the MPI_Testall call; throw
-      // an exception for it.
-      boost::throw_exception(exception("MPI_Testall", error_code));
-    }
-    
-    // No errors. Returns the second status structure if the send has
-    // completed.
-    if (flag != 0) {
-      status result;
-      result.m_status = stats[1];
-      return result;
-    } else {
-      return optional<status>();
-    }
+    return (bool(flag)
+            ? optional<status>(status(error_code == MPI_SUCCESS
+                                      ? stats[0]
+                                      : detail::report_test_wait_error("MPI_Testall", error_code, stats, 2)))
+            : optional<status>());
   }
 }
 
