@@ -34,7 +34,9 @@ class BOOST_MPI_DECL request
 {
  public:
   class handler;
+  class simple_handler;
   class archive_handler;
+  
   /**
    *  Constructs a trivial request.
    */
@@ -77,38 +79,57 @@ class BOOST_MPI_DECL request
 };
 
 class request::handler {
-public:
+protected:
   handler();
+public:
   virtual ~handler();
+  friend class communicator;
+  friend class request;
+
+  virtual status wait() = 0;
+  virtual optional<status> test() = 0;
+  virtual void cancel();
+
+  virtual bool null_requests() const;
+  virtual MPI_Request* requests() = 0;
+  MPI_Request const* requests() const;
+  MPI_Request& request(int i);
+  virtual int  nb_requests() const { return 1; }
+  virtual bool trivial() const = 0;
+};
+
+class request::simple_handler
+  : public handler
+{
+public:
+  simple_handler();
+  virtual ~simple_handler();
+  
   friend class communicator;
   friend class request;
 
   virtual status wait();
   virtual optional<status> test();
-  virtual void cancel();
+  // virtual void cancel() = inherit
 
-  virtual bool null_requests() const;
-  virtual MPI_Request* requests()    { return m_requests; }
-  MPI_Request const* requests() const { 
-    return const_cast<handler*>(this)->requests();
-  }
-  MPI_Request& request(int i) { 
-    assert(i>=0 && i<nb_requests());
-    return requests()[i];
-  }
+  virtual bool         null_requests() const;
+  virtual MPI_Request* requests()    { return &m_request; }
   virtual int          nb_requests() const { return 1; }
-  virtual bool trivial() const { return true; }
+  virtual bool         trivial() const { return true; }
   
-protected:
-  MPI_Request m_requests[2];
+private:
+  MPI_Request m_request;
 };
 
-class request::archive_handler : public request::handler {
+class request::archive_handler 
+  : public request::handler
+{
 public:
   template<class Archive>
-  archive_handler(Archive& archive, MPI_Request* requests) 
+  archive_handler(Archive& archive, 
+                  MPI_Request* size_and_worlload)
     : handler(), m_archive(shared_ptr<Archive>(&archive)) {
-    std::copy(requests, requests + 2, m_requests);
+    std::copy(size_and_worlload, size_and_worlload + 2, m_requests);
   }
   
   virtual status wait();
@@ -120,6 +141,7 @@ public:
   virtual bool trivial() const { return false; }
 
 private:
+  MPI_Request      m_requests[2];
   shared_ptr<void> m_archive;
 };
 
@@ -149,6 +171,19 @@ inline void
 request::cancel()
 {
   m_handler->cancel();
+}
+
+inline
+MPI_Request const*
+request::handler::requests() const { 
+  return const_cast<handler*>(this)->requests();
+}
+
+inline
+MPI_Request&
+request::handler::request(int i) {
+  assert(i>=0 && i<nb_requests());
+  return requests()[i];
 }
 
 } } // end namespace boost::mpi

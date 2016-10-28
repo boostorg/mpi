@@ -48,7 +48,7 @@ communicator::isend(int dest, int tag, const skeleton_proxy<T>& proxy) const
   packed_skeleton_oarchive& archive = *new packed_skeleton_oarchive(*this);
   archive << proxy.object;
   request req = isend(dest, tag, archive);
-  return request(new request::archive_handler(archive, req.m_handler->m_requests));
+  return request(new request::archive_handler(archive, req.m_handler->requests()));
 }
 
 namespace detail {

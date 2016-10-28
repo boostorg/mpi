@@ -10,8 +10,6 @@ namespace boost { namespace mpi {
 
 request::handler::handler()
 {
-  m_requests[0] = MPI_REQUEST_NULL;
-  m_requests[1] = MPI_REQUEST_NULL;
 }
 
 request::handler::~handler()
@@ -19,7 +17,7 @@ request::handler::~handler()
 }
 
 request::request()
-  : m_handler(new handler()) 
+  : m_handler(new simple_handler()) 
 {
 }
 
@@ -28,25 +26,31 @@ request::request(handler* h)
 {
 }
 
-status
-request::handler::wait()
+request::simple_handler::simple_handler() 
 {
-  assert(m_requests[1] == MPI_REQUEST_NULL);
+}
+
+request::simple_handler::~simple_handler() 
+{
+}
+
+status
+request::simple_handler::wait()
+{
   // This request is either a send or a receive for a type with an
   // associated MPI datatype
   status result;
-  BOOST_MPI_CHECK_RESULT(MPI_Wait, (&m_requests[0], &result.m_status));
+  BOOST_MPI_CHECK_RESULT(MPI_Wait, (&m_request, &result.m_status));
   return result;
 }
 
 optional<status> 
-request::handler::test()
+request::simple_handler::test()
 {
-  assert(m_requests[1] == MPI_REQUEST_NULL);
   status result;
   int flag = 0;
   BOOST_MPI_CHECK_RESULT(MPI_Test, 
-                         (&m_requests[0], &flag, &result.m_status));
+                         (&m_request, &flag, &result.m_status));
   return bool(flag) ? optional<status>(result) : optional<status>();
 }
 
@@ -73,6 +77,12 @@ request::handler::null_requests() const
     }
   }
   return true;
+}
+
+bool
+request::simple_handler::null_requests() const
+{
+  return m_request == MPI_REQUEST_NULL;
 }
 
 namespace detail {
@@ -102,46 +112,30 @@ report_test_wait_error(std::string fname, int error_code, MPI_Status* stats, int
 status
 request::archive_handler::wait() 
 {
-  if (m_requests[1] == MPI_REQUEST_NULL) {
-    // This request could be a serialized datatype that has been
-    // packed into a single message. Just wait on the one receive/send
-    // and return the status to the user.
-    // This is very unlikely though.
-    return this->handler::wait();
-  } else {
-    // This request is a send of a serialized type, broken into two
-    // separate messages. Complete both sends at once.
-    MPI_Status stats[2];
-    int error_code = MPI_Waitall(2, m_requests, stats);
-    return status(error_code == MPI_SUCCESS
-                  ? stats[0]
-                  // likely to throw
-                  : detail::report_test_wait_error("MPI_Waitall", error_code, stats, 2));
-  }
+  // This request is a send of a serialized type, broken into two
+  // separate messages. Complete both sends at once.
+  MPI_Status stats[2];
+  int error_code = MPI_Waitall(2, m_requests, stats);
+  return status(error_code == MPI_SUCCESS
+                ? stats[0]
+                // likely to throw
+                : detail::report_test_wait_error("MPI_Waitall", error_code, stats, 2));
 }
 
 optional<status>
 request::archive_handler::test()
 { 
-  if (m_requests[1] == MPI_REQUEST_NULL) {
-    // This request could be a serialized datatype that has been
-    // packed into a single message. Just test the one receive/send
-    // and return the status to the user if it has completed.
-    // This is very unlikely though.
-    return this->handler::test();
-  } else {
-    // This request is a send of a serialized type, broken into two
-    // separate messages. We only get a result if both complete.
-    MPI_Status stats[2];
-    int flag = 0;
-    int error_code = MPI_Testall(2, m_requests, &flag, stats);
-    return (bool(flag)
-            ? optional<status>(status(error_code == MPI_SUCCESS
-                                      ? stats[0]
-                                      // likely to throw:
-                                      : detail::report_test_wait_error("MPI_Testall", error_code, stats, 2)))
-            : optional<status>());
-  }
+  // This request is a send of a serialized type, broken into two
+  // separate messages. We only get a result if both complete.
+  MPI_Status stats[2];
+  int flag = 0;
+  int error_code = MPI_Testall(2, m_requests, &flag, stats);
+  return (bool(flag)
+          ? optional<status>(status(error_code == MPI_SUCCESS
+                                    ? stats[0]
+                                    // likely to throw:
+                                    : detail::report_test_wait_error("MPI_Testall", error_code, stats, 2)))
+          : optional<status>());
 }
 
 void
