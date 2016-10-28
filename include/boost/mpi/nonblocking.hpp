@@ -43,79 +43,19 @@ namespace boost { namespace mpi {
  *  the completed operation and the iterator referencing the completed
  *  request.
  */
+
+std::pair<status, std::vector<request>::iterator>
+wait_any(std::vector<request>::iterator begin,
+         std::vector<request>::iterator end);
+
 template<typename ForwardIterator>
 std::pair<status, ForwardIterator> 
-wait_any(ForwardIterator first, ForwardIterator last)
+wait_any(ForwardIterator begin, ForwardIterator end)
 {
-  using std::advance;
-
-  BOOST_ASSERT(first != last);
-  
-  typedef typename std::iterator_traits<ForwardIterator>::difference_type
-    difference_type;
-
-  bool all_trivial_requests = true;
-  difference_type n = 0;
-  ForwardIterator current = first;
-  while (true) {
-    // Trivial request are processed below.
-    if (!current->trivial()) {
-      // Skip if already completed
-      if (!current->null_requests()) {
-        optional<status> result = current->test();
-        // completed:
-        if (result) {
-          return std::make_pair(*result, current);
-        } else {
-          // some non trivial works is left to do
-          all_trivial_requests = false;
-        }
-      }
-    }
-    // Move to the next request.
-    ++n;
-    ++current;
-    // Check if this request (and all others before it) are "trivial"
-    // requests, e.g., they can be represented with a single
-    // MPI_Request.
-    if (current == last) {
-      // We have reached the end of the list. If all requests thus far
-      // have been trivial, we can call MPI_Waitany directly, because
-      // it may be more efficient than our busy-wait semantics.
-      if (all_trivial_requests) {
-        std::vector<MPI_Request> requests;
-        requests.reserve(n);
-        for (current = first; current != last; ++current)
-          requests.push_back(*current->m_handler->requests());
-
-        // Let MPI wait until one of these operations completes.
-        int index;
-        status stat;
-        BOOST_MPI_CHECK_RESULT(MPI_Waitany, 
-                               (n, &requests[0], &index, &stat.m_status));
-
-        // We don't have a notion of empty requests or status objects,
-        // so this is an error.
-        if (index == MPI_UNDEFINED)
-          boost::throw_exception(exception("MPI_Waitany", MPI_ERR_REQUEST));
-
-        // Find the iterator corresponding to the completed request.
-        current = first;
-        advance(current, index);
-        *current->m_handler->requests() = requests[index];
-        return std::make_pair(stat, current);
-      }
-
-      // There are some nontrivial requests, so we must continue our
-      // busy waiting loop.
-      n = 0;
-      current = first;
-      all_trivial_requests = true;
-    }
-  }
-
-  // We cannot ever get here
-  BOOST_ASSERT(false);
+  std::vector<requests> requests(begin, end);
+  std::pair<status, std::vector<request>::iterator> result = ::boost::mpi::wait_any(requests.begin(), requests.end());
+  std::advance(begin, result.second - requests.begin());
+  return std::make_pair(result.first, begin);
 }
 
 /** 
