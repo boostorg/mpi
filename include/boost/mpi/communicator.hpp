@@ -1530,11 +1530,14 @@ namespace detail {
   };
 
   template<typename T>
-  class serialized_irecv_handler : public request::handler, public serialized_irecv_data<T> {
+  class serialized_irecv_handler 
+    : public request::handler,
+      public serialized_irecv_data<T> 
+  {
   public:
     serialized_irecv_handler(const communicator& comm, int source, int tag, 
                              T& value)
-      : handler(false), serialized_irecv_data<T>(comm, source, tag, value) {}
+      : handler(), serialized_irecv_data<T>(comm, source, tag, value) {}
    
     virtual status wait() 
     {
@@ -1588,7 +1591,14 @@ namespace detail {
       } else 
         return optional<status>();
     }
-    virtual void cancel() {}
+    virtual void cancel() {
+      this->handler::cancel();
+    }
+
+    virtual MPI_Request* requests()    { return m_requests; }
+    virtual int          nb_requests() const { return 2; }
+    virtual bool trivial() const { return false; }
+
   };
 
   /**
@@ -1639,12 +1649,14 @@ namespace detail {
 
   template<typename T>
   class serialized_array_irecv_handler 
-    : public request::handler, public serialized_array_irecv_data<T> {
+    : public request::handler,
+      public serialized_array_irecv_data<T> 
+  {
   public:
     friend class communicator;
     serialized_array_irecv_handler(const communicator& comm, int source, int tag, 
                                    T* values, int n)
-      : handler(false), serialized_array_irecv_data<T>(comm, source, tag, values, n) {}
+      : handler(), serialized_array_irecv_data<T>(comm, source, tag, values, n) {}
  
     virtual status wait() 
     {
@@ -1699,7 +1711,14 @@ namespace detail {
         return optional<status>();      
     }
     
-    virtual void cancel() {}
+    virtual void cancel() {
+      this->handler::cancel();
+    }
+    
+    virtual MPI_Request* requests()    { return m_requests; }
+    virtual int          nb_requests() const { return 2; }
+    virtual bool trivial() const { return false; }
+    
   };
 }
 
@@ -1749,7 +1768,7 @@ communicator::array_irecv_impl(int source, int tag, T* values, int n,
   BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                          (const_cast<T*>(values), n, 
                           get_mpi_datatype<T>(*values),
-                          source, tag, MPI_Comm(*this), &req.m_handler->m_requests[0]));
+                          source, tag, MPI_Comm(*this), &req.m_handler->request(0)));
   return req;
 }
 

@@ -68,7 +68,8 @@ class BOOST_MPI_DECL request
    */
   void cancel();
 
-  bool trivial() const;
+  bool trivial()       const;
+  bool null_requests() const;
 
  public:
   shared_ptr<handler> m_handler;
@@ -77,7 +78,7 @@ class BOOST_MPI_DECL request
 
 class request::handler {
 public:
-  handler(bool simple);
+  handler();
   virtual ~handler();
   friend class communicator;
   friend class request;
@@ -85,25 +86,39 @@ public:
   virtual status wait();
   virtual optional<status> test();
   virtual void cancel();
-  
-  bool trivial() const { return m_simple && m_requests[1] == MPI_REQUEST_NULL; }
 
+  virtual bool null_requests() const;
+  virtual MPI_Request* requests()    { return m_requests; }
+  MPI_Request const* requests() const { 
+    return const_cast<handler*>(this)->requests();
+  }
+  MPI_Request& request(int i) { 
+    assert(i>=0 && i<nb_requests());
+    return requests()[i];
+  }
+  virtual int          nb_requests() const { return 1; }
+  virtual bool trivial() const { return true; }
+  
+protected:
   MPI_Request m_requests[2];
-private:
-  bool             m_simple;
 };
 
 class request::archive_handler : public request::handler {
 public:
   template<class Archive>
   archive_handler(Archive& archive, MPI_Request* requests) 
-    : handler(true), m_archive(shared_ptr<Archive>(&archive)) {
+    : handler(), m_archive(shared_ptr<Archive>(&archive)) {
     std::copy(requests, requests + 2, m_requests);
   }
   
   virtual status wait();
   virtual optional<status> test();
   virtual void cancel();
+
+  virtual MPI_Request* requests()    { return m_requests; }
+  virtual int          nb_requests() const { return 2; }
+  virtual bool trivial() const { return false; }
+
 private:
   shared_ptr<void> m_archive;
 };
@@ -111,6 +126,11 @@ private:
 inline bool
 request::trivial() const { 
   return m_handler->trivial();
+}
+
+inline bool
+request::null_requests() const {
+  return m_handler->null_requests();
 }
 
 inline status

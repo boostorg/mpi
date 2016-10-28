@@ -8,8 +8,7 @@
 
 namespace boost { namespace mpi {
 
-request::handler::handler(bool simple)
-  : m_simple(simple)
+request::handler::handler()
 {
   m_requests[0] = MPI_REQUEST_NULL;
   m_requests[1] = MPI_REQUEST_NULL;
@@ -20,7 +19,7 @@ request::handler::~handler()
 }
 
 request::request()
-  : m_handler(new handler(true)) 
+  : m_handler(new handler()) 
 {
 }
 
@@ -54,9 +53,26 @@ request::handler::test()
 void
 request::handler::cancel()
 {
-  BOOST_MPI_CHECK_RESULT(MPI_Cancel, (&m_requests[0]));
-  if (m_requests[1] != MPI_REQUEST_NULL)
-    BOOST_MPI_CHECK_RESULT(MPI_Cancel, (&m_requests[1]));
+  int nreq = nb_requests();
+  MPI_Request* first = requests();
+  for (MPI_Request* r = first; r < first + nreq; ++r) {
+    if (*r != MPI_REQUEST_NULL) {
+      BOOST_MPI_CHECK_RESULT(MPI_Cancel, (r) );  
+    }
+  }    
+}
+
+bool
+request::handler::null_requests() const
+{
+  int nreq = nb_requests();
+  MPI_Request const* first = requests();
+  for (MPI_Request const* r = first; r < first + nreq; ++r) {
+    if (*r != MPI_REQUEST_NULL) {
+      return false;
+    }
+  }
+  return true;
 }
 
 namespace detail {
@@ -68,6 +84,7 @@ report_test_wait_error(std::string fname, int error_code, MPI_Status* stats, int
       // some specific request went wrong, signal the first failed one.
       for (int i = 0; i < n; ++i) {
         int err = stats[i].MPI_ERROR;
+        // MPI_ERR_PENDING can only appear on Wait
         if (err != MPI_SUCCESS && err != MPI_ERR_PENDING) {
           res = stats[i];
           boost::throw_exception(exception(fname, err));
@@ -98,6 +115,7 @@ request::archive_handler::wait()
     int error_code = MPI_Waitall(2, m_requests, stats);
     return status(error_code == MPI_SUCCESS
                   ? stats[0]
+                  // likely to throw
                   : detail::report_test_wait_error("MPI_Waitall", error_code, stats, 2));
   }
 }
@@ -120,6 +138,7 @@ request::archive_handler::test()
     return (bool(flag)
             ? optional<status>(status(error_code == MPI_SUCCESS
                                       ? stats[0]
+                                      // likely to throw:
                                       : detail::report_test_wait_error("MPI_Testall", error_code, stats, 2)))
             : optional<status>());
   }
