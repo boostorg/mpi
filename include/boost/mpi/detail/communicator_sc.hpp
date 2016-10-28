@@ -45,13 +45,10 @@ template<typename T>
 request
 communicator::isend(int dest, int tag, const skeleton_proxy<T>& proxy) const
 {
-  shared_ptr<packed_skeleton_oarchive> 
-    archive(new packed_skeleton_oarchive(*this));
-
-  *archive << proxy.object;
-  request result = isend(dest, tag, *archive);
-  result.m_data = archive;
-  return result;
+  packed_skeleton_oarchive& archive = *new packed_skeleton_oarchive(*this);
+  archive << proxy.object;
+  request req = isend(dest, tag, archive);
+  return request(new request::archive_handler(archive, req.m_handler->requests()));
 }
 
 namespace detail {

@@ -43,77 +43,19 @@ namespace boost { namespace mpi {
  *  the completed operation and the iterator referencing the completed
  *  request.
  */
+
+std::pair<status, std::vector<request>::iterator>
+wait_any(std::vector<request>::iterator begin,
+         std::vector<request>::iterator end);
+
 template<typename ForwardIterator>
 std::pair<status, ForwardIterator> 
-wait_any(ForwardIterator first, ForwardIterator last)
+wait_any(ForwardIterator begin, ForwardIterator end)
 {
-  using std::advance;
-
-  BOOST_ASSERT(first != last);
-  
-  typedef typename std::iterator_traits<ForwardIterator>::difference_type
-    difference_type;
-
-  bool all_trivial_requests = true;
-  difference_type n = 0;
-  ForwardIterator current = first;
-  while (true) {
-    // Check if we have found a completed request. If so, return it.
-    if (current->m_requests[0] != MPI_REQUEST_NULL &&
-        (current->m_requests[1] != MPI_REQUEST_NULL ||
-         current->m_handler)) {
-      if (optional<status> result = current->test())
-        return std::make_pair(*result, current);
-    }
-
-    // Check if this request (and all others before it) are "trivial"
-    // requests, e.g., they can be represented with a single
-    // MPI_Request.
-    all_trivial_requests = 
-      all_trivial_requests
-      && !current->m_handler 
-      && current->m_requests[1] == MPI_REQUEST_NULL;
-
-    // Move to the next request.
-    ++n;
-    if (++current == last) {
-      // We have reached the end of the list. If all requests thus far
-      // have been trivial, we can call MPI_Waitany directly, because
-      // it may be more efficient than our busy-wait semantics.
-      if (all_trivial_requests) {
-        std::vector<MPI_Request> requests;
-        requests.reserve(n);
-        for (current = first; current != last; ++current)
-          requests.push_back(current->m_requests[0]);
-
-        // Let MPI wait until one of these operations completes.
-        int index;
-        status stat;
-        BOOST_MPI_CHECK_RESULT(MPI_Waitany, 
-                               (n, &requests[0], &index, &stat.m_status));
-
-        // We don't have a notion of empty requests or status objects,
-        // so this is an error.
-        if (index == MPI_UNDEFINED)
-          boost::throw_exception(exception("MPI_Waitany", MPI_ERR_REQUEST));
-
-        // Find the iterator corresponding to the completed request.
-        current = first;
-        advance(current, index);
-        current->m_requests[0] = requests[index];
-        return std::make_pair(stat, current);
-      }
-
-      // There are some nontrivial requests, so we must continue our
-      // busy waiting loop.
-      n = 0;
-      current = first;
-      all_trivial_requests = true;
-    }
-  }
-
-  // We cannot ever get here
-  BOOST_ASSERT(false);
+  std::vector<requests> requests(begin, end);
+  std::pair<status, std::vector<request>::iterator> result = ::boost::mpi::wait_any(requests.begin(), requests.end());
+  std::advance(begin, result.second - requests.begin());
+  return std::make_pair(result.first, begin);
 }
 
 /** 
@@ -203,10 +145,7 @@ wait_all(ForwardIterator first, ForwardIterator last, OutputIterator out)
           // Check if this request (and all others before it) are "trivial"
           // requests, e.g., they can be represented with a single
           // MPI_Request.
-          all_trivial_requests = 
-            all_trivial_requests
-            && !current->m_handler 
-            && current->m_requests[1] == MPI_REQUEST_NULL;          
+          if (!current->trivial()) all_trivial_requests = false;
         }
       }
     }
@@ -219,7 +158,7 @@ wait_all(ForwardIterator first, ForwardIterator last, OutputIterator out)
       std::vector<MPI_Request> requests;
       requests.reserve(num_outstanding_requests);
       for (ForwardIterator current = first; current != last; ++current)
-        requests.push_back(current->m_requests[0]);
+        requests.push_back(*(current->m_handler->requests()));
 
       // Let MPI wait until all of these operations completes.
       std::vector<MPI_Status> stats(num_outstanding_requests);
@@ -274,10 +213,7 @@ wait_all(ForwardIterator first, ForwardIterator last)
           // Check if this request (and all others before it) are "trivial"
           // requests, e.g., they can be represented with a single
           // MPI_Request.
-          all_trivial_requests = 
-            all_trivial_requests
-            && !current->m_handler 
-            && current->m_requests[1] == MPI_REQUEST_NULL;          
+          if (!current->trivial()) all_trivial_requests = false;
         }
       }
     }
@@ -290,7 +226,7 @@ wait_all(ForwardIterator first, ForwardIterator last)
       std::vector<MPI_Request> requests;
       requests.reserve(num_outstanding_requests);
       for (ForwardIterator current = first; current != last; ++current)
-        requests.push_back(current->m_requests[0]);
+        requests.push_back(current->m_handler->request(0));
 
       // Let MPI wait until all of these operations completes.
       BOOST_MPI_CHECK_RESULT(MPI_Waitall, 
@@ -342,10 +278,10 @@ test_all(ForwardIterator first, ForwardIterator last, OutputIterator out)
   for (; first != last; ++first) {
     // If we have a non-trivial request, then no requests can be
     // completed.
-    if (first->m_handler || first->m_requests[1] != MPI_REQUEST_NULL)
+    if (!first->trivial()) {
       return optional<OutputIterator>();
-
-    requests.push_back(first->m_requests[0]);
+    }
+    requests.push_back(first->m_handler->request(0));
   }
 
   int flag = 0;
@@ -375,10 +311,10 @@ test_all(ForwardIterator first, ForwardIterator last)
   for (; first != last; ++first) {
     // If we have a non-trivial request, then no requests can be
     // completed.
-    if (first->m_handler || first->m_requests[1] != MPI_REQUEST_NULL)
+    if (!first->trivial())
       return false;
 
-    requests.push_back(first->m_requests[0]);
+    requests.push_back(first->m_handler->request(0));
   }
 
   int flag = 0;
@@ -461,11 +397,7 @@ wait_some(BidirectionalIterator first, BidirectionalIterator last,
     // Check if this request (and all others before it) are "trivial"
     // requests, e.g., they can be represented with a single
     // MPI_Request.
-    all_trivial_requests = 
-      all_trivial_requests
-      && !current->m_handler 
-      && current->m_requests[1] == MPI_REQUEST_NULL;
-
+    if (!current->trivial()) all_trivial_requests = false;
     // Move to the next request.
     ++n;
     if (++current == start_of_completed) {
@@ -486,7 +418,7 @@ wait_some(BidirectionalIterator first, BidirectionalIterator last,
         std::vector<MPI_Status> stats(n);
         requests.reserve(n);
         for (current = first; current != last; ++current)
-          requests.push_back(current->m_requests[0]);
+          requests.push_back(current->m_handler->request(0));
 
         // Let MPI wait until some of these operations complete.
         int num_completed;
@@ -512,7 +444,7 @@ wait_some(BidirectionalIterator first, BidirectionalIterator last,
 
           // Finish up the request and swap it into the "completed
           // requests" partition.
-          current->m_requests[0] = requests[indices[index]];
+          current->m_handler->request(0) = requests[indices[index]];
           --start_of_completed;
           iter_swap(current, start_of_completed);
         }
@@ -577,10 +509,7 @@ wait_some(BidirectionalIterator first, BidirectionalIterator last)
     // Check if this request (and all others before it) are "trivial"
     // requests, e.g., they can be represented with a single
     // MPI_Request.
-    all_trivial_requests = 
-      all_trivial_requests
-      && !current->m_handler 
-      && current->m_requests[1] == MPI_REQUEST_NULL;
+    if (!current->trivial()) all_trivial_requests = false;
 
     // Move to the next request.
     ++n;
@@ -597,7 +526,7 @@ wait_some(BidirectionalIterator first, BidirectionalIterator last)
         std::vector<int> indices(n);
         requests.reserve(n);
         for (current = first; current != last; ++current)
-          requests.push_back(current->m_requests[0]);
+          requests.push_back(current->m_handler->request(0));
 
         // Let MPI wait until some of these operations complete.
         int num_completed;
@@ -618,7 +547,7 @@ wait_some(BidirectionalIterator first, BidirectionalIterator last)
 
           // Finish up the request and swap it into the "completed
           // requests" partition.
-          current->m_requests[0] = requests[indices[index]];
+          current->m_handler->request(0) = requests[indices[index]];
           --start_of_completed;
           iter_swap(current, start_of_completed);
         }

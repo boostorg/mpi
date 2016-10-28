@@ -16,6 +16,7 @@
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/mpi/packed_iarchive.hpp>
+#include <boost/mpi/status.hpp>
 
 namespace boost { namespace mpi {
 
@@ -32,10 +33,19 @@ class communicator;
 class BOOST_MPI_DECL request 
 {
  public:
+  class handler;
+  class simple_handler;
+  class archive_handler;
+  
   /**
-   *  Constructs a NULL request.
+   *  Constructs a trivial request.
    */
   request();
+
+  /**
+   *  Constructs a less trivial request.
+   */
+  request(handler* h);
 
   /**
    *  Wait until the communication associated with this request has
@@ -60,42 +70,121 @@ class BOOST_MPI_DECL request
    */
   void cancel();
 
- private:
-  enum request_action { ra_wait, ra_test, ra_cancel };
-  typedef optional<status> (*handler_type)(request* self, 
-                                           request_action action);
+  bool trivial()       const;
+  bool null_requests() const;
 
-  /**
-   * INTERNAL ONLY
-   *
-   * Handles the non-blocking receive of a serialized value.
-   */
-  template<typename T>
-  static optional<status> 
-  handle_serialized_irecv(request* self, request_action action);
-
-  /**
-   * INTERNAL ONLY
-   *
-   * Handles the non-blocking receive of an array of  serialized values.
-   */
-  template<typename T>
-  static optional<status> 
-  handle_serialized_array_irecv(request* self, request_action action);
-
- public: // template friends are not portable
-
-  /// INTERNAL ONLY
-  MPI_Request m_requests[2];
-
-  /// INTERNAL ONLY
-  handler_type m_handler;
-
-  /// INTERNAL ONLY
-  shared_ptr<void> m_data;
-
+ public:
+  shared_ptr<handler> m_handler;
   friend class communicator;
 };
+
+class request::handler {
+protected:
+  handler();
+public:
+  virtual ~handler();
+  friend class communicator;
+  friend class request;
+
+  virtual status wait() = 0;
+  virtual optional<status> test() = 0;
+  virtual void cancel();
+
+  virtual bool null_requests() const;
+  virtual MPI_Request* requests() = 0;
+  MPI_Request const* requests() const;
+  MPI_Request& request(int i);
+  virtual int  nb_requests() const { return 1; }
+  virtual bool trivial() const = 0;
+};
+
+class request::simple_handler
+  : public handler
+{
+public:
+  simple_handler();
+  virtual ~simple_handler();
+  
+  friend class communicator;
+  friend class request;
+
+  virtual status wait();
+  virtual optional<status> test();
+  // virtual void cancel() = inherit
+
+  virtual bool         null_requests() const;
+  virtual MPI_Request* requests()    { return &m_request; }
+  virtual int          nb_requests() const { return 1; }
+  virtual bool         trivial() const { return true; }
+  
+private:
+  MPI_Request m_request;
+};
+
+class request::archive_handler 
+  : public request::handler
+{
+public:
+  template<class Archive>
+  archive_handler(Archive& archive, 
+                  MPI_Request* size_and_worlload)
+    : handler(), m_archive(shared_ptr<Archive>(&archive)) {
+    std::copy(size_and_worlload, size_and_worlload + 2, m_requests);
+  }
+  
+  virtual status wait();
+  virtual optional<status> test();
+  virtual void cancel();
+
+  virtual MPI_Request* requests()    { return m_requests; }
+  virtual int          nb_requests() const { return 2; }
+  virtual bool trivial() const { return false; }
+
+private:
+  MPI_Request      m_requests[2];
+  shared_ptr<void> m_archive;
+};
+
+inline bool
+request::trivial() const { 
+  return m_handler->trivial();
+}
+
+inline bool
+request::null_requests() const {
+  return m_handler->null_requests();
+}
+
+inline status
+request::wait() 
+{
+  return m_handler->wait();
+}
+
+inline optional<status> 
+request::test() 
+{
+  return m_handler->test();  
+}
+
+inline void 
+request::cancel()
+{
+  m_handler->cancel();
+}
+
+inline
+MPI_Request const*
+request::handler::requests() const { 
+  return const_cast<handler*>(this)->requests();
+}
+
+inline
+MPI_Request&
+request::handler::request(int i) {
+  assert(i>=0 && i<nb_requests());
+  return requests()[i];
+}
 
 } } // end namespace boost::mpi
 

@@ -10,18 +10,30 @@
 
 namespace boost { namespace mpi {
 
-exception::exception(const char* routine, int result_code)
-  : routine_(routine), result_code_(result_code)
+void
+exception::init() 
 {
   // Query the MPI implementation for its reason for failure
   char buffer[MPI_MAX_ERROR_STRING];
   int len;
-  MPI_Error_string(result_code, buffer, &len);
+  MPI_Error_string(result_code_, buffer, &len);
 
   // Construct the complete error message
   message.append(routine_);
   message.append(": ");
   message.append(buffer, len);
+}
+
+exception::exception(const char* routine, int result_code)
+  : routine_(routine), result_code_(result_code)
+{
+  init();
+}
+
+exception::exception(std::string const& routine, int result_code)
+  : routine_(routine), result_code_(result_code)
+{
+  init();
 }
 
 exception::~exception() throw() { }

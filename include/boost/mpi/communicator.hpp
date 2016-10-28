@@ -1424,7 +1424,7 @@ communicator::isend_impl(int dest, int tag, const T& value, mpl::true_) const
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
                          (const_cast<T*>(&value), 1, 
                           get_mpi_datatype<T>(value),
-                          dest, tag, MPI_Comm(*this), &req.m_requests[0]));
+                          dest, tag, MPI_Comm(*this), &req.m_handler->request(0)));
   return req;
 }
 
@@ -1435,11 +1435,10 @@ template<typename T>
 request
 communicator::isend_impl(int dest, int tag, const T& value, mpl::false_) const
 {
-  shared_ptr<packed_oarchive> archive(new packed_oarchive(*this));
-  *archive << value;
-  request result = isend(dest, tag, *archive);
-  result.m_data = archive;
-  return result;
+  packed_oarchive& archive = *new packed_oarchive(*this);
+  archive << value;
+  request req = isend(dest, tag, archive);
+  return request(new request::archive_handler(archive, req.m_handler->requests()));
 }
 
 // Single-element receive may either send the element directly or
@@ -1459,7 +1458,7 @@ communicator::array_isend_impl(int dest, int tag, const T* values, int n,
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
                          (const_cast<T*>(values), n, 
                           get_mpi_datatype<T>(*values),
-                          dest, tag, MPI_Comm(*this), &req.m_requests[0]));
+                          dest, tag, MPI_Comm(*this), &req.m_handler->request(0)));
   return req;
 }
 
@@ -1468,11 +1467,10 @@ request
 communicator::array_isend_impl(int dest, int tag, const T* values, int n, 
                                mpl::false_) const
 {
-  shared_ptr<packed_oarchive> archive(new packed_oarchive(*this));
-  *archive << n << boost::serialization::make_array(values, n);
-  request result = isend(dest, tag, *archive);
-  result.m_data = archive;
-  return result;
+  packed_oarchive& archive = *new packed_oarchive(*this);
+  archive << n << boost::serialization::make_array(values, n);
+  request req = isend(dest, tag, archive);
+  return request(new request::archive_handler(archive, req.m_handler->requests()));
 }
 
 
@@ -1489,14 +1487,16 @@ namespace detail {
    * the receipt of serialized data via a request object.
    */
   template<typename T>
-  struct serialized_irecv_data
+  class serialized_irecv_data
   {
+  public:
     serialized_irecv_data(const communicator& comm, int source, int tag, 
                           T& value)
       : comm(comm), source(source), tag(tag), ia(comm), value(value) 
     { 
     }
-
+    ~serialized_irecv_data() {}
+  public:
     void deserialize(status& stat) 
     { 
       ia >> value; 
@@ -1512,12 +1512,14 @@ namespace detail {
   };
 
   template<>
-  struct serialized_irecv_data<packed_iarchive>
+  class serialized_irecv_data<packed_iarchive>
   {
+  public:
     serialized_irecv_data(const communicator& comm, int source, int tag, 
                           packed_iarchive& ia)
       : comm(comm), source(source), tag(tag), ia(ia) { }
-
+    ~serialized_irecv_data() {}
+  public:
     void deserialize(status&) { /* Do nothing. */ }
 
     communicator comm;
@@ -1527,18 +1529,97 @@ namespace detail {
     packed_iarchive& ia;
   };
 
+  template<typename T>
+  class serialized_irecv_handler 
+    : public request::handler,
+      public serialized_irecv_data<T> 
+  {
+  public:
+    serialized_irecv_handler(const communicator& comm, int source, int tag, 
+                             T& value)
+      : handler(), serialized_irecv_data<T>(comm, source, tag, value) {
+      m_requests[0] = MPI_REQUEST_NULL;
+      m_requests[1] = MPI_REQUEST_NULL;
+    }
+   
+    virtual status wait() 
+    {
+      status stat;
+      if (m_requests[1] == MPI_REQUEST_NULL) {
+        // Wait for the count message to complete
+        BOOST_MPI_CHECK_RESULT(MPI_Wait,
+                               (m_requests, &stat.m_status));
+        // Resize our buffer and get ready to receive its data
+        this->ia.resize(this->count);
+        BOOST_MPI_CHECK_RESULT(MPI_Irecv,
+                               (this->ia.address(), this->ia.size(), MPI_PACKED,
+                                stat.source(), stat.tag(), 
+                                MPI_Comm(this->comm), m_requests + 1));
+      }
+      
+      // Wait until we have received the entire message
+      BOOST_MPI_CHECK_RESULT(MPI_Wait,
+                             (m_requests + 1, &stat.m_status));
+      
+      this->deserialize(stat);
+      return stat;
+    }
+    
+    virtual optional<status> test() 
+    {
+      status stat;
+      int flag = 0;
+      
+      if (m_requests[1] == MPI_REQUEST_NULL) {
+        // Check if the count message has completed
+        BOOST_MPI_CHECK_RESULT(MPI_Test,
+                               (m_requests, &flag, &stat.m_status));
+        if (flag) {
+          // Resize our buffer and get ready to receive its data
+          this->ia.resize(this->count);
+          BOOST_MPI_CHECK_RESULT(MPI_Irecv,
+                                 (this->ia.address(), this->ia.size(),MPI_PACKED,
+                                  stat.source(), stat.tag(), 
+                                  MPI_Comm(this->comm), m_requests + 1));
+        } else
+          return optional<status>(); // We have not finished yet
+      } 
+
+      // Check if we have received the message data
+      BOOST_MPI_CHECK_RESULT(MPI_Test,
+                             (m_requests + 1, &flag, &stat.m_status));
+      if (flag) {
+        this->deserialize(stat);
+        return stat;
+      } else 
+        return optional<status>();
+    }
+    virtual void cancel() {
+      this->handler::cancel();
+    }
+
+    virtual MPI_Request* requests()    { return m_requests; }
+    virtual int          nb_requests() const { return 2; }
+    virtual bool trivial() const { return false; }
+  private:
+    MPI_Request m_requests[2];
+  };
+
   /**
    * Internal data structure that stores everything required to manage
    * the receipt of an array of serialized data via a request object.
    */
   template<typename T>
-  struct serialized_array_irecv_data
+  class serialized_array_irecv_data
   {
+  protected:
     serialized_array_irecv_data(const communicator& comm, int source, int tag, 
                                 T* values, int n)
       : comm(comm), source(source), tag(tag), ia(comm), values(values), n(n)
     { 
     }
+    ~serialized_array_irecv_data() {}
+  public:
 
     void deserialize(status& stat);
 
@@ -1569,124 +1650,84 @@ namespace detail {
     
     stat.m_count = count;
   }
-}
 
-template<typename T>
-optional<status> 
-request::handle_serialized_irecv(request* self, request_action action)
-{
-  typedef detail::serialized_irecv_data<T> data_t;
-  shared_ptr<data_t> data = static_pointer_cast<data_t>(self->m_data);
-
-  if (action == ra_wait) {
-    status stat;
-    if (self->m_requests[1] == MPI_REQUEST_NULL) {
-      // Wait for the count message to complete
-      BOOST_MPI_CHECK_RESULT(MPI_Wait,
-                             (self->m_requests, &stat.m_status));
-      // Resize our buffer and get ready to receive its data
-      data->ia.resize(data->count);
-      BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-                             (data->ia.address(), data->ia.size(), MPI_PACKED,
-                              stat.source(), stat.tag(), 
-                              MPI_Comm(data->comm), self->m_requests + 1));
+  template<typename T>
+  class serialized_array_irecv_handler 
+    : public request::handler,
+      public serialized_array_irecv_data<T> 
+  {
+  public:
+    friend class communicator;
+    serialized_array_irecv_handler(const communicator& comm, int source, int tag, 
+                                   T* values, int n)
+      : handler(), serialized_array_irecv_data<T>(comm, source, tag, values, n) {
+      m_requests[0] = MPI_REQUEST_NULL;
+      m_requests[1] = MPI_REQUEST_NULL;
     }
-
-    // Wait until we have received the entire message
-    BOOST_MPI_CHECK_RESULT(MPI_Wait,
-                           (self->m_requests + 1, &stat.m_status));
-
-    data->deserialize(stat);
-    return stat;
-  } else if (action == ra_test) {
-    status stat;
-    int flag = 0;
-
-    if (self->m_requests[1] == MPI_REQUEST_NULL) {
-      // Check if the count message has completed
-      BOOST_MPI_CHECK_RESULT(MPI_Test,
-                             (self->m_requests, &flag, &stat.m_status));
-      if (flag) {
+ 
+    virtual status wait() 
+    {
+      status stat;
+      if (m_requests[1] == MPI_REQUEST_NULL) {
+        // Wait for the count message to complete
+        BOOST_MPI_CHECK_RESULT(MPI_Wait,
+                               (m_requests, &stat.m_status));
         // Resize our buffer and get ready to receive its data
-        data->ia.resize(data->count);
+        this->ia.resize(this->count);
         BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-                               (data->ia.address(), data->ia.size(),MPI_PACKED,
+                               (this->ia.address(), this->ia.size(), MPI_PACKED,
                                 stat.source(), stat.tag(), 
-                                MPI_Comm(data->comm), self->m_requests + 1));
-      } else
-        return optional<status>(); // We have not finished yet
-    } 
-
-    // Check if we have received the message data
-    BOOST_MPI_CHECK_RESULT(MPI_Test,
-                           (self->m_requests + 1, &flag, &stat.m_status));
-    if (flag) {
-      data->deserialize(stat);
-      return stat;
-    } else 
-      return optional<status>();
-  } else {
-    return optional<status>();
-  }
-}
-
-template<typename T>
-optional<status> 
-request::handle_serialized_array_irecv(request* self, request_action action)
-{
-  typedef detail::serialized_array_irecv_data<T> data_t;
-  shared_ptr<data_t> data = static_pointer_cast<data_t>(self->m_data);
-
-  if (action == ra_wait) {
-    status stat;
-    if (self->m_requests[1] == MPI_REQUEST_NULL) {
-      // Wait for the count message to complete
+                                MPI_Comm(this->comm), m_requests + 1));
+      }
+      
+      // Wait until we have received the entire message
       BOOST_MPI_CHECK_RESULT(MPI_Wait,
-                             (self->m_requests, &stat.m_status));
-      // Resize our buffer and get ready to receive its data
-      data->ia.resize(data->count);
-      BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-                             (data->ia.address(), data->ia.size(), MPI_PACKED,
-                              stat.source(), stat.tag(), 
-                              MPI_Comm(data->comm), self->m_requests + 1));
-    }
-
-    // Wait until we have received the entire message
-    BOOST_MPI_CHECK_RESULT(MPI_Wait,
-                           (self->m_requests + 1, &stat.m_status));
-
-    data->deserialize(stat);
-    return stat;
-  } else if (action == ra_test) {
-    status stat;
-    int flag = 0;
-
-    if (self->m_requests[1] == MPI_REQUEST_NULL) {
-      // Check if the count message has completed
-      BOOST_MPI_CHECK_RESULT(MPI_Test,
-                             (self->m_requests, &flag, &stat.m_status));
-      if (flag) {
-        // Resize our buffer and get ready to receive its data
-        data->ia.resize(data->count);
-        BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-                               (data->ia.address(), data->ia.size(),MPI_PACKED,
-                                stat.source(), stat.tag(), 
-                                MPI_Comm(data->comm), self->m_requests + 1));
-      } else
-        return optional<status>(); // We have not finished yet
-    } 
-
-    // Check if we have received the message data
-    BOOST_MPI_CHECK_RESULT(MPI_Test,
-                           (self->m_requests + 1, &flag, &stat.m_status));
-    if (flag) {
-      data->deserialize(stat);
+                             (m_requests + 1, &stat.m_status));
+      
+      this->deserialize(stat);
       return stat;
-    } else 
-      return optional<status>();
-  } else {
-    return optional<status>();
-  }
+    }
+    
+    virtual optional<status> test() 
+    {
+      status stat;
+      int flag = 0;
+      
+      if (m_requests[1] == MPI_REQUEST_NULL) {
+        // Check if the count message has completed
+        BOOST_MPI_CHECK_RESULT(MPI_Test,
+                               (m_requests, &flag, &stat.m_status));
+        if (flag) {
+          // Resize our buffer and get ready to receive its data
+          this->ia.resize(this->count);
+          BOOST_MPI_CHECK_RESULT(MPI_Irecv,
+                                 (this->ia.address(), this->ia.size(),MPI_PACKED,
+                                  stat.source(), stat.tag(), 
+                                  MPI_Comm(this->comm), m_requests + 1));
+        } else
+          return optional<status>(); // We have not finished yet
+      } 
+      
+      // Check if we have received the message data
+      BOOST_MPI_CHECK_RESULT(MPI_Test,
+                             (m_requests + 1, &flag, &stat.m_status));
+      if (flag) {
+        this->deserialize(stat);
+        return stat;
+      } else 
+        return optional<status>();      
+    }
+    
+    virtual void cancel() {
+      this->handler::cancel();
+    }
+    
+    virtual MPI_Request* requests()    { return m_requests; }
+    virtual int          nb_requests() const { return 2; }
+    virtual bool trivial() const { return false; }
+  private:
+    MPI_Request m_requests[2];    
+  };
 }
 
 // We're receiving a type that has an associated MPI datatype, so we
@@ -1699,7 +1740,7 @@ communicator::irecv_impl(int source, int tag, T& value, mpl::true_) const
   BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                          (const_cast<T*>(&value), 1, 
                           get_mpi_datatype<T>(value),
-                          source, tag, MPI_Comm(*this), &req.m_requests[0]));
+                          source, tag, MPI_Comm(*this), &req.m_handler->request(0)));
   return req;
 }
 
@@ -1707,16 +1748,14 @@ template<typename T>
 request
 communicator::irecv_impl(int source, int tag, T& value, mpl::false_) const
 {
-  typedef detail::serialized_irecv_data<T> data_t;
-  shared_ptr<data_t> data(new data_t(*this, source, tag, value));
-  request req;
-  req.m_data = data;
-  req.m_handler = request::handle_serialized_irecv<T>;
+  typedef detail::serialized_irecv_handler<T> handler_t;
+  handler_t* handler = new handler_t(*this, source, tag, value);
+  request req(handler);
 
   BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-                         (&data->count, 1, 
-                          get_mpi_datatype<std::size_t>(data->count),
-                          source, tag, MPI_Comm(*this), &req.m_requests[0]));
+                         (&handler->count, 1, 
+                          get_mpi_datatype<std::size_t>(handler->count),
+                          source, tag, MPI_Comm(*this), &handler->request(0)));
   
   return req;
 }
@@ -1737,7 +1776,7 @@ communicator::array_irecv_impl(int source, int tag, T* values, int n,
   BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                          (const_cast<T*>(values), n, 
                           get_mpi_datatype<T>(*values),
-                          source, tag, MPI_Comm(*this), &req.m_requests[0]));
+                          source, tag, MPI_Comm(*this), &req.m_handler->request(0)));
   return req;
 }
 
@@ -1746,16 +1785,14 @@ request
 communicator::array_irecv_impl(int source, int tag, T* values, int n, 
                                mpl::false_) const
 {
-  typedef detail::serialized_array_irecv_data<T> data_t;
-  shared_ptr<data_t> data(new data_t(*this, source, tag, values, n));
-  request req;
-  req.m_data = data;
-  req.m_handler = request::handle_serialized_array_irecv<T>;
+  typedef detail::serialized_array_irecv_handler<T> handler_t;
+  handler_t* handler = new handler_t(*this, source, tag, values, n);
+  request req(handler);
 
   BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-                         (&data->count, 1, 
-                          get_mpi_datatype<std::size_t>(data->count),
-                          source, tag, MPI_Comm(*this), &req.m_requests[0]));
+                         (&handler->count, 1, 
+                          get_mpi_datatype<std::size_t>(handler->count),
+                          source, tag, MPI_Comm(*this), &handler->request(0)));
 
   return req;
 }

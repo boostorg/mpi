@@ -8,113 +8,140 @@
 
 namespace boost { namespace mpi {
 
-/***************************************************************************
- * request                                                                 *
- ***************************************************************************/
+request::handler::handler()
+{
+}
+
+request::handler::~handler()
+{
+}
+
 request::request()
-  : m_handler(0), m_data()
+  : m_handler(new simple_handler()) 
 {
-  m_requests[0] = MPI_REQUEST_NULL;
-  m_requests[1] = MPI_REQUEST_NULL;
 }
 
-status request::wait()
+request::request(handler* h) 
+  : m_handler(h) 
 {
-  if (m_handler) {
-    // This request is a receive for a serialized type. Use the
-    // handler to wait for completion.
-    return *m_handler(this, ra_wait);
-  } else if (m_requests[1] == MPI_REQUEST_NULL) {
-    // This request is either a send or a receive for a type with an
-    // associated MPI datatype, or a serialized datatype that has been
-    // packed into a single message. Just wait on the one receive/send
-    // and return the status to the user.
-    status result;
-    BOOST_MPI_CHECK_RESULT(MPI_Wait, (&m_requests[0], &result.m_status));
-    return result;
-  } else {
-    // This request is a send of a serialized type, broken into two
-    // separate messages. Complete both sends at once.
-    MPI_Status stats[2];
-    int error_code = MPI_Waitall(2, m_requests, stats);
-    if (error_code == MPI_ERR_IN_STATUS) {
-      // Dig out which status structure has the error, and use that
-      // one when throwing the exception.
-      if (stats[0].MPI_ERROR == MPI_SUCCESS 
-          || stats[0].MPI_ERROR == MPI_ERR_PENDING)
-        boost::throw_exception(exception("MPI_Waitall", stats[1].MPI_ERROR));
-      else
-        boost::throw_exception(exception("MPI_Waitall", stats[0].MPI_ERROR));
-    } else if (error_code != MPI_SUCCESS) {
-      // There was an error somewhere in the MPI_Waitall call; throw
-      // an exception for it.
-      boost::throw_exception(exception("MPI_Waitall", error_code));
-    } 
-
-    // No errors. Returns the first status structure.
-    status result;
-    result.m_status = stats[0];
-    return result;
-  }
 }
 
-optional<status> request::test()
+request::simple_handler::simple_handler() 
 {
-  if (m_handler) {
-    // This request is a receive for a serialized type. Use the
-    // handler to test for completion.
-    return m_handler(this, ra_test);
-  } else if (m_requests[1] == MPI_REQUEST_NULL) {
-    // This request is either a send or a receive for a type with an
-    // associated MPI datatype, or a serialized datatype that has been
-    // packed into a single message. Just test the one receive/send
-    // and return the status to the user if it has completed.
-    status result;
-    int flag = 0;
-    BOOST_MPI_CHECK_RESULT(MPI_Test, 
-                           (&m_requests[0], &flag, &result.m_status));
-    return flag != 0? optional<status>(result) : optional<status>();
-  } else {
-    // This request is a send of a serialized type, broken into two
-    // separate messages. We only get a result if both complete.
-    MPI_Status stats[2];
-    int flag = 0;
-    int error_code = MPI_Testall(2, m_requests, &flag, stats);
-    if (error_code == MPI_ERR_IN_STATUS) {
-      // Dig out which status structure has the error, and use that
-      // one when throwing the exception.
-      if (stats[0].MPI_ERROR == MPI_SUCCESS 
-          || stats[0].MPI_ERROR == MPI_ERR_PENDING)
-        boost::throw_exception(exception("MPI_Testall", stats[1].MPI_ERROR));
-      else
-        boost::throw_exception(exception("MPI_Testall", stats[0].MPI_ERROR));
-    } else if (error_code != MPI_SUCCESS) {
-      // There was an error somewhere in the MPI_Testall call; throw
-      // an exception for it.
-      boost::throw_exception(exception("MPI_Testall", error_code));
+}
+
+request::simple_handler::~simple_handler() 
+{
+}
+
+status
+request::simple_handler::wait()
+{
+  // This request is either a send or a receive for a type with an
+  // associated MPI datatype
+  status result;
+  BOOST_MPI_CHECK_RESULT(MPI_Wait, (&m_request, &result.m_status));
+  return result;
+}
+
+optional<status> 
+request::simple_handler::test()
+{
+  status result;
+  int flag = 0;
+  BOOST_MPI_CHECK_RESULT(MPI_Test, 
+                         (&m_request, &flag, &result.m_status));
+  return bool(flag) ? optional<status>(result) : optional<status>();
+}
+
+void
+request::handler::cancel()
+{
+  int nreq = nb_requests();
+  MPI_Request* first = requests();
+  for (MPI_Request* r = first; r < first + nreq; ++r) {
+    if (*r != MPI_REQUEST_NULL) {
+      BOOST_MPI_CHECK_RESULT(MPI_Cancel, (r) );  
     }
+  }    
+}
 
-    // No errors. Returns the second status structure if the send has
-    // completed.
-    if (flag != 0) {
-      status result;
-      result.m_status = stats[1];
-      return result;
-    } else {
-      return optional<status>();
+bool
+request::handler::null_requests() const
+{
+  int nreq = nb_requests();
+  MPI_Request const* first = requests();
+  for (MPI_Request const* r = first; r < first + nreq; ++r) {
+    if (*r != MPI_REQUEST_NULL) {
+      return false;
     }
   }
+  return true;
 }
 
-void request::cancel()
+bool
+request::simple_handler::null_requests() const
 {
-  if (m_handler) {
-    m_handler(this, ra_cancel);
-  } else {
-    BOOST_MPI_CHECK_RESULT(MPI_Cancel, (&m_requests[0]));
-    if (m_requests[1] != MPI_REQUEST_NULL)
-      BOOST_MPI_CHECK_RESULT(MPI_Cancel, (&m_requests[1]));
+  return m_request == MPI_REQUEST_NULL;
+}
+
+namespace detail {
+MPI_Status
+report_test_wait_error(std::string fname, int error_code, MPI_Status* stats, int n) {
+  MPI_Status res = stats[0];
+  if (error_code != MPI_SUCCESS) {
+    if (error_code == MPI_ERR_IN_STATUS) {
+      // some specific request went wrong, signal the first failed one.
+      for (int i = 0; i < n; ++i) {
+        int err = stats[i].MPI_ERROR;
+        // MPI_ERR_PENDING can only appear on Wait
+        if (err != MPI_SUCCESS && err != MPI_ERR_PENDING) {
+          res = stats[i];
+          boost::throw_exception(exception(fname, err));
+        }
+      }
+      boost::throw_exception(exception(fname + " -- intenal error", error_code));
+    }
+    // something else went wrong
+    boost::throw_exception(exception(fname, error_code));
   }
+  return res;
+}
+}
+
+status
+request::archive_handler::wait() 
+{
+  // This request is a send of a serialized type, broken into two
+  // separate messages. Complete both sends at once.
+  MPI_Status stats[2];
+  int error_code = MPI_Waitall(2, m_requests, stats);
+  return status(error_code == MPI_SUCCESS
+                ? stats[0]
+                // likely to throw
+                : detail::report_test_wait_error("MPI_Waitall", error_code, stats, 2));
+}
+
+optional<status>
+request::archive_handler::test()
+{ 
+  // This request is a send of a serialized type, broken into two
+  // separate messages. We only get a result if both complete.
+  MPI_Status stats[2];
+  int flag = 0;
+  int error_code = MPI_Testall(2, m_requests, &flag, stats);
+  return (bool(flag)
+          ? optional<status>(status(error_code == MPI_SUCCESS
+                                    ? stats[0]
+                                    // likely to throw:
+                                    : detail::report_test_wait_error("MPI_Testall", error_code, stats, 2)))
+          : optional<status>());
+}
+
+void
+request::archive_handler::cancel() 
+{
+  this->handler::cancel();
 }
 
 } } // end namespace boost::mpi

@@ -35,6 +35,7 @@ lib boost_mpi
     intercommunicator.cpp
     mpi_datatype_cache.cpp
     mpi_datatype_oarchive.cpp
+    nonblocking.cpp
     packed_iarchive.cpp
     packed_oarchive.cpp
     packed_skeleton_iarchive.cpp
