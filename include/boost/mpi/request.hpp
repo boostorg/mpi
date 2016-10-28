@@ -186,6 +186,10 @@ request::handler::request(int i) {
   return requests()[i];
 }
 
+namespace detail {
+MPI_Status
+report_test_wait_error(std::string fname, int error_code, MPI_Status* stats, int n);
+}
 } } // end namespace boost::mpi
 
 #endif // BOOST_MPI_REQUEST_HPP
