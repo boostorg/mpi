@@ -52,7 +52,7 @@ template<typename ForwardIterator>
 std::pair<status, ForwardIterator> 
 wait_any(ForwardIterator begin, ForwardIterator end)
 {
-  std::vector<requests> requests(begin, end);
+  std::vector<request> requests(begin, end);
   std::pair<status, std::vector<request>::iterator> result = ::boost::mpi::wait_any(requests.begin(), requests.end());
   std::advance(begin, result.second - requests.begin());
   return std::make_pair(result.first, begin);
