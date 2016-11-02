@@ -32,9 +32,18 @@
  */
 #define BOOST_MPI_HOMOGENEOUS
 
+#if defined(MPI_VERSION)
+#  if MPI_VERSION >= 3
+/** @brief Determine if the MPI non-blockin global communications
+ *  are available.
+ * 
+ * Could be available in version 2.
+ */
+#    define  BOOST_MPI_HAS_NONBLOCKING_GLOBAL
+#  endif // MPI_VERSION >=2
 // If this is an MPI-2 implementation, define configuration macros for
 // the features we are interested in.
-#if defined(MPI_VERSION) && MPI_VERSION >= 2
+#  if MPI_VERSION >= 2
 /** @brief Determine if the MPI implementation has support for memory
  *  allocation.
  *
@@ -44,7 +53,7 @@
  *  class template will provide Standard Library-compliant access to
  *  these memory-allocation routines.
  */
-#  define BOOST_MPI_HAS_MEMORY_ALLOCATION
+#    define BOOST_MPI_HAS_MEMORY_ALLOCATION
 
 /** @brief Determine if the MPI implementation has supports initialization 
  *  without command-line arguments.
@@ -54,12 +63,16 @@
  *  arguments, e.g., @c MPI_Init(NULL, NULL). When defined, the @c
  *  environment class will provide a default constructor. This macro is 
  *  always defined for MPI-2 implementations. */
-#  define BOOST_MPI_HAS_NOARG_INITIALIZATION
-#else
+#    define BOOST_MPI_HAS_NOARG_INITIALIZATION
+#  endif // MPI_VERSION >=2
+#  if MPI_VERSION >= 1
 // If this is an MPI-1.x implementation, no arg initialization for
 // mpi environment could still be available, but not mandatory.
 // Undef this if no arg init is available:
 //#  define BOOST_MPI_HAS_NOARG_INITIALIZATION
+#  endif
+#else
+// should not come here
 #endif
 
 #if defined(MPIAPI)

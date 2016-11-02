@@ -28,5 +28,12 @@ test_main(int argc, char* argv[]) {
 
   BOOST_CHECK(version.first == mpi_version);
   BOOST_CHECK(version.second == mpi_subversion);
+
+#if defined(BOOST_MPI_HAS_NONBLOCKING_GLOBAL)
+  std::cout << "Assuming non-blocking globals availables.\n";
+  if (false) { // are those defined ?
+    std::cout << MPI_Ibcast(0, 0, MPI_INTEGER, 0, MPI_COMM_WORLD, 0);
+  }
+#endif
   return 0;
 }
