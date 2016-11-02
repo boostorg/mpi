@@ -48,6 +48,11 @@ class BOOST_MPI_DECL request
   request(handler* h);
 
   /**
+   *  Constructs a less trivial request.
+   */
+  request(shared_ptr<handler> h);
+  
+  /**
    *  Wait until the communication associated with this request has
    *  completed, then return a @c status object describing the
    *  communication.

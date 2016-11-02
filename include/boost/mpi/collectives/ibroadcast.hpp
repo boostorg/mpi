@@ -22,7 +22,7 @@ request
 ibroadcast_impl(const communicator& comm, T* values, int n, int root, 
                 mpl::true_)
 {
-  shared_ptr<request::basic_handler> handler(new request::basic_handler());
+  shared_ptr<request::simple_handler> handler(new request::simple_handler());
   
   BOOST_MPI_CHECK_RESULT(MPI_Ibcast,
                          (values, n,
@@ -99,6 +99,7 @@ protected:
 template<class T>
 class ibroadcast_root_handler
   : public ibroadcast_root_handler_base {
+public:
   ibroadcast_root_handler(const communicator& comm, int root,
                           T const* values, int n)
     : ibroadcast_root_handler_base(comm, root) {
@@ -191,7 +192,7 @@ public:
   virtual int  nb_requests() const { return 2; }
   virtual bool trivial() const { return false; }
   
-  private:
+protected:
   communicator const& m_comm;
   buffer_type         m_buffer;
   MPI_Request         m_requests[2];
@@ -204,16 +205,20 @@ class ibroadcast_target_handler
   : public ibroadcast_target_handler_base {
 public:
   ibroadcast_target_handler(const communicator& comm, int root, T* ptr, int n)
-    : ibroadcast_target_handler_base(comm,root),m_buffer(ptr), m_nslots(n) {}
+    : ibroadcast_target_handler_base(comm,root), m_values(ptr), m_nslots(n) {}
   
   void load(status& stat) {
     packed_iarchive ia(m_comm, m_buffer);
     for (int i = 0; i < m_nslots; ++i) {
-      ia >> buffer[i];
+      ia >> m_values[i];
     }
-    stat.m_count = m_nslosts;
+    stat.m_count = m_nslots;
     m_buffer.resize(0);
   }
+  
+private:
+  T*   m_values;
+  int  m_nslots;
 };
 
 // We're sending a type that has an no associated MPI datatype,
@@ -225,7 +230,7 @@ request
 ibroadcast_impl(const communicator& comm, T* values, int n, int root, 
                 mpl::false_)
 {
-  shared_ptr<request::basic_handler> handler;
+  shared_ptr<request::handler> handler;
   if (comm.rank() == root) {
     handler.reset(new ibroadcast_root_handler<T>(comm, root, values, n));
   } else {
@@ -238,19 +243,19 @@ ibroadcast_impl(const communicator& comm, T* values, int n, int root,
 template<typename T>
 request ibroadcast(const communicator& comm, T* values, int n, int root)
 {
-  detail::ibroadcast_impl(comm, values, n, root, is_mpi_datatype<T>());
+  return detail::ibroadcast_impl(comm, values, n, root, is_mpi_datatype<T>());
 }
 
 template<typename T>
 request ibroadcast(const communicator& comm, T& value, int root)
 {
-  detail::ibroadcast(comm, &value, 1, root, is_mpi_datatype<T>());
+  return mpi::ibroadcast(comm, &value, 1, root);
 }
 
 template<typename T>
 request ibroadcast(const communicator& comm, std::vector<T>& values, int root)
 {
-  detail::ibroadcast(comm, values.data(), values.size(), root, is_mpi_datatype<T>());
+  return mpi::ibroadcast(comm, values.data(), values.size(), root);
 }
 
 }}

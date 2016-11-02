@@ -26,6 +26,11 @@ request::request(handler* h)
 {
 }
 
+request::request(shared_ptr<handler> h) 
+  : m_handler(h) 
+{
+}
+
 request::simple_handler::simple_handler() 
 {
 }
