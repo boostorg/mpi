@@ -23,7 +23,9 @@
 #include <utility>
 #include <iostream>
 #include <utility>
+#if !defined(BOOST_NO_CXX11_HDR_INITIALIZER_LIST)
 #include <initializer_list>
+#endif // BOOST_NO_CXX11_HDR_INITIALIZER_LIST
 
 // Headers required to implement cartesian topologies
 #include <boost/shared_array.hpp>
