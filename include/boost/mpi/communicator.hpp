@@ -116,14 +116,6 @@ class intercommunicator;
 class graph_communicator;
 
 /**
- * INTERNAL ONLY
- *
- * Forward declaration of @c cartesian_communicator needed for the "cast"
- * from a communicator to a cartesian communicator.
- */
-class cartesian_communicator;
-
-/**
  * @brief A communicator that permits communication and
  * synchronization among a set of processes.
  *
@@ -860,24 +852,6 @@ class BOOST_MPI_DECL communicator
   /**
    * Determines whether this communicator has a Cartesian topology.
    */
-  bool has_graph_topology() const;
-
-  /**
-   * Determine if the communicator has a cartesian topology and, if so,
-   * return that @c cartesian_communicator. Even though the communicators
-   * have different types, they refer to the same underlying
-   * communication space and can be used interchangeably for
-   * communication.
-   *
-   * @returns an @c optional containing the cartesian communicator, if this
-   * communicator does in fact have a cartesian topology. Otherwise, returns
-   * an empty @c optional.
-   */
-  optional<cartesian_communicator> as_cartesian_communicator() const;
-
-  /**
-   * Determines whether this communicator has a Cartesian topology.
-   */
   bool has_cartesian_topology() const;
 
 #if 0
@@ -1191,17 +1165,6 @@ communicator::send_impl(int dest, int tag, const T& value, mpl::true_) const
                           dest, tag, MPI_Comm(*this)));
 }
 
-// We're sending a type that does not have an associated MPI
-// datatype, so it must be serialized then sent as MPI_PACKED data,
-// to be deserialized on the receiver side.
-template<typename T>
-void
-communicator::send_impl(int dest, int tag, const T& value, mpl::false_) const
-{
-  packed_oarchive oa(*this);
-  oa << value;
-  send(dest, tag, oa);
-}
 
 // Single-element receive may either send the element directly or
 // serialize it via a buffer.
@@ -1222,19 +1185,6 @@ communicator::array_send_impl(int dest, int tag, const T* values, int n,
                          (const_cast<T*>(values), n, 
                           get_mpi_datatype<T>(*values),
                           dest, tag, MPI_Comm(*this)));
-}
-
-// We're sending an array of a type that does not have an associated
-// MPI datatype, so it must be serialized then sent as MPI_PACKED
-// data, to be deserialized on the receiver side.
-template<typename T>
-void
-communicator::array_send_impl(int dest, int tag, const T* values, int n,
-                              mpl::false_) const
-{
-  packed_oarchive oa(*this);
-  oa << n << boost::serialization::make_array(values, n);
-  send(dest, tag, oa);
 }
 
 template<typename T, typename A>
@@ -1282,19 +1232,6 @@ status communicator::recv_impl(int source, int tag, T& value, mpl::true_) const
   return stat;
 }
 
-template<typename T>
-status
-communicator::recv_impl(int source, int tag, T& value, mpl::false_) const
-{
-  // Receive the message
-  packed_iarchive ia(*this);
-  status stat = recv(source, tag, ia);
-
-  // Deserialize the data in the message
-  ia >> value;
-
-  return stat;
-}
 
 // Single-element receive may either receive the element directly or
 // deserialize it from a buffer.
@@ -1317,31 +1254,6 @@ communicator::array_recv_impl(int source, int tag, T* values, int n,
   return stat;
 }
 
-template<typename T>
-status
-communicator::array_recv_impl(int source, int tag, T* values, int n, 
-                              mpl::false_) const
-{
-  // Receive the message
-  packed_iarchive ia(*this);
-  status stat = recv(source, tag, ia);
-
-  // Determine how much data we are going to receive
-  int count;
-  ia >> count;
-
-  // Deserialize the data in the message
-  boost::serialization::array_wrapper<T> arr(values, count > n? n : count);
-  ia >> arr;
-
-  if (count > n) {
-    boost::throw_exception(
-      std::range_error("communicator::recv: message receive overflow"));
-  }
-
-  stat.m_count = count;
-  return stat;
-}
 
 template<typename T, typename A>
 status communicator::recv_vector(int source, int tag, 
@@ -1428,19 +1340,6 @@ communicator::isend_impl(int dest, int tag, const T& value, mpl::true_) const
   return req;
 }
 
-// We're sending a type that does not have an associated MPI
-// datatype, so it must be serialized then sent as MPI_PACKED data,
-// to be deserialized on the receiver side.
-template<typename T>
-request
-communicator::isend_impl(int dest, int tag, const T& value, mpl::false_) const
-{
-  shared_ptr<packed_oarchive> archive(new packed_oarchive(*this));
-  *archive << value;
-  request result = isend(dest, tag, *archive);
-  result.m_data = archive;
-  return result;
-}
 
 // Single-element receive may either send the element directly or
 // serialize it via a buffer.
@@ -1462,19 +1361,6 @@ communicator::array_isend_impl(int dest, int tag, const T* values, int n,
                           dest, tag, MPI_Comm(*this), &req.m_requests[0]));
   return req;
 }
-
-template<typename T>
-request
-communicator::array_isend_impl(int dest, int tag, const T* values, int n, 
-                               mpl::false_) const
-{
-  shared_ptr<packed_oarchive> archive(new packed_oarchive(*this));
-  *archive << n << boost::serialization::make_array(values, n);
-  request result = isend(dest, tag, *archive);
-  result.m_data = archive;
-  return result;
-}
-
 
 // Array isend must send the elements directly
 template<typename T>
@@ -1791,6 +1677,31 @@ template<>
 BOOST_MPI_DECL void
 communicator::send<content>(int dest, int tag, const content& c) const;
 
+// We're sending a type that does not have an associated MPI
+// datatype, so it must be serialized then sent as MPI_PACKED data,
+// to be deserialized on the receiver side.
+template<typename T>
+void
+communicator::send_impl(int dest, int tag, const T& value, mpl::false_) const
+{
+  packed_oarchive oa(*this);
+  oa << value;
+  send(dest, tag, oa);
+}
+
+// We're sending an array of a type that does not have an associated
+// MPI datatype, so it must be serialized then sent as MPI_PACKED
+// data, to be deserialized on the receiver side.
+template<typename T>
+void
+communicator::array_send_impl(int dest, int tag, const T* values, int n,
+                              mpl::false_) const
+{
+  packed_oarchive oa(*this);
+  oa << n << boost::serialization::make_array(values, n);
+  send(dest, tag, oa);
+}
+
 /**
  * INTERNAL ONLY
  */
@@ -1826,6 +1737,46 @@ communicator::recv<content>(int source, int tag,
   return recv<const content>(source,tag,c);
 }                                  
 
+template<typename T>
+status
+communicator::recv_impl(int source, int tag, T& value, mpl::false_) const
+{
+  // Receive the message
+  packed_iarchive ia(*this);
+  status stat = recv(source, tag, ia);
+
+  // Deserialize the data in the message
+  ia >> value;
+
+  return stat;
+}
+
+template<typename T>
+status
+communicator::array_recv_impl(int source, int tag, T* values, int n, 
+                              mpl::false_) const
+{
+  // Receive the message
+  packed_iarchive ia(*this);
+  status stat = recv(source, tag, ia);
+
+  // Determine how much data we are going to receive
+  int count;
+  ia >> count;
+
+  // Deserialize the data in the message
+  boost::serialization::array_wrapper<T> arr(values, count > n? n : count);
+  ia >> arr;
+
+  if (count > n) {
+    boost::throw_exception(
+      std::range_error("communicator::recv: message receive overflow"));
+  }
+
+  stat.m_count = count;
+  return stat;
+}
+
 /**
  * INTERNAL ONLY
  */
@@ -1848,6 +1799,32 @@ communicator::isend<packed_skeleton_oarchive>
 template<>
 BOOST_MPI_DECL request
 communicator::isend<content>(int dest, int tag, const content& c) const;
+
+// We're sending a type that does not have an associated MPI
+// datatype, so it must be serialized then sent as MPI_PACKED data,
+// to be deserialized on the receiver side.
+template<typename T>
+request
+communicator::isend_impl(int dest, int tag, const T& value, mpl::false_) const
+{
+  shared_ptr<packed_oarchive> archive(new packed_oarchive(*this));
+  *archive << value;
+  request result = isend(dest, tag, *archive);
+  result.m_data = archive;
+  return result;
+}
+
+template<typename T>
+request
+communicator::array_isend_impl(int dest, int tag, const T* values, int n, 
+                               mpl::false_) const
+{
+  shared_ptr<packed_oarchive> archive(new packed_oarchive(*this));
+  *archive << n << boost::serialization::make_array(values, n);
+  request result = isend(dest, tag, *archive);
+  result.m_data = archive;
+  return result;
+}
 
 /**
  * INTERNAL ONLY
