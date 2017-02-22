@@ -14,7 +14,6 @@
 #include <boost/archive/basic_archive.hpp>
 #include <boost/archive/detail/oserializer.hpp>
 #include <boost/serialization/collection_size_type.hpp>
-#include <boost/serialization/array.hpp>
 #include <boost/serialization/item_version_type.hpp>
 
 namespace boost { namespace mpi { namespace detail {

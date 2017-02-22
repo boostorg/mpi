@@ -14,7 +14,6 @@
 #include <cstddef> // size_t
 #include <boost/config.hpp>
 
-#include <boost/serialization/array.hpp>
 #include <boost/serialization/is_bitwise_serializable.hpp>
 #include <boost/assert.hpp>
 #include <boost/mpl/assert.hpp>

@@ -35,7 +35,6 @@
 #include <boost/mpl/if.hpp>
 
 #include <boost/serialization/split_free.hpp>
-#include <boost/serialization/array.hpp>
 
 #include <boost/assert.hpp>
 
