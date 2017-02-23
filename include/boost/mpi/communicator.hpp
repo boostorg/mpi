@@ -34,7 +34,6 @@
 #include <boost/mpi/skeleton_and_content_fwd.hpp>
 
 // For (de-)serializing arrays
-#include <boost/serialization/array.hpp>
 
 #include <boost/mpi/detail/point_to_point.hpp>
 #include <boost/mpi/status.hpp>

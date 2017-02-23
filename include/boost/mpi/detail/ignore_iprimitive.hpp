@@ -11,7 +11,6 @@
 
 #include <boost/config.hpp>
 #include <boost/mpi/datatype.hpp>
-#include <boost/serialization/array.hpp>
 
 
 namespace boost { namespace mpi { namespace detail {

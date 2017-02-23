@@ -24,7 +24,6 @@ namespace std{
 #include <boost/throw_exception.hpp>
 #include <boost/assert.hpp>
 #include <boost/mpl/placeholders.hpp>
-#include <boost/serialization/array.hpp>
 #include <stdexcept>
 #include <iostream>
 #include <vector>
@@ -79,18 +78,18 @@ public:
        BOOST_MPI_CHECK_RESULT(MPI_Type_create_struct,
                     (
                       addresses.size(),
-                      get_data(lengths),
-                      get_data(addresses),
-                      get_data(types),
+                      lengths.data(),
+                      addresses.data(),
+                      types.data(),
                       &datatype_
                     ));
 #else
         BOOST_MPI_CHECK_RESULT(MPI_Type_struct,
                                (
                                 addresses.size(),
-                                get_data(lengths),
-                                get_data(addresses),
-                                get_data(types),
+                                lengths.data(),
+                                addresses.data(),
+                                types.data(),
                                 &datatype_
                                 ));
 #endif

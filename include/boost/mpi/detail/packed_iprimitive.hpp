@@ -15,7 +15,6 @@
 #include <boost/mpi/datatype.hpp>
 #include <boost/mpi/exception.hpp>
 #include <boost/assert.hpp>
-#include <boost/serialization/array.hpp>
 #include <vector>
 #include <boost/mpi/allocator.hpp>
 
@@ -103,12 +102,8 @@ private:
     void load_impl(void * p, MPI_Datatype t, int l)
     {
       BOOST_MPI_CHECK_RESULT(MPI_Unpack,
-        (get_data(buffer_), buffer_.size(), &position, p, l, t, comm));
-    }
-
-    static buffer_type::value_type* get_data(buffer_type& b)
-    {
-      return b.empty() ? 0 : &(b[0]);
+			     (const_cast<char*>(buffer_.data()),
+			      buffer_.size(), &position, p, l, t, comm));
     }
 
     buffer_type & buffer_;
