@@ -858,7 +858,7 @@ class BOOST_MPI_DECL communicator
   optional<graph_communicator> as_graph_communicator() const;
 
   /**
-   * Determines whether this communicator has a Cartesian topology.
+   * Determines whether this communicator has a Graph topology.
    */
   bool has_graph_topology() const;
 
