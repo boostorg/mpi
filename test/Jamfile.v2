@@ -10,7 +10,7 @@
 #          Andrew Lumsdaine
 
 use-project /boost/mpi : ../build ;
-project /boost/mpi/test ;
+project /boost/mpi/test : requirements <toolset>msvc:<define>_SCL_SECURE_NO_WARNINGS ;
 import mpi : mpi-test ;
 
 if [ mpi.configured ]
