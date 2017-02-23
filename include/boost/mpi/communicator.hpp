@@ -880,26 +880,6 @@ class BOOST_MPI_DECL communicator
    */
   bool has_cartesian_topology() const;
 
-#if 0
-  template<typename Extents>
-  communicator 
-  with_cartesian_topology(const Extents& extents, 
-                          bool periodic = false, 
-                          bool reorder = false) const;
-
-  template<typename DimInputIterator, typename PeriodicInputIterator>
-  communicator
-  with_cartesian_topology(DimInputIterator first_dim,
-                          DimInputIterator last_dim,
-                          PeriodicInputIterator first_periodic,
-                          bool reorder = false);
-
-  template<typename Allocator, std::size_t NumDims>
-  communicator
-  with_cartesian_topology(const multi_array<bool, NumDims, Allocator>& periods,
-                          bool reorder = false);
-#endif
-
   /** Abort all tasks in the group of this communicator.
    *
    *  Makes a "best attempt" to abort all of the tasks in the group of
