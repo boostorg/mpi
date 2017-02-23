@@ -35,6 +35,7 @@
 
 #include <boost/serialization/split_free.hpp>
 #include <boost/serialization/array.hpp>
+#include <boost/serialization/array_wrapper.hpp>
 
 #include <boost/smart_ptr/scoped_array.hpp>
 
