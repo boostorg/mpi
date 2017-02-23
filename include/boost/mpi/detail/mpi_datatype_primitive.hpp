@@ -25,7 +25,6 @@ namespace std{
 #include <boost/assert.hpp>
 #include <boost/mpl/placeholders.hpp>
 #include <boost/serialization/array.hpp>
-#include <boost/serialization/detail/get_data.hpp>
 #include <stdexcept>
 #include <iostream>
 #include <vector>
@@ -80,18 +79,18 @@ public:
        BOOST_MPI_CHECK_RESULT(MPI_Type_create_struct,
                     (
                       addresses.size(),
-                      boost::serialization::detail::get_data(lengths),
-                      boost::serialization::detail::get_data(addresses),
-                      boost::serialization::detail::get_data(types),
+                      get_data(lengths),
+                      get_data(addresses),
+                      get_data(types),
                       &datatype_
                     ));
 #else
         BOOST_MPI_CHECK_RESULT(MPI_Type_struct,
                                (
                                 addresses.size(),
-                                boost::serialization::detail::get_data(lengths),
-                                boost::serialization::detail::get_data(addresses),
-                                boost::serialization::detail::get_data(types),
+                                get_data(lengths),
+                                get_data(addresses),
+                                get_data(types),
                                 &datatype_
                                 ));
 #endif
@@ -127,6 +126,12 @@ private:
       addresses.push_back(a-origin);
       types.push_back(t);
       lengths.push_back(l);
+    }
+
+    template <class T>
+    static T* get_data(std::vector<T>& v)
+    {
+      return v.empty() ? 0 : &(v[0]);
     }
 
     std::vector<MPI_Aint> addresses;

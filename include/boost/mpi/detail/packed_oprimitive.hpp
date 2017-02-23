@@ -15,7 +15,6 @@
 
 #include <boost/mpi/datatype.hpp>
 #include <boost/mpi/exception.hpp>
-#include <boost/serialization/detail/get_data.hpp>
 #include <boost/serialization/array.hpp>
 #include <boost/assert.hpp>
 #include <vector>
@@ -103,11 +102,16 @@ private:
 
       // pack the data into the buffer
       BOOST_MPI_CHECK_RESULT(MPI_Pack,
-      (const_cast<void*>(p), l, t, boost::serialization::detail::get_data(buffer_), buffer_.size(), &position, comm));
+      (const_cast<void*>(p), l, t, get_data(buffer_), buffer_.size(), &position, comm));
       // reduce the buffer size if needed
       BOOST_ASSERT(std::size_t(position) <= buffer_.size());
       if (std::size_t(position) < buffer_.size())
           buffer_.resize(position);
+    }
+
+    static buffer_type::value_type* get_data(buffer_type& b)
+    {
+      return b.empty() ? 0 : &(b[0]);
     }
 
   buffer_type& buffer_;
