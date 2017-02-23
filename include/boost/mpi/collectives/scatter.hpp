@@ -80,6 +80,13 @@ fill_scatter_sendbuf(const communicator& comm, T const* values,
   }
 }
 
+template<typename T, class A>
+T*
+non_const_data(std::vector<T,A> const& v) {
+  T const* cptr = v.data();
+  return const_cast<T*>(cptr);
+}
+
 // Dispatch the sendbuf among proc.
 // Used in the second steps of both scatter and scatterv
 // in_value is only provide in the non variadic case.
@@ -92,7 +99,7 @@ dispatch_scatter_sendbuf(const communicator& comm,
   // Distribute the sizes
   int myarchsize;
   BOOST_MPI_CHECK_RESULT(MPI_Scatter,
-                         (archsizes.data(), 1, MPI_INTEGER,
+                         (non_const_data(archsizes), 1, MPI_INTEGER,
                           &myarchsize, 1, MPI_INTEGER, root, comm));
   std::vector<int> offsets;
   if (root == comm.rank()) {
@@ -102,7 +109,7 @@ dispatch_scatter_sendbuf(const communicator& comm,
   packed_iarchive::buffer_type recvbuf;
   recvbuf.resize(myarchsize);
   BOOST_MPI_CHECK_RESULT(MPI_Scatterv,
-                         (sendbuf.data(), archsizes.data(), offsets.data(), MPI_BYTE,
+                         (non_const_data(sendbuf), non_const_data(archsizes), offsets.data(), MPI_BYTE,
                           recvbuf.data(), recvbuf.size(), MPI_BYTE,
                           root, MPI_Comm(comm)));
   // Unserialize

@@ -109,6 +109,11 @@ private:
           buffer_.resize(position);
     }
 
+    static buffer_type::value_type* get_data(buffer_type& b)
+    {
+      return b.empty() ? 0 : &(b[0]);
+    }
+
   buffer_type& buffer_;
   mutable std::size_t size_;
   MPI_Comm comm;

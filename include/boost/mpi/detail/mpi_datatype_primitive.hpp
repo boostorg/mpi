@@ -87,7 +87,7 @@ public:
         BOOST_MPI_CHECK_RESULT(MPI_Type_struct,
                                (
                                 addresses.size(),
-				lengths.data(),
+                                lengths.data(),
                                 addresses.data(),
                                 types.data(),
                                 &datatype_
@@ -125,6 +125,12 @@ private:
       addresses.push_back(a-origin);
       types.push_back(t);
       lengths.push_back(l);
+    }
+
+    template <class T>
+    static T* get_data(std::vector<T>& v)
+    {
+      return v.empty() ? 0 : &(v[0]);
     }
 
     std::vector<MPI_Aint> addresses;
