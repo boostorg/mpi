@@ -25,9 +25,12 @@
 
 namespace mpi = boost::mpi;
 
-
 BOOST_AUTO_TEST_CASE(cartesian_dimension_init)
 {
+  // Curly brace initialization syntax not supported on (very) old gnu
+  // This typedef keeps things shorter
+  typedef mpi::cartesian_dimension cd;
+
   {
     // Check the basic ctor
     mpi::cartesian_dimension def;
@@ -48,7 +51,7 @@ BOOST_AUTO_TEST_CASE(cartesian_dimension_init)
   // Container based ctor only available as a replacement for initializer list ctor
   {
     // seq ctor vs C array ctor
-    mpi::cartesian_dimension d[] = {{2,true},{3, false},{4, true}};
+    mpi::cartesian_dimension d[] = {cd(2,true),cd(3, false),cd(4, true)};
     std::list<mpi::cartesian_dimension> seq;
     std::copy(d, d+3, std::back_inserter(seq));
     mpi::cartesian_topology t1(seq);
@@ -57,7 +60,7 @@ BOOST_AUTO_TEST_CASE(cartesian_dimension_init)
   }
   {
     // Check range based with array based ctor.
-    boost::array<mpi::cartesian_dimension, 3> d = {{{2,true},{3, false},{4, true}}};
+    boost::array<mpi::cartesian_dimension, 3> d = {{cd(2,true),cd(3, false),cd(4, true)}};
     int dims[] = {2,3,4};
     bool per[] = {true, false, true};
     mpi::cartesian_topology t1(dims, per);
@@ -67,7 +70,7 @@ BOOST_AUTO_TEST_CASE(cartesian_dimension_init)
   }
   {
     // Iterator based ctor vs C array based ctor
-    mpi::cartesian_dimension d[] = {{2,true},{3, false},{4, true}};
+    mpi::cartesian_dimension d[] = {cd(2,true),cd(3, false),cd(4, true)};
     std::vector<mpi::cartesian_dimension> vdims(d, d+3);
     mpi::cartesian_topology t1(vdims);
     mpi::cartesian_topology t2(d);

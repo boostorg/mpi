@@ -16,13 +16,20 @@
 #include <boost/test/minimal.hpp>
 
 namespace mpi = boost::mpi;
+// Curly brace init make this useless, but
+//  - Need to support obsolete like g++ 4.3.x. for some reason
+//  - Can't conditionnaly compile with bjam (unless you find 
+//  the doc, and read it, which would only make sense if you
+//  actually wan't to use bjam, which does not (make sense))
+typedef mpi::cartesian_dimension cd;
+
 int test_main(int argc, char* argv[])
 {
   mpi::environment  env;
   mpi::communicator world;
   
   if (world.size() != 24)  return -1;
-  mpi::cartesian_dimension dims[] = {{2, true}, {3,true}, {4,true}};
+  mpi::cartesian_dimension dims[] = {cd(2, true), cd(3,true), cd(4,true)};
   mpi::cartesian_communicator cart(world, mpi::cartesian_topology(dims));
   for (int r = 0; r < cart.size(); ++r) {
     cart.barrier();
