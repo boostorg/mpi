@@ -49,8 +49,8 @@ void test_coordinates_consistency( mpi::cartesian_communicator const& cc,
   for(int p = 0; p < cc.size(); ++p) {
     std::vector<int> min(cc.ndims());
     std::vector<int> local(cc.coordinates(p));
-    mpi::reduce(cc, local.data(), local.size(),
-                min.data(), mpi::minimum<int>(), p);
+    mpi::reduce(cc, &local.front(), local.size(),
+                &(min[0]), mpi::minimum<int>(), p);
     cc.barrier();
     if (p == cc.rank()) {
       BOOST_CHECK(std::equal(coords.begin(), coords.end(), min.begin()));

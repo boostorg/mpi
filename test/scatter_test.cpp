@@ -141,9 +141,9 @@ scatterv_test(const communicator& comm, Generator generator,
       std::cout << "Scatteringv " << kind << " from root "
                 << root << "..." << std::endl;
       assert(mysize == sizes[comm.rank()]);
-      scatterv(comm, values, sizes, myvalues.data(), root);
+      scatterv(comm, values, sizes, &(myvalues[0]), root);
     } else {
-      scatterv(comm, myvalues.data(), mysize, root);
+      scatterv(comm, &(myvalues[0]), mysize, root);
     }
 
     for (int i = 0; i < mysize; ++i)

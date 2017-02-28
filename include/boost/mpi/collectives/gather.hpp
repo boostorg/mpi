@@ -20,6 +20,7 @@
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/detail/offsets.hpp>
+#include <boost/mpi/detail/antiques.hpp>
 #include <boost/assert.hpp>
 
 namespace boost { namespace mpi {
@@ -69,7 +70,7 @@ gather_impl(const communicator& comm, const T* in_values, int n, T* out_values,
   int oasize = oa.size();
   BOOST_MPI_CHECK_RESULT(MPI_Gather,
                          (&oasize, 1, MPI_INTEGER,
-                          oasizes.data(), 1, MPI_INTEGER, 
+                          c_data(oasizes), 1, MPI_INTEGER, 
                           root, MPI_Comm(comm)));
   // Gather the archives, which can be of different sizes, so
   // we need to use gatherv.
@@ -80,7 +81,7 @@ gather_impl(const communicator& comm, const T* in_values, int n, T* out_values,
   packed_iarchive::buffer_type recv_buffer(is_root ? std::accumulate(oasizes.begin(), oasizes.end(), 0) : 0);
   BOOST_MPI_CHECK_RESULT(MPI_Gatherv,
                          (const_cast<void*>(oa.address()), int(oa.size()), MPI_BYTE,
-                          recv_buffer.data(), oasizes.data(), offsets.data(), MPI_BYTE, 
+                          c_data(recv_buffer), c_data(oasizes), c_data(offsets), MPI_BYTE, 
                           root, MPI_Comm(comm)));
   if (is_root) {
     for (int src = 0; src < nproc; ++src) {
@@ -135,10 +136,11 @@ void
 gather(const communicator& comm, const T& in_value, std::vector<T>& out_values,
        int root)
 {
+  using detail::c_data;
   if (comm.rank() == root) {
     out_values.resize(comm.size());
   }
-  ::boost::mpi::gather(comm, in_value, out_values.data(), root);
+  ::boost::mpi::gather(comm, in_value, c_data(out_values), root);
 }
 
 template<typename T>

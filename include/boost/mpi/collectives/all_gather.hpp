@@ -20,6 +20,7 @@
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/detail/offsets.hpp>
+#include <boost/mpi/detail/antiques.hpp>
 #include <boost/assert.hpp>
 
 namespace boost { namespace mpi {
@@ -57,7 +58,7 @@ all_gather_impl(const communicator& comm, const T* in_values, int n,
   int oasize = oa.size();
   BOOST_MPI_CHECK_RESULT(MPI_Allgather,
                          (&oasize, 1, MPI_INTEGER,
-                          oasizes.data(), 1, MPI_INTEGER, 
+                          c_data(oasizes), 1, MPI_INTEGER, 
                           MPI_Comm(comm)));
   // Gather the archives, which can be of different sizes, so
   // we need to use allgatherv.
@@ -68,7 +69,7 @@ all_gather_impl(const communicator& comm, const T* in_values, int n,
   packed_iarchive::buffer_type recv_buffer(std::accumulate(oasizes.begin(), oasizes.end(), 0));
   BOOST_MPI_CHECK_RESULT(MPI_Allgatherv,
                          (const_cast<void*>(oa.address()), int(oa.size()), MPI_BYTE,
-                          recv_buffer.data(), oasizes.data(), offsets.data(), MPI_BYTE, 
+                          c_data(recv_buffer), c_data(oasizes), c_data(offsets), MPI_BYTE, 
                           MPI_Comm(comm)));
   for (int src = 0; src < nproc; ++src) {
     int nb   = sizes ? sizes[src] : n;
@@ -110,8 +111,9 @@ template<typename T>
 void
 all_gather(const communicator& comm, const T& in_value, std::vector<T>& out_values)
 {
+  using detail::c_data;
   out_values.resize(comm.size());
-  ::boost::mpi::all_gather(comm, in_value, out_values.data());
+  ::boost::mpi::all_gather(comm, in_value, c_data(out_values));
 }
 
 template<typename T>
@@ -125,8 +127,9 @@ template<typename T>
 void
 all_gather(const communicator& comm, const T* in_values, int n, std::vector<T>& out_values)
 {
+  using detail::c_data;
   out_values.resize(comm.size() * n);
-  ::boost::mpi::all_gather(comm, in_values, n, out_values.data());
+  ::boost::mpi::all_gather(comm, in_values, n, c_data(out_values));
 }
 
 } } // end namespace boost::mpi

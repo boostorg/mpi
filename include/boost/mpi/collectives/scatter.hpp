@@ -17,6 +17,7 @@
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/detail/offsets.hpp>
+#include <boost/mpi/detail/antiques.hpp>
 #include <boost/assert.hpp>
 
 namespace boost { namespace mpi {
@@ -83,8 +84,8 @@ fill_scatter_sendbuf(const communicator& comm, T const* values,
 template<typename T, class A>
 T*
 non_const_data(std::vector<T,A> const& v) {
-  T const* cptr = v.data();
-  return const_cast<T*>(cptr);
+  using detail::c_data;
+  return const_cast<T*>(c_data(v));
 }
 
 // Dispatch the sendbuf among proc.
@@ -109,8 +110,8 @@ dispatch_scatter_sendbuf(const communicator& comm,
   packed_iarchive::buffer_type recvbuf;
   recvbuf.resize(myarchsize);
   BOOST_MPI_CHECK_RESULT(MPI_Scatterv,
-                         (non_const_data(sendbuf), non_const_data(archsizes), offsets.data(), MPI_BYTE,
-                          recvbuf.data(), recvbuf.size(), MPI_BYTE,
+                         (non_const_data(sendbuf), non_const_data(archsizes), c_data(offsets), MPI_BYTE,
+                          c_data(recvbuf), recvbuf.size(), MPI_BYTE,
                           root, MPI_Comm(comm)));
   // Unserialize
   if ( in_values != 0 && root == comm.rank()) {
@@ -137,7 +138,7 @@ scatter_impl(const communicator& comm, const T* in_values, T* out_values,
   
   if (root == comm.rank()) {
     std::vector<int> nslots(comm.size(), n);
-    fill_scatter_sendbuf(comm, in_values, nslots.data(), (int const*)0, sendbuf, archsizes);
+    fill_scatter_sendbuf(comm, in_values, c_data(nslots), (int const*)0, sendbuf, archsizes);
   }
   dispatch_scatter_sendbuf(comm, sendbuf, archsizes, in_values, out_values, n, root);
 }
@@ -163,7 +164,8 @@ void
 scatter(const communicator& comm, const std::vector<T>& in_values, T& out_value,
         int root)
 {
-  ::boost::mpi::scatter<T>(comm, in_values.data(), out_value, root);
+  using detail::c_data;
+  ::boost::mpi::scatter<T>(comm, c_data(in_values), out_value, root);
 }
 
 template<typename T>

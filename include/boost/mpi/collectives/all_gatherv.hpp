@@ -21,6 +21,7 @@
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/detail/offsets.hpp>
+#include <boost/mpi/detail/antiques.hpp>
 #include <boost/assert.hpp>
 #include <boost/scoped_array.hpp>
 
@@ -68,9 +69,10 @@ void
 all_gatherv(const communicator& comm, const T& in_value, T* out_values,
             const std::vector<int>& sizes)
 {
+  using detail::c_data;
   assert(sizes.size()   == comm.size());
   assert(sizes[comm.rank()] == 1);
-  detail::all_gatherv_impl(comm, &in_value, out_values, sizes.data(), 0, is_mpi_datatype<T>());
+  detail::all_gatherv_impl(comm, &in_value, out_values, c_data(sizes), 0, is_mpi_datatype<T>());
 }
 
 template<typename T>
@@ -78,8 +80,9 @@ void
 all_gatherv(const communicator& comm, const T* in_values, T* out_values,
             const std::vector<int>& sizes)
 {
+  using detail::c_data;
   assert(int(sizes.size()) == comm.size());
-  detail::all_gatherv_impl(comm, in_values, out_values, sizes.data(), 0, is_mpi_datatype<T>());
+  detail::all_gatherv_impl(comm, in_values, out_values, c_data(sizes), 0, is_mpi_datatype<T>());
 }
 
 template<typename T>
@@ -87,10 +90,11 @@ void
 all_gatherv(const communicator& comm, std::vector<T> const& in_values,  std::vector<T>& out_values,
            const std::vector<int>& sizes)
 {
+  using detail::c_data;
   assert(int(sizes.size()) == comm.size());
   assert(int(in_values.size()) == sizes[comm.rank()]);
   out_values.resize(std::accumulate(sizes.begin(), sizes.end(), 0));
-  ::boost::mpi::all_gatherv(comm, in_values.data(), out_values.data(), sizes);
+  ::boost::mpi::all_gatherv(comm, c_data(in_values), c_data(out_values), sizes);
 }
 
 
@@ -99,10 +103,11 @@ void
 all_gatherv(const communicator& comm, const T& in_value, T* out_values,
             const std::vector<int>& sizes, const std::vector<int>& displs)
 {
+  using detail::c_data;
   assert(sizes.size()   == comm.size());
   assert(displs.size() == comm.size());
   detail::all_gatherv_impl(comm, &in_value, 1, out_values,
-                           sizes.data(), displs.data(), is_mpi_datatype<T>());
+                           c_data(sizes), c_data(displs), is_mpi_datatype<T>());
 }
 
 template<typename T>
@@ -110,10 +115,11 @@ void
 all_gatherv(const communicator& comm, const T* in_values, T* out_values,
             const std::vector<int>& sizes, const std::vector<int>& displs)
 {
+  using detail::c_data;
   assert(sizes.size()   == comm.size());
   assert(displs.size() == comm.size());
   detail::all_gatherv_impl(comm, in_values, out_values,
-                           sizes.data(), displs.data(), is_mpi_datatype<T>());
+                           c_data(sizes), c_data(displs), is_mpi_datatype<T>());
 }
 
 template<typename T>
@@ -121,11 +127,12 @@ void
 all_gatherv(const communicator& comm, std::vector<T> const& in_values, std::vector<T>& out_values,
             const std::vector<int>& sizes, const std::vector<int>& displs)
 {
+  using detail::c_data;
   assert(sizes.size()   == comm.size());
   assert(displs.size() == comm.size());
   assert(in_values.size() == sizes[comm.rank()]);
   out_values.resize(std::accumulate(sizes.begin(), sizes.end(), 0));
-  ::boost::mpi::all_gatherv(comm, in_values.data(), out_values.data(), sizes, displs);
+  ::boost::mpi::all_gatherv(comm, c_data(in_values), c_data(out_values), sizes, displs);
 }
 
 } } // end namespace boost::mpi

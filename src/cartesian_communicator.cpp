@@ -13,6 +13,11 @@
 
 namespace boost { namespace mpi {
 
+namespace {
+  template <typename T, typename A>
+  T* c_data(std::vector<T,A>& v) { return &(v[0]); }
+}
+
 std::ostream&
 operator<<(std::ostream& out, cartesian_dimension const& d) {
   out << '(' << d.size << ',';
@@ -57,8 +62,8 @@ cartesian_communicator::cartesian_communicator(const communicator&         comm,
   }
   MPI_Comm newcomm;
   BOOST_MPI_CHECK_RESULT(MPI_Cart_create, 
-                         ((MPI_Comm)comm, dims.size(), 
-                          dims.data(), periodic.data(), 
+                         ((MPI_Comm)comm, dims.size(),
+                          c_data(dims), c_data(periodic),
                           int(reorder), &newcomm));
   if(newcomm != MPI_COMM_NULL) {
     comm_ptr.reset(new MPI_Comm(newcomm), comm_free());
@@ -80,7 +85,7 @@ cartesian_communicator::cartesian_communicator(const cartesian_communicator& com
   
   MPI_Comm newcomm;
   BOOST_MPI_CHECK_RESULT(MPI_Cart_sub, 
-                         ((MPI_Comm)comm, bitset.data(), &newcomm));
+                         ((MPI_Comm)comm, c_data(bitset), &newcomm));
   if(newcomm != MPI_COMM_NULL) {
     comm_ptr.reset(new MPI_Comm(newcomm), comm_free());
   }
@@ -99,7 +104,7 @@ cartesian_communicator::rank(const std::vector<int>& coords ) const {
   int r = -1;
   assert(int(coords.size()) == ndims());
   BOOST_MPI_CHECK_RESULT(MPI_Cart_rank, 
-                         (MPI_Comm(*this), const_cast<std::vector<int>&>(coords).data(), 
+                         (MPI_Comm(*this), c_data(const_cast<std::vector<int>&>(coords)), 
                           &r));
   return r;
 }
@@ -117,7 +122,7 @@ std::vector<int>
 cartesian_communicator::coordinates(int rk) const {
   std::vector<int> cbuf(ndims());
   BOOST_MPI_CHECK_RESULT(MPI_Cart_coords, 
-                         (MPI_Comm(*this), rk, cbuf.size(), cbuf.data() ));
+                         (MPI_Comm(*this), rk, cbuf.size(), c_data(cbuf) ));
   return cbuf;
 }
 
@@ -130,7 +135,7 @@ cartesian_communicator::topology(  cartesian_topology&  topo,
   std::vector<int> cdims(ndims);
   std::vector<int> cperiods(ndims);
   BOOST_MPI_CHECK_RESULT(MPI_Cart_get,
-                         (MPI_Comm(*this), ndims, cdims.data(), cperiods.data(), coords.data()));
+                         (MPI_Comm(*this), ndims, c_data(cdims), c_data(cperiods), c_data(coords)));
   cartesian_topology res(cdims.begin(), cperiods.begin(), ndims);
   topo.swap(res);
 }
@@ -167,7 +172,7 @@ cartesian_dimensions(int sz, std::vector<int>&  dims) {
   int leftover = sz % min;
   
   BOOST_MPI_CHECK_RESULT(MPI_Dims_create,
-                         (sz-leftover, dims.size(), dims.data()));
+                         (sz-leftover, dims.size(), c_data(dims)));
   return dims;
 }
 

@@ -6,6 +6,7 @@
 // Authors: Alain Miniussi
 
 #include <boost/mpi/detail/offsets.hpp>
+#include <boost/mpi/detail/antiques.hpp>
 
 namespace boost { namespace mpi {
 namespace detail {
@@ -28,7 +29,7 @@ sizes2offsets(std::vector<int> const& sizes, std::vector<int>& offsets)
 {
   int sz = sizes.size();
   offsets.resize(sz);
-  sizes2offsets(sizes.data(), offsets.data(), sz);
+  sizes2offsets(c_data(sizes), c_data(offsets), sz);
 }
 
 // Given a sequence of sizes (typically the number of records dispatched

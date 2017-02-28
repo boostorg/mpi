@@ -11,6 +11,7 @@
 #include <boost/scoped_array.hpp>
 #include <boost/mpi/collectives/scatter.hpp>
 #include <boost/mpi/detail/offsets.hpp>
+#include <boost/mpi/detail/antiques.hpp>
 
 namespace boost { namespace mpi {
 
@@ -71,8 +72,8 @@ scatterv_impl(const communicator& comm, const T* in_values, T* out_values, int o
     std::vector<int> skipped;
     if (displs) {
       skipped.resize(nproc);
-      offsets2skipped(sizes, displs, skipped.data(), nproc);
-      displs = skipped.data();
+      offsets2skipped(sizes, displs, c_data(skipped), nproc);
+      displs = c_data(skipped);
     }
     fill_scatter_sendbuf(comm, in_values, sizes, (int const*)0, sendbuf, archsizes);
   }
@@ -99,7 +100,8 @@ scatterv(const communicator& comm, const T* in_values,
          const std::vector<int>& sizes, const std::vector<int>& displs,
          T* out_values, int out_size, int root)
 {
-  scatterv_impl(comm, in_values, out_values, out_size, sizes.data(), displs.data(), 
+  using detail::c_data;
+  scatterv_impl(comm, in_values, out_values, out_size, c_data(sizes), c_data(displs), 
                 root, is_mpi_datatype<T>());
 }
 
@@ -109,7 +111,8 @@ scatterv(const communicator& comm, const std::vector<T>& in_values,
          const std::vector<int>& sizes, const std::vector<int>& displs,
          T* out_values, int out_size, int root)
 {
-  ::boost::mpi::scatterv(comm, in_values.data(), sizes, displs,
+  using detail::c_data;
+  ::boost::mpi::scatterv(comm, c_data(in_values), sizes, displs,
                          out_values, out_size, root);
 }
 
@@ -128,8 +131,9 @@ void
 scatterv(const communicator& comm, const T* in_values,
          const std::vector<int>& sizes, T* out_values, int root)
 {
+  using detail::c_data;
   detail::scatterv_impl(comm, in_values, out_values, sizes[comm.rank()], 
-                        sizes.data(), (int const*)0,
+                        c_data(sizes), (int const*)0,
                         root, is_mpi_datatype<T>());
 }
 
