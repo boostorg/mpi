@@ -21,6 +21,7 @@ namespace std{
 
 #include <boost/mpi/datatype_fwd.hpp>
 #include <boost/mpi/exception.hpp>
+#include <boost/mpi/detail/antiques.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/assert.hpp>
 #include <boost/mpl/placeholders.hpp>
@@ -28,6 +29,7 @@ namespace std{
 #include <stdexcept>
 #include <iostream>
 #include <vector>
+#include <boost/mpi/detail/antiques.hpp>
 
 namespace boost { namespace mpi { namespace detail {
 
@@ -79,18 +81,18 @@ public:
        BOOST_MPI_CHECK_RESULT(MPI_Type_create_struct,
                     (
                       addresses.size(),
-                      get_data(lengths),
-                      get_data(addresses),
-                      get_data(types),
+                      c_data(lengths),
+                      c_data(addresses),
+                      c_data(types),
                       &datatype_
                     ));
 #else
         BOOST_MPI_CHECK_RESULT(MPI_Type_struct,
                                (
                                 addresses.size(),
-                                get_data(lengths),
-                                get_data(addresses),
-                                get_data(types),
+                                c_data(lengths),
+                                c_data(addresses),
+                                c_data(types),
                                 &datatype_
                                 ));
 #endif
