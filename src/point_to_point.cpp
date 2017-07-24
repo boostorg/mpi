@@ -20,6 +20,7 @@
 #include <boost/mpi/detail/point_to_point.hpp>
 #include <boost/mpi/datatype.hpp>
 #include <boost/mpi/exception.hpp>
+#include <boost/mpi/detail/antiques.hpp>
 #include <cassert>
 
 namespace boost { namespace mpi { namespace detail {
@@ -30,11 +31,11 @@ packed_archive_send(MPI_Comm comm, int dest, int tag,
 {
   std::size_t const& size = ar.size();
   BOOST_MPI_CHECK_RESULT(MPI_Send,
-                         (&size, 1, 
+                         (detail::unconst(&size), 1, 
                           get_mpi_datatype(size), 
                           dest, tag, comm));
   BOOST_MPI_CHECK_RESULT(MPI_Send,
-                         (const_cast<void*>(ar.address()), size,
+                         (detail::unconst(ar.address()), size,
                           MPI_PACKED,
                           dest, tag, comm));
 }
@@ -47,11 +48,11 @@ packed_archive_isend(MPI_Comm comm, int dest, int tag,
   assert(num_out_requests >= 2);
   std::size_t const& size = ar.size();
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                         (&size, 1, 
+                         (detail::unconst(&size), 1, 
                           get_mpi_datatype(size),
                           dest, tag, comm, out_requests));
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                         (const_cast<void*>(ar.address()), size,
+                         (detail::unconst(ar.address()), size,
                           MPI_PACKED,
                           dest, tag, comm, out_requests + 1));
 
@@ -67,11 +68,11 @@ packed_archive_isend(MPI_Comm comm, int dest, int tag,
 
   std::size_t const& size = ar.size();
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                         (&size, 1, 
+                         (detail::unconst(&size), 1, 
                           get_mpi_datatype(size), 
                           dest, tag, comm, out_requests));
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                         (const_cast<void*>(ar.address()), size,
+                         (detail::unconst(ar.address()), size,
                           MPI_PACKED,
                           dest, tag, comm, out_requests + 1));
 
