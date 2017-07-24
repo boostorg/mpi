@@ -23,7 +23,18 @@ namespace detail {
 
   template <typename T, typename A>
   T const* c_data(std::vector<T,A> const& v) { return &(v[0]); }
-  
+
+  // Some old MPI implementation (OpenMPI 1.6 for example) have non 
+  // conforming API w.r.t. constness.
+  // We choose to fix this trhough this converter in order to 
+  // explain/remember why we're doing this and remove it easilly 
+  // when support for those MPI is dropped.
+  // The fix is as specific (un templatized, for one) as possible 
+  // in order to encourage it usage for the probleme at hand.
+  // Problematic API include MPI_Send
+  inline
+  void *unconst(void const* addr) { return const_cast<void*>(addr); }
+
 } } }
 
 #endif
