@@ -137,6 +137,7 @@ struct bitwise_or
  */
 template<typename T>
 struct logical_xor
+{
   typedef T first_argument_type;
   typedef T second_argument_type;
   typedef T result_type;
