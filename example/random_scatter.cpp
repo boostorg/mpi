@@ -7,25 +7,31 @@
 // An example using Boost.MPI's gather(): [main]
 
 #include <boost/mpi.hpp>
+#include <boost/mpi/collectives.hpp>
 #include <iostream>
 #include <cstdlib>
+#include <vector>
+
 namespace mpi = boost::mpi;
 
 int main(int argc, char* argv[])
 {
   mpi::environment env(argc, argv);
   mpi::communicator world;
-
+  
   std::srand(time(0) + world.rank());
-  int my_number = std::rand();
+  std::vector<int> all;
+  int mine = -1;
   if (world.rank() == 0) {
-    std::vector<int> all_numbers;
-    gather(world, my_number, all_numbers, 0);
-    for (int proc = 0; proc < world.size(); ++proc)
-      std::cout << "Process #" << proc << " thought of " << all_numbers[proc]
-                << std::endl;
-  } else {
-    gather(world, my_number, 0);
+    all.resize(world.size());
+    std::generate(all.begin(), all.end(), std::rand);
+  }
+  mpi::scatter(world, all, mine, 0);
+  for (int r = 0; r < world.size(); ++r) {
+    world.barrier();
+    if (r == world.rank()) {
+      std::cout << "Rank " << r << " got " << mine << '\n';
+    }
   }
   return 0;
 }

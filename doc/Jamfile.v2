@@ -12,6 +12,7 @@ doxygen mpi_autodoc
   : [ glob
     ../../../boost/mpi.hpp
     ../../../boost/mpi/allocator.hpp
+    ../../../boost/mpi/cartesian_communicator.hpp
     ../../../boost/mpi/collectives.hpp
     ../../../boost/mpi/collectives_fwd.hpp
     ../../../boost/mpi/communicator.hpp

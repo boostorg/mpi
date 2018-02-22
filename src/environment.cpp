@@ -247,4 +247,11 @@ bool environment::is_main_thread()
   return static_cast<bool>(isit);
 }
 
+std::pair<int, int> environment::version()
+{
+  int major, minor;
+  BOOST_MPI_CHECK_RESULT(MPI_Get_version, (&major, &minor));
+  return std::make_pair(major, minor);
+}
+
 } } // end namespace boost::mpi

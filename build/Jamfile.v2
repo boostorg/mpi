@@ -24,6 +24,7 @@ project boost/mpi
 lib boost_mpi
   :
     broadcast.cpp
+    cartesian_communicator.cpp
     communicator.cpp
     computation_tree.cpp
     content_oarchive.cpp
@@ -42,6 +43,7 @@ lib boost_mpi
     request.cpp
     text_skeleton_oarchive.cpp
     timer.cpp
+    offsets.cpp
   : # Requirements
     <library>../../serialization/build//boost_serialization
     <library>/mpi//mpi [ mpi.extra-requirements ]
