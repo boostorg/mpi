@@ -29,6 +29,7 @@ lib boost_mpi
     computation_tree.cpp
     content_oarchive.cpp
     environment.cpp
+    error_string.cpp
     exception.cpp
     graph_communicator.cpp
     group.cpp
