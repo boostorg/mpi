@@ -54,7 +54,9 @@ int test_main(int argc, char* argv[])
     fmt << msg << i;
     auto found = std::find(ss.begin(), ss.end(), fmt.str());
     BOOST_CHECK(found != ss.end());
-    std::cout << "Got msg from " << i << '\n';    
+    fmt.str("");
+    fmt << "Proc " << world.rank() << " Got msg from " << i << '\n';
+    std::cout << fmt.str();
   }
 
   mpi::wait_all(std::begin(sreqs), std::end(sreqs));
