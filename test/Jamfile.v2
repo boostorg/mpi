@@ -39,6 +39,7 @@ test-suite mpi
   [ mpi-test reduce_test  ]
   [ mpi-test ring_test : : : 2 3 4 7 8 13 17 ]
   [ mpi-test sendrecv_test : : : 1 4 7 48 ]
+  [ mpi-test wait_any_test : : : 1 4 7 20 ]
   [ mpi-test scan_test  ]
   [ mpi-test scatter_test  ]
   # Note: Microsoft MPI fails all skeleton-content tests
