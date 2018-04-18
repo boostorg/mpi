@@ -9,8 +9,7 @@
 
 namespace boost { namespace mpi {
 
-std::string
-error_string(int err)
+std::string error_string(int err)
 {
   char buffer[MPI_MAX_ERROR_STRING];
   int len;
