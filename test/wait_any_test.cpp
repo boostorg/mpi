@@ -42,12 +42,9 @@ int test_main(int argc, char* argv[])
   }
   
   for (int i = 0; i < world.size(); ++i) {
-    mpi::status status;
-    decltype(rreqs.begin()) it;
-    std::tie(status, it) = mpi::wait_any(rreqs.begin(), rreqs.end());
-    int sender = status.source();
+    std::pair<mpi::status, requests::iterator> completed = mpi::wait_any(rreqs.begin(), rreqs.end());
     std::ostringstream out;
-    out << "Proc " << world.rank() << " got message from " << status.source() << '\n';
+    out << "Proc " << world.rank() << " got message from " << completed.first.source() << '\n';
     std::cout << out.str();
   }
   
