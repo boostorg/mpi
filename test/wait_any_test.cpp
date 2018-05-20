@@ -23,7 +23,8 @@ int test_main(int argc, char* argv[])
   mpi::communicator world;
   
   std::vector<std::string> ss(world.size());
-  std::vector<mpi::request> rreqs;
+  typedef std::vector<mpi::request> requests;
+  requests rreqs;
   
   std::set<int> pending_senders;
   for (int i = 0; i < world.size(); ++i) {
@@ -35,7 +36,7 @@ int test_main(int argc, char* argv[])
   std::string msg = "Hello, World! this is ";
   fmt << msg << world.rank();
 
-  std::vector<mpi::request> sreqs;
+  requests sreqs;
   for (int i = 0; i < world.size(); ++i) {
     sreqs.push_back(world.isend(i, world.rank(), fmt.str()));
   }
@@ -46,7 +47,8 @@ int test_main(int argc, char* argv[])
     std::tie(status, it) = mpi::wait_any(std::begin(rreqs), std::end(rreqs));
     int sender = status.source();
     std::ostringstream out;
-    out << "Proc " << world.rank() << " got message from " << status.source();
+    out << "Proc " << world.rank() << " got message from " << status.source() << '\n';
+    std::cout << out.str();
   }
   
   for (int i = 0; i < world.size(); ++i) {
