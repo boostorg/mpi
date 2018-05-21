@@ -118,6 +118,17 @@ else if ! ( --without-mpi in  [ modules.peek : ARGV ] )
       : "note: to suppress this message, pass \"--without-mpi\" to bjam."
       : "note: otherwise, you can safely ignore this message." 
       ;
+
+  project boost/mpi
+    : source-location ../src
+    ;
+  lib boost_seqmpi
+    : #sources:
+     error_string.cpp
+    : # Requirements
+     <define>BOOST_MPI_SEQ=1
+    ;
+  libraries += boost_seqmpi ;
 }
 
 boost-install $(libraries) ;

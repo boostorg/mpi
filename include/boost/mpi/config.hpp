@@ -17,7 +17,11 @@
    conflict with the versions in <stdio.h> and <cstdio>. */
 #define MPICH_IGNORE_CXX_SEEK 1
 
+#ifndef BOOST_MPI_SEQ
 #include <mpi.h>
+#else
+#include <boost/mpi/seq.hpp>
+#endif
 #include <boost/config.hpp>
 
 /** @brief Comment this macro is you are running in an heterogeneous environment.

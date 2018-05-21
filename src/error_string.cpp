@@ -9,6 +9,7 @@
 
 namespace boost { namespace mpi {
 
+#ifndef BOOST_MPI_SEQ
 std::string error_string(int err)
 {
   char buffer[MPI_MAX_ERROR_STRING];
@@ -27,5 +28,10 @@ std::string error_string(int err)
     return out.str();
   }
 }
-    
+#else // BOOST_MPI_SEQ
+std::string error_string(int err)
+{
+  return err == MPI_SUCCESS ? "No error" : "Unknown error";
+}
+#endif // BOOST_MPI_SEQ
 } }
