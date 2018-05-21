@@ -20,6 +20,7 @@ namespace boost { namespace mpi {
 class request;
 class communicator;
 
+#ifndef BOOST_MPI_SEQ
 /** @brief Contains information about a message that has been or can
  *  be received.
  *
@@ -100,7 +101,25 @@ class BOOST_MPI_DECL status
   friend class communicator;
   friend class request;
 };
+#else // BOOST_MPI_SEQ
+// Does not make much sense to asyncronously send message to self. 
+// So this will be short
+class BOOST_MPI_DECL status
+{
+ public:
+  status(int tag, int count) : m_tag(tag), m_count(count) { }
+  
+  int source() const { return 0; }
+  int tag() const { return m_tag; }
+  int error() const { return MPI_SUCCESS; }
+  bool cancelled() const { false;}
+  template<typename T> optional<int> count() const { return m_count; }
 
+ private:
+  int m_tag;
+  int m_count;
+};
+#endif // BOOST_MPI_SEQ
 
 } } // end namespace boost::mpi
 
