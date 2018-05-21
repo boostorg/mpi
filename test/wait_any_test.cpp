@@ -51,7 +51,7 @@ int test_main(int argc, char* argv[])
   for (int i = 0; i < world.size(); ++i) {
     std::ostringstream fmt;
     fmt << msg << i;
-    auto found = std::find(ss.begin(), ss.end(), fmt.str());
+    std::vector<std::string>::iterator found = std::find(ss.begin(), ss.end(), fmt.str());
     BOOST_CHECK(found != ss.end());
     fmt.str("");
     fmt << "Proc " << world.rank() << " Got msg from " << i << '\n';
