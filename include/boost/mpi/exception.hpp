@@ -68,12 +68,7 @@ class BOOST_MPI_DECL exception : public std::exception
    * @brief Returns the MPI error class associated with the error that
    * triggered this exception.
    */
-  int error_class() const 
-  { 
-    int result;
-    MPI_Error_class(result_code_, &result);
-    return result;
-  }
+  int error_class() const;
 
  protected:
   /// The MPI routine that triggered the error
@@ -86,6 +81,7 @@ class BOOST_MPI_DECL exception : public std::exception
   std::string message;
 };
 
+#ifndef BOOST_MPI_SEQ
 /**
  * Call the MPI routine MPIFunc with arguments Args (surrounded by
  * parentheses). If the result is not MPI_SUCCESS, use
@@ -97,10 +93,12 @@ class BOOST_MPI_DECL exception : public std::exception
    int _check_result = MPIFunc Args;                                    \
    assert(_check_result == MPI_SUCCESS);                                \
    if (_check_result != MPI_SUCCESS)                                    \
-     boost::throw_exception(boost::mpi::exception(#MPIFunc,   \
-                                                             _check_result)); \
+     boost::throw_exception(boost::mpi::exception(#MPIFunc,             \
+                                                       _check_result)); \
  }
-
+#else
+#define BOOST_MPI_CHECK_RESULT( MPIFunc, Args ) 
+#endif
 } } // end namespace boost::mpi
 
 #endif // BOOST_MPI_EXCEPTION_HPP

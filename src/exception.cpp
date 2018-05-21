@@ -21,4 +21,18 @@ exception::exception(const char* routine, int result_code)
 
 exception::~exception() throw() { }
 
+#ifndef BOOST_MPI_SEQ
+int exception::error_class() const
+{ 
+  int result;
+  MPI_Error_class(result_code_, &result);
+  return result;
+}
+#else // BOOST_MPI_SEQ
+int exception::error_class() const
+{ 
+  // This approximation should do in sequential mode.
+  return result_code_;
+}
+#endif // BOOST_MPI_SEQ
 } } // end namespace boost::mpi

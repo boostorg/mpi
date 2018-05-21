@@ -125,6 +125,7 @@ else if ! ( --without-mpi in  [ modules.peek : ARGV ] )
   lib boost_seqmpi
     : #sources:
      error_string.cpp
+     exception.cpp
     : # Requirements
      <define>BOOST_MPI_SEQ=1
     ;
