@@ -182,6 +182,12 @@ int test_main(int argc, char* argv[])
     }
   }
   test_cartesian_topology( world, topo);
-
+#if !defined(BOOST_NO_CXX11_DEFAULTED_MOVES)
+  world.barrier();
+  if (world.rank()==0) {
+    std::cout << "Testing move constructor.\n";
+  }
+  test_cartesian_topology( world, std::move(topo));
+#endif
   return 0;
 }
