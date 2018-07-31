@@ -253,7 +253,7 @@ You can refer to the your specific MPI environment documentation.
 Most of the time though, your wrapper have an option that provide that information, it usually starts with `--show`:
 [pre
 $ mpiicc -show
-icc -I/softs/intel//impi/5.0.3.048/intel64/include -L/softs/intel//impi/5.0.3.048/intel64/lib/release_mt -L/softs/intel//impi/5.0.3.048/intel64/lib -Xlinker --enable-new-dtags -Xlinker -rpath -Xlinker /softs/intel//impi/5.0.3.048/intel64/lib/release_mt -Xlinker -rpath -Xlinker /softs/intel//impi/5.0.3.048/intel64/lib -Xlinker -rpath -Xlinker /opt/intel/mpi-rt/5.0/intel64/lib/release_mt -Xlinker -rpath -Xlinker /opt/intel/mpi-rt/5.0/intel64/lib -lmpifort -lmpi -lmpigi -ldl -lrt -lpthread
+icc -I/softs/...\/include ... -L/softs/...\/lib ... -Xlinker -rpath -Xlinker \/softs/...\/lib .... -lmpi -ldl -lrt -lpthread
 $ 
 ]
 [pre
