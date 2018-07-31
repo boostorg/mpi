@@ -258,11 +258,11 @@ $
 ]
 [pre
 $ mpicc --showme
-icc -I/opt/mpi/bullxmpi/1.2.8.3/include -pthread -L/opt/mpi/bullxmpi/1.2.8.3/lib -lmpi -ldl -lm -lnuma -Wl,--export-dynamic -lrt -lnsl -lutil -lm -ldl
+icc -I/opt/...\/include -pthread -L/opt/...\/lib -lmpi -ldl -lm -lnuma -Wl,--export-dynamic -lrt -lnsl -lutil -lm -ldl
 $ mpicc --showme:compile
 -I/opt/mpi/bullxmpi/1.2.8.3/include -pthread
 $ mpicc --showme:link
--pthread -L/opt/mpi/bullxmpi/1.2.8.3/lib -lmpi -ldl -lm -lnuma -Wl,--export-dynamic -lrt -lnsl -lutil -lm -ldl
+-pthread -L/opt/...\/lib -lmpi -ldl -lm -lnuma -Wl,--export-dynamic -lrt -lnsl -lutil -lm -ldl
 $ 
 ]
 
