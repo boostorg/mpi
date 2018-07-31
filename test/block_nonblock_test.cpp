@@ -6,12 +6,15 @@
 
 namespace mpi = boost::mpi;
 
-bool test(mpi::communicator const& comm, std::vector<int> const& ref, bool iswap)
+bool test(mpi::communicator const& comm, std::vector<int> const& ref, bool iswap, bool alloc)
 {
   int rank = comm.rank();
   
   if (rank == 0) {
     std::vector<int> data;
+    if (alloc) {
+      data.resize(ref.size());
+    }
     if (iswap) {
       auto req = comm.irecv(1, 0, data);
       req.wait();
@@ -45,7 +48,9 @@ int main(int argc, char **argv)
   for(int i = 0; i < int(ref.size()); ++i) {
     ref[i] = i;
   }
-  bool send  = test(world, ref, true);
-  bool isend = test(world, ref, false);
+  bool send_alloc  = test(world, ref, true,  true);
+  bool isend_alloc = test(world, ref, false, true);
+  bool send  = test(world, ref, true,  false);
+  bool isend = test(world, ref, false, false);
   return send && isend ? 0 : 1;
 }
