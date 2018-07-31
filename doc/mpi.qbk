@@ -917,7 +917,7 @@ The use of `mpi::minimum<int>` indicates that the minimum value
 should be computed. `mpi::minimum<int>` is a binary function object
 that compares its two parameters via `<` and returns the smaller
 value. Any associative binary function or function object will
-work. For instance, to concatenate strings with `reduce` one could use
+work provided it's stateless. For instance, to concatenate strings with `reduce` one could use
 the function object `std::plus<std::string>` (`string_cat.cpp`):
 
   #include <boost/mpi.hpp>
@@ -957,6 +957,7 @@ following output:
 The result is zero one two three four five six
 ]
 
+[h4 Binary operations for reduce]
 Any kind of binary function objects can be used with `reduce`. For
 instance, and there are many such function objects in the C++ standard
 `<functional>` header and the Boost.MPI header
@@ -1000,6 +1001,10 @@ objects in `<functional>` to `MPI_Op` values predefined by MPI (e.g.,
 take advantage of this mapping, see the class template [classref
 boost::mpi::is_mpi_op `is_mpi_op`].
 
+[warning Due to the unerlying MPI limitations, it is important to note that the opertation must be stateless.]
+
+[h4 All process variant]
+
 Like [link mpi.gather `gather`], `reduce` has an "all"
 variant called [funcref boost::mpi::all_reduce `all_reduce`]
 that performs the reduction operation and broadcasts the result to all
@@ -1023,7 +1028,7 @@ the `random_min.cpp` example:
     int my_number = std::rand();
     int minimum;
   
-    all_reduce(world, my_number, minimum, mpi::minimum<int>());
+    mpi::all_reduce(world, my_number, minimum, mpi::minimum<int>());
     
     if (world.rank() == 0) {
         std::cout << "The minimum value is " << minimum << std::endl;
@@ -1054,7 +1059,7 @@ flag of the MPI C mapping), as in the following example (`in_place_global_min.cp
     std::srand(world.rank());
     int my_number = std::rand();
   
-    all_reduce(world, my_number, mpi::minimum<int>());
+    mpi::all_reduce(world, my_number, mpi::minimum<int>());
     
     if (world.rank() == 0) {
         std::cout << "The minimum value is " << my_number << std::endl;
