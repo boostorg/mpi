@@ -256,7 +256,7 @@ $ mpiicc -show
 icc -I/softs/intel//impi/5.0.3.048/intel64/include -L/softs/intel//impi/5.0.3.048/intel64/lib/release_mt -L/softs/intel//impi/5.0.3.048/intel64/lib -Xlinker --enable-new-dtags -Xlinker -rpath -Xlinker /softs/intel//impi/5.0.3.048/intel64/lib/release_mt -Xlinker -rpath -Xlinker /softs/intel//impi/5.0.3.048/intel64/lib -Xlinker -rpath -Xlinker /opt/intel/mpi-rt/5.0/intel64/lib/release_mt -Xlinker -rpath -Xlinker /opt/intel/mpi-rt/5.0/intel64/lib -lmpifort -lmpi -lmpigi -ldl -lrt -lpthread
 $ 
 ]
-[
+[pre
 $ mpicc --showme
 icc -I/opt/mpi/bullxmpi/1.2.8.3/include -pthread -L/opt/mpi/bullxmpi/1.2.8.3/lib -lmpi -ldl -lm -lnuma -Wl,--export-dynamic -lrt -lnsl -lutil -lm -ldl
 $ mpicc --showme:compile
