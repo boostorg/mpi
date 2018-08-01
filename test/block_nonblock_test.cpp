@@ -3,6 +3,7 @@
 #include <iterator>
 #include <boost/mpi.hpp>
 #include <boost/serialization/vector.hpp>
+#include <boost/test/minimal.hpp>
 
 namespace mpi = boost::mpi;
 
@@ -54,7 +55,7 @@ bool test(mpi::communicator const& comm, std::vector<T> const& ref, bool iswap, 
   }
 }
 
-int main(int argc, char **argv)
+int test_main(int argc, char **argv)
 {
   mpi::environment env(argc, argv);
   mpi::communicator world;
