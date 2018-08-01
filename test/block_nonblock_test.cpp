@@ -23,7 +23,7 @@ bool test(mpi::communicator const& comm, std::vector<T> const& ref, bool iswap, 
     }
   }
   if (rank == 0) {
-    std::vector<int> data;
+    std::vector<T> data;
     if (alloc) {
       data.resize(ref.size());
     }
@@ -34,15 +34,15 @@ bool test(mpi::communicator const& comm, std::vector<T> const& ref, bool iswap, 
       comm.recv(1, 0, data);
     }
     std::cout << "Process 0 received " << data.size() << " elements :" << std::endl;
-    std::copy(data.begin(), data.end(), std::ostream_iterator<int>(std::cout, " "));
+    std::copy(data.begin(), data.end(), std::ostream_iterator<T>(std::cout, " "));
     std::cout << std::endl;
     std::cout << "While expecting " << ref.size() << " elements :" << std::endl;
-    std::copy(ref.begin(),  ref.end(),  std::ostream_iterator<int>(std::cout, " "));
+    std::copy(ref.begin(),  ref.end(),  std::ostream_iterator<T>(std::cout, " "));
     std::cout << std::endl;
     return (data == ref);
   } else {
     if (rank == 1) {
-      std::vector<int> vec = ref;
+      std::vector<T> vec = ref;
       if (iswap) {
         comm.send(0, 0, vec);
       } else {
@@ -58,10 +58,19 @@ int main(int argc, char **argv)
 {
   mpi::environment env(argc, argv);
   mpi::communicator world;
-  std::vector<int> ref(13); // don't assume we're lucky
-  for(int i = 0; i < int(ref.size()); ++i) {
-    ref[i] = i;
+
+  std::vector<int> integers(13); // don't assume we're lucky
+  for(int i = 0; i < int(integers.size()); ++i) {
+    integers[i] = i;
   }
+
+  std::vector<std::string> strings(13); // don't assume we're lucky
+  for(int i = 0; i < int(strings.size()); ++i) {
+    std::ostringstream fmt;
+    fmt << "S" << i;
+    strings[i] = fmt.str();
+  }
+  
   bool block_to_non_block = true;
   bool non_block_to_block = true;
   if (argc == 2) {
@@ -78,12 +87,16 @@ int main(int argc, char **argv)
   }
   bool passed = true;
   if (block_to_non_block) {
-    passed = passed && test(world, ref, true,  true);
-    passed = passed && test(world, ref, true,  false);
+    passed = passed && test(world, integers, true,  true);
+    passed = passed && test(world, integers, true,  false);
+    passed = passed && test(world, strings, true,  true);
+    passed = passed && test(world, strings, true,  false);
   }
   if (non_block_to_block) {
-    passed = passed && test(world, ref, false,  true);
-    passed = passed && test(world, ref, false,  false);
+    passed = passed && test(world, integers, false,  true);
+    passed = passed && test(world, integers, false,  false);
+    passed = passed && test(world, strings, false,  true);
+    passed = passed && test(world, strings, false,  false);
   }
   passed = mpi::all_reduce(world, passed, std::logical_and<bool>());
   return passed ? 0 : 1;
