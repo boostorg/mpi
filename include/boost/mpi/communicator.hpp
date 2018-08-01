@@ -610,6 +610,17 @@ class BOOST_MPI_DECL communicator
   template<typename T>
   request isend(int dest, int tag, const T* values, int n) const;
 
+  template<typename T, class A>
+  request isend(int dest, int tag, const std::vector<T,A>& values) const;
+
+  template<typename T, class A>
+  request isend_vector(int dest, int tag, const std::vector<T,A>& values,
+                       mpl::true_) const;
+
+  template<typename T, class A>
+  request isend_vector(int dest, int tag, const std::vector<T,A>& values,
+                       mpl::false_) const;
+
   /**
    *  @brief Send a message to another process without any data
    *  without blocking.
@@ -1551,6 +1562,35 @@ request communicator::isend(int dest, int tag, const T& value) const
   return this->isend_impl(dest, tag, value, is_mpi_datatype<T>());
 }
 
+template<typename T, class A>
+request communicator::isend(int dest, int tag, const std::vector<T,A>& values) const
+{
+  return this->isend_vector(dest, tag, values, is_mpi_datatype<T>());
+}
+
+template<typename T, class A>
+request
+communicator::isend_vector(int dest, int tag, const std::vector<T,A>& values,
+                           mpl::true_) const
+{
+  std::size_t size = values.size();
+  request req = this->isend_impl(dest, tag, size, mpl::true_());
+  BOOST_MPI_CHECK_RESULT(MPI_Isend,
+                         (const_cast<T*>(values.data()), size, 
+                          get_mpi_datatype<T>(),
+                          dest, tag, MPI_Comm(*this), &req.m_requests[1]));
+  return req;
+  
+}
+
+template<typename T, class A>
+request
+communicator::isend_vector(int dest, int tag, const std::vector<T,A>& values,
+                           mpl::false_ no) const 
+{
+  return this->isend_impl(dest, tag, values, no);
+}
+
 template<typename T>
 request
 communicator::array_isend_impl(int dest, int tag, const T* values, int n,
@@ -1964,9 +2004,9 @@ communicator::irecv_vector(int source, int tag, std::vector<T,A>& values,
 template<typename T, class A>
 request
 communicator::irecv_vector(int source, int tag, std::vector<T,A>& values, 
-                           mpl::false_) const
+                           mpl::false_ no) const
 {
-  return irecv_impl(source, tag, values, mpl::false_());
+  return irecv_impl(source, tag, values, no);
 }
 
 template<typename T, typename A>
