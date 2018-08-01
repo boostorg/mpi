@@ -6,7 +6,8 @@
 
 namespace mpi = boost::mpi;
 
-bool test(mpi::communicator const& comm, std::vector<int> const& ref, bool iswap, bool alloc)
+template<typename T>
+bool test(mpi::communicator const& comm, std::vector<T> const& ref, bool iswap, bool alloc)
 {
   int rank = comm.rank();
   if (rank == 0) {
