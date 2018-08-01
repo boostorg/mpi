@@ -32,10 +32,10 @@ bool test(mpi::communicator const& comm, std::vector<int> const& ref, bool iswap
     } else {
       comm.recv(1, 0, data);
     }
-    std::cout << "Process 0 received:" << std::endl;
+    std::cout << "Process 0 received " << data.size() << " elements :" << std::endl;
     std::copy(data.begin(), data.end(), std::ostream_iterator<int>(std::cout, " "));
     std::cout << std::endl;
-    std::cout << "While expecting:" << std::endl;
+    std::cout << "While expecting " << ref.size() << " elements :" << std::endl;
     std::copy(ref.begin(),  ref.end(),  std::ostream_iterator<int>(std::cout, " "));
     std::cout << std::endl;
     return (data == ref);
