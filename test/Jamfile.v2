@@ -48,7 +48,8 @@ test-suite mpi
   [ mpi-test cartesian_topology_test : : : 24 ]
   [ mpi-test pointer_test : : : 2 ]
   [ mpi-test groups_test  ]
-  [ mpi-test block_nonblock_test : : : 2 ]
+  [ mpi-test block_nonblock_test-b2nb : block_nonblock_test.cpp : <testing.arg>"b2nb" : 2 ]
+  [ mpi-test block_nonblock_test-nb2b : block_nonblock_test.cpp : <testing.arg>"nb2b" : 2 ]
   # tests that require -std=c++11
   [ mpi-test sendrecv_vector : : : 2 ]
   ;

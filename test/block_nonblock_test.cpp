@@ -61,11 +61,29 @@ int main(int argc, char **argv)
   for(int i = 0; i < int(ref.size()); ++i) {
     ref[i] = i;
   }
-  bool send_alloc  = test(world, ref, true,  true);
-  bool isend_alloc = test(world, ref, false, true);
-  bool send  = test(world, ref, true,  false);
-  bool isend = test(world, ref, false, false);
-  bool local_passed = send && isend && send_alloc && isend_alloc;
-  bool passed = mpi::all_reduce(world, local_passed, std::logical_and<bool>());
+  bool block_to_non_block = true;
+  bool non_block_to_block = true;
+  if (argc == 2) {
+    if (std::string(argv[1]) == "b2nb") {
+      non_block_to_block = false;
+    } else if (std::string(argv[1]) == "nb2b") {
+      block_to_non_block = false;
+    } else {
+      if (world.rank() == 0) {
+        std::cerr << "Usage: " << argv[0] << " [<n2nb|nb2b]\n";
+      }
+      return -1;
+    }
+  }
+  bool passed = true;
+  if (block_to_non_block) {
+    passed = passed && test(world, ref, true,  true);
+    passed = passed && test(world, ref, true,  false);
+  }
+  if (non_block_to_block) {
+    passed = passed && test(world, ref, false,  true);
+    passed = passed && test(world, ref, false,  false);
+  }
+  passed = mpi::all_reduce(world, passed, std::logical_and<bool>());
   return passed ? 0 : 1;
 }
