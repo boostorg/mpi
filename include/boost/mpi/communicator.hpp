@@ -265,9 +265,17 @@ class BOOST_MPI_DECL communicator
    *  a single MPI_Send call. For variable-length data, e.g.,
    *  serialized types and packed archives, two messages will be sent
    *  via MPI_Send: one containing the length of the data and the
-   *  second containing the data itself. Note that the transmission
-   *  mode for variable-length data is an implementation detail that
-   *  is subject to change.
+   *  second containing the data itself.
+   * 
+   *  Std::vectors of MPI data type
+   *  are considered variable size, e.g. their number of elements is 
+   *  unknown and must be transmited (although the serialization process
+   *  is skipped). You can use the array specialized versions of 
+   *  communication methods is both sender and receiver know the vector 
+   *  size.
+   *  
+   *  Note that the transmission mode for variable-length data is an 
+   *  implementation detail that is subject to change.
    *
    *  @param dest The rank of the remote process to which the data
    *  will be sent.
@@ -278,7 +286,7 @@ class BOOST_MPI_DECL communicator
    *
    *  @param value The value that will be transmitted to the
    *  receiver. The type @c T of this value must meet the aforementioned
-   *  criteria for transmission.
+   *  criteria for transmission. 
    */
   template<typename T>
   void send(int dest, int tag, const T& value) const;
@@ -545,7 +553,8 @@ class BOOST_MPI_DECL communicator
    *
    *  @param value The value that will be transmitted to the
    *  receiver. The type @c T of this value must meet the aforementioned
-   *  criteria for transmission.
+   *  criteria for transmission. If modified before transmited, the 
+   *  modification may or may not be transmited.
    *
    *  @returns a @c request object that describes this communication.
    */
