@@ -294,14 +294,6 @@ class BOOST_MPI_DECL communicator
   template<typename T, typename A>
   void send(int dest, int tag, const std::vector<T,A>& value) const;
 
-  template<typename T, typename A>
-  void send_vector(int dest, int tag, const std::vector<T,A>& value, 
-    mpl::true_) const;
-
-  template<typename T, typename A>
-  void send_vector(int dest, int tag, const std::vector<T,A>& value, 
-    mpl::false_) const;
-
   /**
    *  @brief Send the skeleton of an object.
    *
@@ -416,14 +408,6 @@ class BOOST_MPI_DECL communicator
 
   template<typename T, typename A>
   status recv(int source, int tag, std::vector<T,A>& value) const;
-
-  template<typename T, typename A>
-  status recv_vector(int source, int tag, std::vector<T,A>& value,
-    mpl::true_) const;
-
-  template<typename T, typename A>
-  status recv_vector(int source, int tag, std::vector<T,A>& value,
-    mpl::false_) const;
 
   /**
    *  @brief Receive a skeleton from a remote process.
@@ -622,14 +606,6 @@ class BOOST_MPI_DECL communicator
   template<typename T, class A>
   request isend(int dest, int tag, const std::vector<T,A>& values) const;
 
-  template<typename T, class A>
-  request isend_vector(int dest, int tag, const std::vector<T,A>& values,
-                       mpl::true_) const;
-
-  template<typename T, class A>
-  request isend_vector(int dest, int tag, const std::vector<T,A>& values,
-                       mpl::false_) const;
-
   /**
    *  @brief Send a message to another process without any data
    *  without blocking.
@@ -716,14 +692,6 @@ class BOOST_MPI_DECL communicator
 
   template<typename T, typename A>
   request irecv(int source, int tag, std::vector<T,A>& values) const;
-
-  template<typename T, typename A>
-  request irecv_vector(int source, int tag, std::vector<T,A>& values, 
-                       mpl::true_) const;
-
-  template<typename T, typename A>
-  request irecv_vector(int source, int tag, std::vector<T,A>& values, 
-                       mpl::false_) const;
 
   /**
    *  @brief Initiate receipt of a message from a remote process that
@@ -1132,6 +1100,39 @@ class BOOST_MPI_DECL communicator
   request 
   array_irecv_impl(int source, int tag, T* values, int n, mpl::false_) const;
 
+  // We're sending/receivig a vector with associated MPI datatype.
+  // We need to send/recv the size and then the data and make sure 
+  // blocking and non blocking method agrees on the format.
+  template<typename T, typename A>
+  request irecv_vector(int source, int tag, std::vector<T,A>& values, 
+                       mpl::true_) const;
+  template<typename T, class A>
+  request isend_vector(int dest, int tag, const std::vector<T,A>& values,
+                       mpl::true_) const;
+  template<typename T, typename A>
+  void send_vector(int dest, int tag, const std::vector<T,A>& value, 
+		   mpl::true_) const;
+  template<typename T, typename A>
+  status recv_vector(int source, int tag, std::vector<T,A>& value,
+		     mpl::true_) const;
+  
+  // We're sending/receivig a vector with no associated MPI datatype.
+  // We need to send/recv it as an archive and make sure 
+  // blocking and non blocking method agrees on the format.
+  template<typename T, typename A>
+  request irecv_vector(int source, int tag, std::vector<T,A>& values, 
+                       mpl::false_) const;
+  template<typename T, class A>
+  request isend_vector(int dest, int tag, const std::vector<T,A>& values,
+                       mpl::false_) const;
+  template<typename T, typename A>
+  void send_vector(int dest, int tag, const std::vector<T,A>& value, 
+		   mpl::false_) const;
+  template<typename T, typename A>
+  status recv_vector(int source, int tag, std::vector<T,A>& value,
+		     mpl::false_) const;
+
+ protected:
   shared_ptr<MPI_Comm> comm_ptr;
 };
 
