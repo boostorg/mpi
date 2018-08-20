@@ -1,5 +1,6 @@
 # Copyright (C) 2005, 2006 The Trustees of Indiana University.
 # Copyright (C) 2005 Douglas Gregor <doug.gregor -at- gmail.com>
+# Copyright (c) 2018 Stefan Seefeld
 
 # Use, modification and distribution is subject to the Boost Software
 # License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
@@ -11,8 +12,67 @@
 import mpi ;
 import indirect ;
 import python ;
+import option ;
+import regex ;
 
-libraries = ;
+#
+# The `version-suffix` rule really belongs into python.jam, and
+# should be moved there. `split-version` is only duplicated here
+# as a prerequisite. (See https://github.com/boostorg/build/pull/290)
+#
+
+
+# Validate the version string and extract the major/minor part we care about.
+#
+local rule split-version ( version )
+{
+    local major-minor = [ MATCH "^([0-9]+)\.([0-9]+)(.*)$" : $(version) : 1 2 3 ] ;
+    if ! $(major-minor[2]) || $(major-minor[3])
+    {
+        ECHO "Warning: \"using python\" expects a two part (major, minor) version number; got" $(version) instead ;
+
+        # Add a zero to account for the missing digit if necessary.
+        major-minor += 0 ;
+    }
+
+    return $(major-minor[1]) $(major-minor[2]) ;
+}
+
+# Define a version suffix for libraries depending on Python.
+# For example, Boost.Python built for Python 2.7 uses the suffix "27"
+rule version-suffix ( version )
+{
+    local major-minor = [ split-version $(version) ] ;
+    local suffix = $(major-minor:J="") ;
+    return $(suffix) ;
+}
+
+
+# Python build id (for Python libraries only).
+python-id = [ option.get "python-buildid" ] ;
+if $(python-id)
+{
+    PYTHON_ID = [ regex.replace $(python-id) "[*\\/:.\"\']" _ ] ;
+}
+
+rule python-tag ( name : type ? : property-set )
+{
+    local result = $(name) ;
+    if $(type) in STATIC_LIB SHARED_LIB IMPORT_LIB
+    {
+        local version = [ $(property-set).get <python> ] ;
+        local lib-suffix = [ version-suffix $(version) ] ;
+        result = $(result)$(lib-suffix) ;
+    }
+    if $(type) in STATIC_LIB SHARED_LIB IMPORT_LIB && $(PYTHON_ID)
+    {
+        result = $(result)-$(PYTHON_ID) ;
+    }
+
+    # forward to the boost tagging rule
+    return  [ tag $(result) : $(type) : $(property-set) ] ;
+}
+
 
 if [ mpi.configured ]
 {
@@ -57,8 +117,6 @@ lib boost_mpi
     <library>/mpi//mpi [ mpi.extra-requirements ]
   ;
 
-libraries += boost_mpi ;
-
   if [ python.configured ]
   {
             lib boost_mpi_python
@@ -72,9 +130,11 @@ libraries += boost_mpi ;
                 <link>shared:<define>BOOST_MPI_PYTHON_DYN_LINK=1
                 <link>shared:<define>BOOST_PYTHON_DYN_LINK=1
                 <define>BOOST_MPI_PYTHON_SOURCE=1
-                -<tag>@$(BOOST_JAMROOT_MODULE)%$(BOOST_JAMROOT_MODULE).tag
-                <tag>@$(BOOST_JAMROOT_MODULE)%$(BOOST_JAMROOT_MODULE).python-tag
                 <python-debugging>on:<define>BOOST_DEBUG_PYTHON
+                -<tag>@$(BOOST_JAMROOT_MODULE)%$(BOOST_JAMROOT_MODULE).tag
+                <tag>@$(__name__).python-tag
+                <conditional>@python.require-py
+
               : # Default build
                 <link>shared
               : # Usage requirements
@@ -106,8 +166,6 @@ libraries += boost_mpi ;
                 <link>shared <runtime-link>shared
                 <python-debugging>on:<define>BOOST_DEBUG_PYTHON
               ;
-
-            libraries += boost_mpi_python ;
   }
 }
 else if ! ( --without-mpi in  [ modules.peek : ARGV ] )
@@ -119,6 +177,3 @@ else if ! ( --without-mpi in  [ modules.peek : ARGV ] )
       : "note: otherwise, you can safely ignore this message." 
       ;
 }
-
-boost-install $(libraries) ;
-

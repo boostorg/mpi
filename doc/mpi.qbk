@@ -253,16 +253,16 @@ You can refer to the your specific MPI environment documentation.
 Most of the time though, your wrapper have an option that provide that information, it usually starts with `--show`:
 [pre
 $ mpiicc -show
-icc -I/softs/intel//impi/5.0.3.048/intel64/include -L/softs/intel//impi/5.0.3.048/intel64/lib/release_mt -L/softs/intel//impi/5.0.3.048/intel64/lib -Xlinker --enable-new-dtags -Xlinker -rpath -Xlinker /softs/intel//impi/5.0.3.048/intel64/lib/release_mt -Xlinker -rpath -Xlinker /softs/intel//impi/5.0.3.048/intel64/lib -Xlinker -rpath -Xlinker /opt/intel/mpi-rt/5.0/intel64/lib/release_mt -Xlinker -rpath -Xlinker /opt/intel/mpi-rt/5.0/intel64/lib -lmpifort -lmpi -lmpigi -ldl -lrt -lpthread
+icc -I/softs/...\/include ... -L/softs/...\/lib ... -Xlinker -rpath -Xlinker \/softs/...\/lib .... -lmpi -ldl -lrt -lpthread
 $ 
 ]
-[
+[pre
 $ mpicc --showme
-icc -I/opt/mpi/bullxmpi/1.2.8.3/include -pthread -L/opt/mpi/bullxmpi/1.2.8.3/lib -lmpi -ldl -lm -lnuma -Wl,--export-dynamic -lrt -lnsl -lutil -lm -ldl
+icc -I/opt/...\/include -pthread -L/opt/...\/lib -lmpi -ldl -lm -lnuma -Wl,--export-dynamic -lrt -lnsl -lutil -lm -ldl
 $ mpicc --showme:compile
 -I/opt/mpi/bullxmpi/1.2.8.3/include -pthread
 $ mpicc --showme:link
--pthread -L/opt/mpi/bullxmpi/1.2.8.3/lib -lmpi -ldl -lm -lnuma -Wl,--export-dynamic -lrt -lnsl -lutil -lm -ldl
+-pthread -L/opt/...\/lib -lmpi -ldl -lm -lnuma -Wl,--export-dynamic -lrt -lnsl -lutil -lm -ldl
 $ 
 ]
 
@@ -568,7 +568,7 @@ boost::mpi::request::wait wait] method). Multiple requests
 can be completed at the same time with the [funcref
 boost::mpi::wait_all wait_all] operation. 
 
-Important note: The MPI standard requires users to keep the request
+[important The MPI standard requires users to keep the request
 handle for a non-blocking communication, and to call the "wait"
 operation (or successfully test for completion) to complete the send
 or receive. Unlike most C MPI implementations, which allow the user to
@@ -579,7 +579,7 @@ completed. Moreover, the MPI standard does not guarantee that the
 receive makes any progress before a call to "wait" or "test", although
 most implementations of the C MPI do allow receives to progress before
 the call to "wait" or "test". Boost.MPI, on the other hand, generally
-requires "test" or "wait" calls to make progress.
+requires "test" or "wait" calls to make progress.]
 
 If you run this program multiple times, you may see some strange
 results: namely, some runs will produce:
@@ -917,7 +917,7 @@ The use of `mpi::minimum<int>` indicates that the minimum value
 should be computed. `mpi::minimum<int>` is a binary function object
 that compares its two parameters via `<` and returns the smaller
 value. Any associative binary function or function object will
-work. For instance, to concatenate strings with `reduce` one could use
+work provided it's stateless. For instance, to concatenate strings with `reduce` one could use
 the function object `std::plus<std::string>` (`string_cat.cpp`):
 
   #include <boost/mpi.hpp>
@@ -957,6 +957,7 @@ following output:
 The result is zero one two three four five six
 ]
 
+[h4 Binary operations for reduce]
 Any kind of binary function objects can be used with `reduce`. For
 instance, and there are many such function objects in the C++ standard
 `<functional>` header and the Boost.MPI header
@@ -1000,6 +1001,10 @@ objects in `<functional>` to `MPI_Op` values predefined by MPI (e.g.,
 take advantage of this mapping, see the class template [classref
 boost::mpi::is_mpi_op `is_mpi_op`].
 
+[warning Due to the unerlying MPI limitations, it is important to note that the opertation must be stateless.]
+
+[h4 All process variant]
+
 Like [link mpi.gather `gather`], `reduce` has an "all"
 variant called [funcref boost::mpi::all_reduce `all_reduce`]
 that performs the reduction operation and broadcasts the result to all
@@ -1023,7 +1028,7 @@ the `random_min.cpp` example:
     int my_number = std::rand();
     int minimum;
   
-    all_reduce(world, my_number, minimum, mpi::minimum<int>());
+    mpi::all_reduce(world, my_number, minimum, mpi::minimum<int>());
     
     if (world.rank() == 0) {
         std::cout << "The minimum value is " << minimum << std::endl;
@@ -1054,7 +1059,7 @@ flag of the MPI C mapping), as in the following example (`in_place_global_min.cp
     std::srand(world.rank());
     int my_number = std::rand();
   
-    all_reduce(world, my_number, mpi::minimum<int>());
+    mpi::all_reduce(world, my_number, mpi::minimum<int>());
     
     if (world.rank() == 0) {
         std::cout << "The minimum value is " << my_number << std::endl;
