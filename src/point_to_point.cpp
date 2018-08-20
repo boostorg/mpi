@@ -89,7 +89,13 @@ packed_archive_recv(MPI_Comm comm, int source, int tag, packed_iarchive& ar,
                           source, tag, comm, &status));
 
   // Prepare input buffer and receive the message
-  ar.resize(count);
+  BOOST_MPI_CHECK_RESULT(MPI_Probe,
+                         (status.MPI_SOURCE, status.MPI_TAG,
+                          comm, &status));
+  int payload_count;
+  BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&status, MPI_PACKED, &payload_count));
+  ar.resize(payload_count);
+  assert(payload_count == count);
   BOOST_MPI_CHECK_RESULT(MPI_Recv,
                          (ar.address(), count, MPI_PACKED,
                           status.MPI_SOURCE, status.MPI_TAG,
