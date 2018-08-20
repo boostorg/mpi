@@ -1760,17 +1760,24 @@ request::handle_serialized_irecv(request* self, request_action action)
       // Wait for the count message to complete
       BOOST_MPI_CHECK_RESULT(MPI_Wait,
                              (self->m_requests, &stat.m_status));
-      // Resize our buffer and get ready to receive its data
+      // Blocking (since we are waiting) receive of data.
+      BOOST_MPI_CHECK_RESULT(MPI_Probe,
+                             (stat.m_status.MPI_SOURCE, stat.m_status.MPI_TAG,
+                              data->comm, &stat.m_status));
+      int payload_count;
+      BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&stat.m_status, MPI_PACKED, &payload_count));
+      data->count = payload_count;
       data->ia.resize(data->count);
-      BOOST_MPI_CHECK_RESULT(MPI_Irecv,
+      BOOST_MPI_CHECK_RESULT(MPI_Recv,
                              (data->ia.address(), data->ia.size(), MPI_PACKED,
                               stat.source(), stat.tag(), 
-                              MPI_Comm(data->comm), self->m_requests + 1));
+                              MPI_Comm(data->comm), &stat.m_status));
+      self->m_requests[1] = MPI_REQUEST_NULL;
+    } else {
+      // Wait until we have received the entire message
+      BOOST_MPI_CHECK_RESULT(MPI_Wait,
+                             (self->m_requests + 1, &stat.m_status));
     }
-
-    // Wait until we have received the entire message
-    BOOST_MPI_CHECK_RESULT(MPI_Wait,
-                           (self->m_requests + 1, &stat.m_status));
 
     data->deserialize(stat);
     return stat;
