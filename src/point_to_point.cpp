@@ -65,16 +65,16 @@ void
 packed_archive_recv(MPI_Comm comm, int source, int tag, packed_iarchive& ar,
                     MPI_Status& status)
 {
-  BOOST_MPI_CHECK_RESULT(MPI_Probe,
-                         (status.MPI_SOURCE, status.MPI_TAG,
-                          comm, &status));
+  MPI_Message message;
+  BOOST_MPI_CHECK_RESULT(MPI_Mprobe,
+                         (source, tag, comm, 
+                          &message, &status));
   int count;
   BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&status, MPI_PACKED, &count));
   ar.resize(count);
-  BOOST_MPI_CHECK_RESULT(MPI_Recv,
+  BOOST_MPI_CHECK_RESULT(MPI_Mrecv,
                          (ar.address(), count, MPI_PACKED,
-                          status.MPI_SOURCE, status.MPI_TAG,
-                          comm, &status));
+                          &message, &status));
 }
 
 } } } // end namespace boost::mpi::detail
