@@ -17,6 +17,9 @@
 #include <exception>
 #include <cassert>
 #include <string>
+#ifndef NDEBUG
+#include <iostream>
+#endif
 #include <boost/config.hpp>
 #include <boost/throw_exception.hpp>
 
@@ -92,14 +95,25 @@ class BOOST_MPI_DECL exception : public std::exception
  * boost::throw_exception to throw an exception or abort, depending on
  * BOOST_NO_EXCEPTIONS.
  */
-#define BOOST_MPI_CHECK_RESULT( MPIFunc, Args )                         \
+#define BOOST_MPI_CHECK_RESULT_IMPL( MPIFunc, Args, Abrt )              \
  {                                                                      \
    int _check_result = MPIFunc Args;                                    \
-   assert(_check_result == MPI_SUCCESS);                                \
-   if (_check_result != MPI_SUCCESS)                                    \
-     boost::throw_exception(boost::mpi::exception(#MPIFunc,   \
-                                                             _check_result)); \
+   if (_check_result != MPI_SUCCESS) {                                  \
+      boost::mpi::exception _mpi_error(#MPIFunc, _check_result);        \
+      if (Abrt) {                                                       \
+         std::cerr << _mpi_error.what() << '\n';                        \
+         std::abort();                                                  \
+      }                                                                 \
+      boost::throw_exception(_mpi_error);                               \
+   }                                                                    \
  }
+#ifdef NDEBUG
+# define BOOST_MPI_CHECK_RESULT( MPIFunc, Args)      \
+  BOOST_MPI_CHECK_RESULT_IMPL( MPIFunc, Args, false) 
+#else
+# define BOOST_MPI_CHECK_RESULT( MPIFunc, Args)      \
+   BOOST_MPI_CHECK_RESULT_IMPL( MPIFunc, Args, true) 
+#endif
 
 } } // end namespace boost::mpi
 
