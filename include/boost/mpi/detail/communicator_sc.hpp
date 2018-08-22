@@ -45,8 +45,7 @@ template<typename T>
 request
 communicator::isend(int dest, int tag, const skeleton_proxy<T>& proxy) const
 {
-  shared_ptr<packed_skeleton_oarchive> 
-    archive(new packed_skeleton_oarchive(*this));
+  shared_ptr<packed_skeleton_oarchive> archive(new packed_skeleton_oarchive(*this));
 
   *archive << proxy.object;
   request result = isend(dest, tag, *archive);
@@ -54,41 +53,79 @@ communicator::isend(int dest, int tag, const skeleton_proxy<T>& proxy) const
   return result;
 }
 
-namespace detail {
-  template<typename T>
-  struct serialized_irecv_data<const skeleton_proxy<T> >
-  {
-    serialized_irecv_data(const communicator& comm, int source, int tag, 
-                          skeleton_proxy<T> proxy)
-      : comm(comm), source(source), tag(tag), isa(comm), 
-        ia(isa.get_skeleton()), proxy(proxy) { }
+template<class T>
+struct request::probe_info_const_skeleton_proxy : public request::probe_info_base {
+  probe_info_const_skeleton_proxy(int source, int tag, const MPI_Comm& comm, const skeleton_proxy<T>& proxy)
+    : probe_info_base(source, tag, comm),
+      m_isa(comm),
+      m_archive(m_isa.get_skeleton()),
+      m_proxy(proxy) {}
+  
+  packed_iarchive& archive() { return m_archive;}
+  void deserialize(status& stat) {
+    m_isa >> m_proxy.object;
+    stat.m_count = 1;
+  }
+  
+  packed_skeleton_iarchive m_isa;
+  packed_iarchive&         m_archive;
+  skeleton_proxy<T>        m_proxy;
+};
 
-    void deserialize(status& stat) 
-    { 
-      isa >> proxy.object;
-      stat.m_count = 1;
-    }
+template<class T>
+struct request::probe_info_skeleton_proxy : public request::probe_info_const_skeleton_proxy<T> {
+  typedef probe_info_const_skeleton_proxy<T> super;
+  probe_info_skeleton_proxy(int source, int tag, const MPI_Comm& comm, const skeleton_proxy<T>& proxy)
+    : super(source, tag, comm, proxy) {}
+};
 
-    communicator comm;
-    int source;
-    int tag;
-    std::size_t count;
-    packed_skeleton_iarchive isa;
-    packed_iarchive& ia;
-    skeleton_proxy<T> proxy;
-  };
+template<class T>
+request::request(int source, int tag, MPI_Comm const& comm, const skeleton_proxy<T>& proxy) 
+  : m_request(), 
+    m_probe_info(new probe_info_const_skeleton_proxy<T>(source, tag, comm, proxy)),
+    m_data() {}
 
-  template<typename T>
-  struct serialized_irecv_data<skeleton_proxy<T> >
-    : public serialized_irecv_data<const skeleton_proxy<T> >
-  {
-    typedef serialized_irecv_data<const skeleton_proxy<T> > inherited;
+template<class T>
+request::request(int source, int tag, MPI_Comm const& comm, skeleton_proxy<T>& proxy) 
+  : m_request(), 
+    m_probe_info(new probe_info_skeleton_proxy<T>(source, tag, comm, proxy)),
+    m_data() {}
 
-    serialized_irecv_data(const communicator& comm, int source, int tag, 
-                          const skeleton_proxy<T>& proxy)
-      : inherited(comm, source, tag, proxy) { }
-  };
-}
+// namespace detail {
+//   template<typename T>
+//   struct serialized_irecv_data<const skeleton_proxy<T> >
+//   {
+//     serialized_irecv_data(const communicator& comm, int source, int tag, 
+//                           skeleton_proxy<T> proxy)
+//       : comm(comm), source(source), tag(tag), isa(comm), 
+//         ia(isa.get_skeleton()), proxy(proxy) { }
+
+//     void deserialize(status& stat) 
+//     { 
+//       isa >> proxy.object;
+//       stat.m_count = 1;
+//     }
+
+//     communicator comm;
+//     int source;
+//     int tag;
+//     std::size_t count;
+//     packed_skeleton_iarchive isa;
+//     packed_iarchive& ia;
+//     skeleton_proxy<T> proxy;
+//   };
+
+//   template<typename T>
+//   struct serialized_irecv_data<skeleton_proxy<T> >
+//     : public serialized_irecv_data<const skeleton_proxy<T> >
+//   {
+//     typedef serialized_irecv_data<const skeleton_proxy<T> > inherited;
+
+//     serialized_irecv_data(const communicator& comm, int source, int tag, 
+//                           const skeleton_proxy<T>& proxy)
+//       : inherited(comm, source, tag, proxy) { }
+//   };
+// }
 
 } } // end namespace boost::mpi
 

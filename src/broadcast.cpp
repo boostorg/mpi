@@ -31,13 +31,13 @@ broadcast<const packed_oarchive>(const communicator& comm,
   int tag = environment::collectives_tag();
 
   // Broadcast data to all nodes
-  std::vector<MPI_Request> requests(size * 2);
+  std::vector<MPI_Request> requests(size);
   int num_requests = 0;
   for (int dest = 0; dest < size; ++dest) {
     if (dest != root) {
       // Build up send requests for each child send.
       num_requests += detail::packed_archive_isend(comm, dest, tag, oa,
-                                                   &requests[num_requests], 2);
+                                                   requests[num_requests]);
     }
   }
 
@@ -71,14 +71,13 @@ broadcast<packed_iarchive>(const communicator& comm, packed_iarchive& ia,
     detail::packed_archive_recv(comm, root, tag, ia, status);
   } else {
     // Broadcast data to all nodes
-    std::vector<MPI_Request> requests(size * 2);
+    std::vector<MPI_Request> requests(size);
     int num_requests = 0;
     for (int dest = 0; dest < size; ++dest) {
       if (dest != root) {
         // Build up send requests for each child send.
         num_requests += detail::packed_archive_isend(comm, dest, tag, ia,
-                                                     &requests[num_requests],
-                                                     2);
+                                                     requests[num_requests]);
       }
     }
 

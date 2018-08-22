@@ -32,7 +32,7 @@ packed_archive_send(MPI_Comm comm, int dest, int tag,
 BOOST_MPI_DECL int
 packed_archive_isend(MPI_Comm comm, int dest, int tag,
                      const packed_oarchive& ar,
-                     MPI_Request* out_requests, int num_out_requests);
+                     MPI_Request& out_requests);
 
 /**
  * \overload
@@ -40,7 +40,7 @@ packed_archive_isend(MPI_Comm comm, int dest, int tag,
 BOOST_MPI_DECL int
 packed_archive_isend(MPI_Comm comm, int dest, int tag,
                      const packed_iarchive& ar,
-                     MPI_Request* out_requests, int num_out_requests);
+                     MPI_Request& out_requests);
 
 /** Receives a packed archive using MPI_Recv. */
 BOOST_MPI_DECL void

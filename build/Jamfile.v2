@@ -105,6 +105,7 @@ lib boost_mpi
     text_skeleton_oarchive.cpp
     timer.cpp
     offsets.cpp
+    status.cpp
   : # Requirements
     <library>../../serialization/build//boost_serialization
     <library>/mpi//mpi [ mpi.extra-requirements ]

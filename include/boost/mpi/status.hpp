@@ -12,6 +12,7 @@
 #ifndef BOOST_MPI_STATUS_HPP
 #define BOOST_MPI_STATUS_HPP
 
+#include <boost/mpl/bool.hpp>
 #include <boost/mpi/config.hpp>
 #include <boost/optional.hpp>
 
@@ -79,6 +80,11 @@ class BOOST_MPI_DECL status
    * References the underlying @c MPI_Status
    */
   operator const MPI_Status&() const { return m_status; }
+  
+  /**
+   * An empty status.
+   */
+  static status const& empty_status();
 
  private:
   /**

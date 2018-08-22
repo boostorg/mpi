@@ -16,11 +16,13 @@
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/mpi/packed_iarchive.hpp>
+#include <boost/mpi/skeleton_and_content_fwd.hpp>
 
 namespace boost { namespace mpi {
 
 class status;
 class communicator;
+class packed_oarchive;
 
 /**
  *  @brief A request for a non-blocking send or receive.
@@ -33,9 +35,34 @@ class BOOST_MPI_DECL request
 {
  public:
   /**
-   *  Constructs a NULL request.
+   *  Constructs a request for non serialized type.
    */
   request();
+
+  /**
+   *  Constructs a request for serialized type.
+   */
+  template<class T>
+  request(int source, int tag, MPI_Comm const& comm, T& value) 
+    : m_request(), 
+      m_probe_info(new probe_info<T>(source, tag, comm, &value, 1)),
+      m_data() {}
+
+  template<class T>
+  request(int source, int tag, MPI_Comm const& comm, const skeleton_proxy<T>& proxy);
+
+  template<class T>
+  request(int source, int tag, MPI_Comm const& comm, skeleton_proxy<T>& proxy);
+
+  /**
+   *  Constructs a request for serialized type array.
+   */
+  template<class T>
+  request(int source, int tag, MPI_Comm const& comm, T* values, int nb) 
+    : m_request(), m_probe_info(new probe_info<T>(source, tag, comm, values, nb)) {}
+
+  request(int source, int tag, MPI_Comm const& comm, packed_iarchive& ar) 
+    : m_request(), m_probe_info(new probe_info_iarchive(source, tag, comm, ar)) {}
 
   /**
    *  Wait until the communication associated with this request has
@@ -60,51 +87,66 @@ class BOOST_MPI_DECL request
    */
   void cancel();
 
+  bool active() const { return bool(m_request) || bool(m_probe_info); }
+  
  private:
-  enum request_action { ra_wait, ra_test, ra_cancel };
-  typedef optional<status> (*handler_type)(request* self, 
-                                           request_action action);
+  struct probe_info_base {
+    int                 m_source;
+    int                 m_tag;
+    MPI_Message         m_message;
+    MPI_Comm            m_comm;
+    
+    virtual packed_iarchive& archive() = 0;
+    virtual void deserialize(status& stat) = 0;
 
-  /**
-   * INTERNAL ONLY
-   *
-   * Handles the non-blocking receive of a serialized value.
-   */
-  template<typename T>
-  static optional<status> 
-  handle_serialized_irecv(request* self, request_action action);
+    probe_info_base(int source, int tag, const MPI_Comm& comm)
+      : m_source(source),
+        m_tag(tag),
+        m_message(MPI_MESSAGE_NO_PROC),
+        m_comm(comm) {}
+    virtual ~probe_info_base() {}
+  };
 
-  /**
-   * INTERNAL ONLY
-   *
-   * Handles the non-blocking receive of an array of  serialized values.
-   */
-  template<typename T>
-  static optional<status> 
-  handle_serialized_array_irecv(request* self, request_action action);
+  template<class T>
+  struct probe_info : public probe_info_base {
+    probe_info(int source, int tag, const MPI_Comm& comm, T* values, int nb)
+      : probe_info_base(source, tag, comm),
+        m_archive(comm),
+        m_values(values),
+        m_nb(nb) {}
 
-  /**
-   * INTERNAL ONLY
-   *
-   * Handles the non-blocking receive of a dynamic array of primitive values.
-   */
-  template<typename T, class A>
-  static optional<status> 
-  handle_dynamic_primitive_array_irecv(request* self, request_action action);
+    packed_iarchive& archive() { return m_archive;}
+    void deserialize(status& stat) {
+      for(int i = 0; i < m_nb; ++i) {
+        m_archive >> m_values[i]; 
+      }
+      stat.m_count = m_nb;
+    }
+    packed_iarchive m_archive;
+    T*              m_values;
+    int             m_nb;
+  };
 
- public: // template friends are not portable
+  struct probe_info_iarchive : public probe_info_base {
+    probe_info_iarchive(int source, int tag, const MPI_Comm& comm, packed_iarchive& ar)
+      : probe_info_base(source, tag, comm),
+        m_archive(ar) {}
+    packed_iarchive& archive() { return m_archive;}
+    void deserialize(status& stat) {}
+    
+    packed_iarchive& m_archive;
+  };
 
-  /// INTERNAL ONLY
-  MPI_Request m_requests[2];
+  template<class T> struct probe_info_const_skeleton_proxy;
+  template<class T> struct probe_info_skeleton_proxy;
 
-  /// INTERNAL ONLY
-  handler_type m_handler;
-
-  /// INTERNAL ONLY
-  shared_ptr<void> m_data;
+  shared_ptr<MPI_Request>      m_request;
+  shared_ptr<probe_info_base>  m_probe_info;
+  shared_ptr<void>             m_data;
 
   friend class communicator;
 };
+
 
 } } // end namespace boost::mpi
 
