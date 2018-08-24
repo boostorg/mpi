@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
   int prev = (comm.rank() + comm.size() - 1) % comm.size();
   int tag = 2;
   request sreq = comm.isend(next, tag, value);
-  request rreq = comm.irecv(prev, tag, incoming);
+  //request rreq = comm.irecv(prev, tag, incoming);
   int probe = 0;
   int test  = 0;
   MPI_Message msg;
