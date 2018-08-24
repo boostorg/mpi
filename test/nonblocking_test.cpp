@@ -14,19 +14,20 @@ int main(int argc, char* argv[])
 {
   boost::mpi::environment env(argc, argv);
   boost::mpi::communicator comm;
-  std::string value = "Hello";
-  std::string incoming;
+  int value = 42;
+  int input;
   int next = (comm.rank() + 1) % comm.size();
   int prev = (comm.rank() + comm.size() - 1) % comm.size();
   int tag = 2;
-  request sreq = comm.isend(next, tag, value);
-  //request rreq = comm.irecv(prev, tag, incoming);
+  MPI_Request sreq;
+  MPI_Isend(&value, 1, MPI_INT, next, tag, comm, &sreq);
+  //request rreq = comm.irecv(prev, tag, input);
   int probe = 0;
   int test  = 0;
   MPI_Message msg;
   do {
     if (!test) {
-      MPI_Test(sreq.m_request.get(), &test, MPI_STATUS_IGNORE);
+      MPI_Test(&sreq, &test, MPI_STATUS_IGNORE);
       if (test) {
         printf("Proc %i sent msg %i to Proc %i\n", comm.rank(), tag, next);
       } else {
