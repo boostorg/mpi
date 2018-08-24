@@ -1,10 +1,5 @@
-#include <boost/mpi/nonblocking.hpp>
-#include <boost/mpi/communicator.hpp>
-#include <boost/mpi/environment.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/serialization/string.hpp>
-#include <iterator>
-#include <algorithm>
+#include <stdio.h>
+#include <mpi.h>
 
 int main(int argc, char* argv[])
 {
