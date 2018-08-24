@@ -14,6 +14,8 @@
 
 #include <boost/mpi/config.hpp>
 #include <vector>
+#include <memory>
+#include <cstdio>
 #include <iterator> // for std::iterator_traits
 #include <boost/optional.hpp>
 #include <utility> // for std::pair
@@ -88,7 +90,8 @@ optional<std::pair<status, ForwardIterator> >
 test_any(ForwardIterator first, ForwardIterator last)
 {
   while (first != last) {
-    if (optional<status> result = first->test()) {
+    optional<status> result = first->test();
+    if (result) {
       return std::make_pair(*result, first);
     }
     ++first;
@@ -124,9 +127,34 @@ template<typename ForwardIterator, typename OutputIterator>
 OutputIterator 
 wait_all(ForwardIterator first, ForwardIterator last, OutputIterator out)
 {
-  for(ForwardIterator it = first; it != last; ++it) {
-    *out++ = it->wait();
+  std::vector<request*> requests(std::distance(first, last));
+  for(int i = 0; i < requests.size(); ++i) {
+    requests[i] = &(*first++);
   }
+  std::vector<status>   statuses(requests.size());
+  typedef std::vector<request*>::iterator vriter;
+  int pending;
+  do {
+    pending = 0;
+    for(int i = 0; i < requests.size(); ++i) {
+      if (requests[i]) {
+        request& req = *requests[i];
+        if (!req.active()) {
+          statuses[i] = status::empty_status();
+        } else {
+          optional<status> stat = req.test();
+          if (stat) {
+            printf("Proc %i got msg %d\n", communicator().rank(), stat->tag());
+            statuses[i] = *stat;
+            requests[i] = 0;
+          } else {
+            ++pending;
+          }
+        }
+      }
+    }
+  } while(pending>0);
+  std::copy(statuses.begin(), statuses.end(), out);
   return out;
 }
 
@@ -137,9 +165,8 @@ template<typename ForwardIterator>
 void
 wait_all(ForwardIterator first, ForwardIterator last)
 {
-  for(ForwardIterator it = first; it != last; ++it) {
-    it->wait();
-  }
+  std::vector<status>   statuses(std::distance(first, last));
+  wait_all(first, last, statuses.begin());
 }
 
 /** 

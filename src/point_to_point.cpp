@@ -21,7 +21,9 @@
 #include <boost/mpi/datatype.hpp>
 #include <boost/mpi/exception.hpp>
 #include <boost/mpi/detail/antiques.hpp>
+#include <boost/mpi/communicator.hpp>
 #include <cassert>
+#include <cstdio>
 
 namespace boost { namespace mpi { namespace detail {
 
@@ -38,12 +40,16 @@ packed_archive_send(MPI_Comm comm, int dest, int tag,
 int
 packed_archive_isend(MPI_Comm comm, int dest, int tag,
                      const packed_oarchive& ar,
-                     MPI_Request& out_requests)
+                     MPI_Request& out_request)
 {
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
                          (detail::unconst(ar.address()), ar.size(),
                           MPI_PACKED,
-                          dest, tag, comm, &out_requests));
+                          dest, tag, comm, &out_request));
+  int flag;
+  MPI_Status stat;
+  MPI_Request_get_status(out_request, &flag, &stat);
+  printf("Proc %i ISending message %i to %i\n", communicator().rank(), tag, dest);
 
   return 1;
 }

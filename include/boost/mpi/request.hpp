@@ -139,7 +139,7 @@ class BOOST_MPI_DECL request
 
   template<class T> struct probe_info_const_skeleton_proxy;
   template<class T> struct probe_info_skeleton_proxy;
-
+ public: // while debuging
   shared_ptr<MPI_Request>      m_request;
   shared_ptr<probe_info_base>  m_probe_info;
   shared_ptr<void>             m_data;
