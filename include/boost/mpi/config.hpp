@@ -96,6 +96,11 @@
 // Configuration for MPICH
 #endif
 
+#if defined(I_MPI_NUMVERSION)
+// This is intel
+#define BOOST_MPI_NO_IMPROBE
+#endif
+
 /*****************************************************************************
  *                                                                           *
  *  DLL import/export options                                                *  
