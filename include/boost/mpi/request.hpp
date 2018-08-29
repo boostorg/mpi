@@ -59,6 +59,17 @@ class BOOST_MPI_DECL request
    *  completed.
    */
   void cancel();
+  
+  /**
+   * The trivial MPI requet implenting this request, provided it's trivial.
+   * Probably irrelevant to most users.
+   */
+  optional<MPI_Request&> trivial();
+
+  /**
+   * Is this request potentialy pending ?
+   */
+  bool active() const;
 
  private:
   enum request_action { ra_wait, ra_test, ra_cancel };
@@ -92,15 +103,9 @@ class BOOST_MPI_DECL request
   static optional<status> 
   handle_dynamic_primitive_array_irecv(request* self, request_action action);
 
- public: // template friends are not portable
-
-  /// INTERNAL ONLY
-  MPI_Request m_requests[2];
-
-  /// INTERNAL ONLY
-  handler_type m_handler;
-
-  /// INTERNAL ONLY
+ private:
+  MPI_Request      m_requests[2];
+  handler_type     m_handler;
   shared_ptr<void> m_data;
 
   friend class communicator;

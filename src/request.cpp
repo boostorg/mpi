@@ -18,6 +18,20 @@ request::request()
   m_requests[1] = MPI_REQUEST_NULL;
 }
 
+optional<MPI_Request&>
+request::trivial() {
+  if ((!bool(m_handler) && m_requests[1] == MPI_REQUEST_NULL)) {
+    return m_requests[0];
+  } else {
+    return boost::none;
+  }
+}
+
+bool
+request::active() const {
+  return m_requests[0] != MPI_REQUEST_NULL || m_requests[1] != MPI_REQUEST_NULL;
+}
+
 status request::wait()
 {
   if (m_handler) {
