@@ -1935,26 +1935,24 @@ communicator::irecv_impl(int source, int tag, T& value, mpl::true_) const
 }
 
 template<typename T>
-request::request(communicator const& comm, int source, int tag, T& value, std::size_t*& count)
+request::request(communicator const& comm, int source, int tag, T& value)
 : m_data(new detail::serialized_irecv_data<T>(comm, source, tag, value)),
   m_handler(handle_serialized_irecv<T>) {
   m_requests[0] = MPI_REQUEST_NULL;
   m_requests[1] = MPI_REQUEST_NULL;
-  count = &data<detail::serialized_irecv_data<T> >()->count;
+  std::size_t& count = data<detail::serialized_irecv_data<T> >()->count;
+  BOOST_MPI_CHECK_RESULT(MPI_Irecv,
+                         (&count, 1, 
+                          get_mpi_datatype(count),
+                          source, tag, comm, &size_request()));
+
 }
 
 template<typename T>
 request
 communicator::irecv_impl(int source, int tag, T& value, mpl::false_) const
 {
-  std::size_t* count;
-  request req(*this, source, tag, value, count);
-  BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-                         (count, 1, 
-                          get_mpi_datatype(*count),
-                          source, tag, MPI_Comm(*this), &req.size_request()));
-  
-  return req;
+  return request(*this, source, tag, value);
 }
 
 template<typename T>
@@ -1978,12 +1976,16 @@ communicator::array_irecv_impl(int source, int tag, T* values, int n,
 }
 
 template<typename T>
-request::request(communicator const& comm, int source, int tag, T* values, int n, std::size_t*& count)
-: m_data(new detail::serialized_array_irecv_data<T>(comm, source, tag, values, n)),
-  m_handler(handle_serialized_array_irecv<T>) {
+request::request(communicator const& comm, int source, int tag, T* values, int n)
+  : m_data(new detail::serialized_array_irecv_data<T>(comm, source, tag, values, n)),
+    m_handler(handle_serialized_array_irecv<T>) {
   m_requests[0] = MPI_REQUEST_NULL;
   m_requests[1] = MPI_REQUEST_NULL;
-  count = &data<detail::serialized_array_irecv_data<T> >()->count;
+  std::size_t& count = data<detail::serialized_array_irecv_data<T> >()->count;
+  BOOST_MPI_CHECK_RESULT(MPI_Irecv,
+			 (&count, 1, 
+                          get_mpi_datatype(count),
+                          source, tag, comm, &size_request()));
 }
 
 template<typename T>
@@ -1991,24 +1993,21 @@ request
 communicator::array_irecv_impl(int source, int tag, T* values, int n, 
                                mpl::false_) const
 {
-  std::size_t* count;
-  request req(*this, source, tag, values, n, count);
-  BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-                         (count, 1, 
-                          get_mpi_datatype(*count),
-                          source, tag, MPI_Comm(*this), &req.size_request()));
-
-  return req;
+  return request(*this, source, tag, values, n);
 }
 
 template<typename T, class A>
-request::request(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive, std::size_t*& count)
+request::request(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive)
   : m_data(new detail::dynamic_array_irecv_data<T,A>(comm, source, tag, values)),
     m_handler(handle_dynamic_primitive_array_irecv<T,A>)
 {
   m_requests[0] = MPI_REQUEST_NULL;
   m_requests[1] = MPI_REQUEST_NULL;
-  count = &data<detail::dynamic_array_irecv_data<T,A> >()->count;
+  std::size_t& count = data<detail::dynamic_array_irecv_data<T,A> >()->count;
+  BOOST_MPI_CHECK_RESULT(MPI_Irecv,
+                         (&count, 1, 
+                          get_mpi_datatype(count),
+                          source, tag, comm, &size_request()));
 }
 
 template<typename T, class A>
@@ -2016,13 +2015,7 @@ request
 communicator::irecv_vector(int source, int tag, std::vector<T,A>& values, 
                            mpl::true_ primitive) const
 {
-  std::size_t* count;
-  request req(*this, source, tag, values, primitive, count);
-  BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-                         (count, 1, 
-                          get_mpi_datatype(*count),
-                          source, tag, MPI_Comm(*this), &req.size_request()));
-  return req;
+  return request(*this, source, tag, values, primitive);
 }
 
 template<typename T, class A>

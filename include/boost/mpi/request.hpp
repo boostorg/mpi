@@ -40,15 +40,15 @@ class BOOST_MPI_DECL request
   /**
    *  Constructs request for complex data.
    */
-  template<typename T> request(communicator const& comm, int source, int tag, T& value, std::size_t*& count);
+  template<typename T> request(communicator const& comm, int source, int tag, T& value);
   /**
    *  Constructs request for array of complex data.
    */  
-  template<typename T> request(communicator const& comm, int source, int tag, T* value, int n, std::size_t*& count);
+  template<typename T> request(communicator const& comm, int source, int tag, T* value, int n);
   /**
    *  Constructs request for array of primitive data.
    */
-  template<typename T, class A> request(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive, std::size_t*& count);
+  template<typename T, class A> request(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive);
 
   /**
    *  Wait until the communication associated with this request has
@@ -135,8 +135,8 @@ class BOOST_MPI_DECL request
 
  private:
   MPI_Request      m_requests[2];
-  handler_type     m_handler;
   shared_ptr<void> m_data;
+  handler_type     m_handler;
 };
 
 } } // end namespace boost::mpi
