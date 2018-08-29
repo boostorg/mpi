@@ -1879,7 +1879,6 @@ request::handle_dynamic_primitive_array_irecv(request* self, request_action acti
       BOOST_MPI_CHECK_RESULT(MPI_Wait,
                              (self->m_requests, &stat.m_status));
       // Resize our buffer and get ready to receive its data
-      std::cout << "ZNORT : " << data->count << "\n";
       data->values.resize(data->count);
       BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                              (&(data->values[0]), data->values.size(), get_mpi_datatype<T>(),
