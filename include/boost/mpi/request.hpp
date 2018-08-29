@@ -38,6 +38,19 @@ class BOOST_MPI_DECL request
   request();
 
   /**
+   *  Constructs request for complex data.
+   */
+  template<typename T> request(communicator const& comm, int source, int tag, T& value, std::size_t*& count);
+  /**
+   *  Constructs request for array of complex data.
+   */  
+  template<typename T> request(communicator const& comm, int source, int tag, T* value, int n, std::size_t*& count);
+  /**
+   *  Constructs request for array of primitive data.
+   */
+  template<typename T, class A> request(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive, std::size_t*& count);
+
+  /**
    *  Wait until the communication associated with this request has
    *  completed, then return a @c status object describing the
    *  communication.
@@ -67,9 +80,26 @@ class BOOST_MPI_DECL request
   optional<MPI_Request&> trivial();
 
   /**
+   * For two steps requests, that need to first send the size, then the payload,
+   * access to the size request.
+   * Probably irrelevant to most users.
+   */
+  MPI_Request& size_request() { return m_requests[0]; }
+
+  /**
+   * For two steps requests, that need to first send the size, then the payload,
+   * access to the size request.
+   * Probably irrelevant to most users.
+   */
+  MPI_Request& payload_request() { return m_requests[1]; }
+
+  /**
    * Is this request potentialy pending ?
    */
   bool active() const;
+
+  template<class T>  boost::shared_ptr<T>    data() { return boost::static_pointer_cast<T>(m_data); }
+  template<class T>  void                    set_data(boost::shared_ptr<T>& d) { m_data = d; }
 
  private:
   enum request_action { ra_wait, ra_test, ra_cancel };
@@ -107,8 +137,6 @@ class BOOST_MPI_DECL request
   MPI_Request      m_requests[2];
   handler_type     m_handler;
   shared_ptr<void> m_data;
-
-  friend class communicator;
 };
 
 } } // end namespace boost::mpi

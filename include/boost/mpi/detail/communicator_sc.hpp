@@ -50,7 +50,7 @@ communicator::isend(int dest, int tag, const skeleton_proxy<T>& proxy) const
 
   *archive << proxy.object;
   request result = isend(dest, tag, *archive);
-  result.m_data = archive;
+  result.set_data(archive);
   return result;
 }
 

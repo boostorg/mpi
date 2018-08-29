@@ -20,6 +20,7 @@
 #include <boost/mpi/detail/point_to_point.hpp>
 #include <boost/mpi/datatype.hpp>
 #include <boost/mpi/exception.hpp>
+#include <boost/mpi/request.hpp>
 #include <boost/mpi/detail/antiques.hpp>
 #include <cassert>
 
@@ -43,38 +44,35 @@ packed_archive_send(MPI_Comm comm, int dest, int tag,
 int
 packed_archive_isend(MPI_Comm comm, int dest, int tag,
                      const packed_oarchive& ar,
-                     MPI_Request* out_requests, int num_out_requests)
+                     request& req)
 {
-  assert(num_out_requests >= 2);
   std::size_t const& size = ar.size();
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
                          (detail::unconst(&size), 1, 
                           get_mpi_datatype(size),
-                          dest, tag, comm, out_requests));
+                          dest, tag, comm, &req.size_request()));
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
                          (detail::unconst(ar.address()), size,
                           MPI_PACKED,
-                          dest, tag, comm, out_requests + 1));
-
+                          dest, tag, comm, &req.payload_request()));
+  
   return 2;
 }
 
 int
 packed_archive_isend(MPI_Comm comm, int dest, int tag,
                      const packed_iarchive& ar,
-                     MPI_Request* out_requests, int num_out_requests)
+                     request& req)
 {
-  assert(num_out_requests >= 2);
-
   std::size_t const& size = ar.size();
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
                          (detail::unconst(&size), 1, 
                           get_mpi_datatype(size), 
-                          dest, tag, comm, out_requests));
+                          dest, tag, comm, &req.size_request()));
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
                          (detail::unconst(ar.address()), size,
                           MPI_PACKED,
-                          dest, tag, comm, out_requests + 1));
+                          dest, tag, comm, &req.payload_request()));
 
   return 2;
 }

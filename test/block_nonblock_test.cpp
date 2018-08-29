@@ -1,8 +1,11 @@
 #include <vector>
 #include <iostream>
 #include <iterator>
+#include <typeinfo>
+
 #include <boost/mpi.hpp>
 #include <boost/serialization/vector.hpp>
+#include <boost/core/demangle.hpp>
 #include <boost/test/minimal.hpp>
 
 namespace mpi = boost::mpi;
@@ -10,8 +13,10 @@ namespace mpi = boost::mpi;
 template<typename T>
 bool test(mpi::communicator const& comm, std::vector<T> const& ref, bool iswap, bool alloc)
 {
+  
   int rank = comm.rank();
   if (rank == 0) {
+    std::cout << "Testing with type " << boost::core::demangle(typeid(T).name()) << '\n';
     if (iswap) {
       std::cout << "Blockin send, non blocking receive.\n";
     } else {
