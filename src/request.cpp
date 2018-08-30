@@ -11,7 +11,12 @@ namespace boost { namespace mpi {
 /***************************************************************************
  * request                                                                 *
  ***************************************************************************/
-request::request() : m_handler(new legacy_handler()) {}
+request::request() 
+  : m_handler(new legacy_handler()) {}
+
+/***************************************************************************
+ * handlers                                                                *
+ ***************************************************************************/
 
 request::handler::~handler() {}
     
@@ -130,5 +135,73 @@ request::legacy_handler::cancel()
       BOOST_MPI_CHECK_RESULT(MPI_Cancel, (&m_requests[1]));
   }
 }
+
+
+request::trivial_handler::trivial_handler()
+    : m_request(MPI_REQUEST_NULL), m_data() {}
+  
+status
+request::trivial_handler::wait()
+{
+  status result;
+  BOOST_MPI_CHECK_RESULT(MPI_Wait, (&m_request, &result.m_status));
+  return result;  
+}
+
+
+optional<status>
+request::trivial_handler::test() 
+{
+  status result;
+  int flag = 0;
+  BOOST_MPI_CHECK_RESULT(MPI_Test, 
+                         (&m_request, &flag, &result.m_status));
+  return flag != 0? optional<status>(result) : optional<status>();
+}
+
+void
+request::trivial_handler::cancel()
+{
+  BOOST_MPI_CHECK_RESULT(MPI_Cancel, (&m_request));
+}
+  
+bool
+request::trivial_handler::active() const
+{
+  return m_request != MPI_REQUEST_NULL; 
+}
+
+optional<MPI_Request&>
+request::trivial_handler::trivial() 
+{ 
+  return m_request; 
+}
+  
+MPI_Request&
+request::trivial_handler::size_request()
+{
+  std::abort(); 
+  return m_request; // avoid warning
+}
+
+MPI_Request&
+request::trivial_handler::payload_request()
+{
+  std::abort();
+  return m_request;  // avoid warning
+}
+  
+boost::shared_ptr<void>
+request::trivial_handler::data() 
+{
+  return m_data; 
+}
+
+void
+request::trivial_handler::set_data(boost::shared_ptr<void> d) 
+{
+  m_data = d; 
+}
+  
 
 } } // end namespace boost::mpi

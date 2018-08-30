@@ -54,6 +54,7 @@ class BOOST_MPI_DECL request
   template<typename T, class A> request(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive)
     : m_handler(new legacy_handler(comm, source, tag, values, primitive)) {}
 
+  static request make_trivial() { return request(new trivial_handler()); }
   /**
    *  Wait until the communication associated with this request has
    *  completed, then return a @c status object describing the
@@ -122,6 +123,9 @@ class BOOST_MPI_DECL request
   };
   
  private:
+  
+  request(handler *h) : m_handler(h) {};
+
   enum request_action { ra_wait, ra_test, ra_cancel };
 
   struct legacy_handler : public handler {
@@ -167,6 +171,26 @@ class BOOST_MPI_DECL request
     MPI_Request      m_requests[2];
     shared_ptr<void> m_data;
     handler_type     m_handler;  
+  };
+
+  struct trivial_handler : public handler {
+    trivial_handler();
+    
+    status wait();
+    optional<status> test();
+    void cancel();
+
+    bool active() const;
+    optional<MPI_Request&> trivial();
+    
+    MPI_Request& size_request();
+    MPI_Request& payload_request();
+    
+    boost::shared_ptr<void> data();
+    void                    set_data(boost::shared_ptr<void> d);
+    
+    MPI_Request      m_request;
+    shared_ptr<void> m_data;
   };
   
  private:
