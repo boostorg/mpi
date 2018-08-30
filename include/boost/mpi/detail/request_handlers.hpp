@@ -50,7 +50,28 @@ struct request::legacy_handler : public request::handler {
   
   MPI_Request      m_requests[2];
   shared_ptr<void> m_data;
-  handler_type     m_handler;  
+  handler_type     m_handler;
+};
+
+template<typename T>
+struct request::legacy_serialized_handler 
+  : public request::legacy_handler {
+  legacy_serialized_handler(communicator const& comm, int source, int tag, T& value)
+    : legacy_handler(comm, source, tag, value) {}
+};
+
+template<typename T>
+struct request::legacy_serialized_array_handler 
+  : public request::legacy_handler {
+  legacy_serialized_array_handler(communicator const& comm, int source, int tag, T* values, int n)
+    : legacy_handler(comm, source, tag, values, n) {}
+};
+
+template<typename T, class A>
+struct request::legacy_dynamic_primitive_array_handler 
+  : public request::legacy_handler {
+  legacy_dynamic_primitive_array_handler(communicator const& comm, int source, int tag, std::vector<T,A>& values)
+    : legacy_handler(comm, source, tag, values, mpl::true_()) {}
 };
 
 struct request::trivial_handler : public request::handler {
@@ -95,18 +116,18 @@ struct request::dynamic_handler : public request::handler {
 
 template<typename T> 
 request request::make_serialized(communicator const& comm, int source, int tag, T& value) {
-  return request(new legacy_handler(comm, source, tag, value));
+  return request(new legacy_serialized_handler<T>(comm, source, tag, value));
 }
 
 template<typename T>
 request request::make_serialized_array(communicator const& comm, int source, int tag, T* values, int n) {
-  return request(new legacy_handler(comm, source, tag, values, n));
+  return request(new legacy_serialized_array_handler<T>(comm, source, tag, values, n));
 }
 
 template<typename T, class A>
 request request::make_dynamic_primitive_array(communicator const& comm, int source, int tag, 
                                               std::vector<T,A>& values) {
-  return request(new legacy_handler(comm, source, tag, values, mpl::true_()));
+  return request(new legacy_dynamic_primitive_array_handler<T,A>(comm, source, tag, values));
 }
 
 namespace detail {
