@@ -290,7 +290,7 @@ communicator::isend<packed_skeleton_oarchive>
 template<>
 request communicator::isend<content>(int dest, int tag, const content& c) const
 {
-  request req;
+  request req = request::make_trivial();
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
                          (MPI_BOTTOM, 1, c.get_mpi_datatype(),
                           dest, tag, MPI_Comm(*this), req.trivial().get_ptr()));
@@ -299,7 +299,7 @@ request communicator::isend<content>(int dest, int tag, const content& c) const
 
 request communicator::isend(int dest, int tag) const
 {
-  request req;
+  request req = request::make_trivial();
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
                          (MPI_BOTTOM, 0, MPI_PACKED,
                           dest, tag, MPI_Comm(*this), req.trivial().get_ptr()));
@@ -319,7 +319,7 @@ request
 communicator::irecv<const content>(int source, int tag,
                                    const content& c) const
 {
-  request req;
+  request req = request::make_trivial();
   BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                          (MPI_BOTTOM, 1, c.get_mpi_datatype(),
                           source, tag, MPI_Comm(*this), req.trivial().get_ptr()));
@@ -328,7 +328,7 @@ communicator::irecv<const content>(int source, int tag,
 
 request communicator::irecv(int source, int tag) const
 {
-  request req;
+  request req = request::make_trivial();
   BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                          (MPI_BOTTOM, 0, MPI_PACKED,
                           source, tag, MPI_Comm(*this), req.trivial().get_ptr()));
