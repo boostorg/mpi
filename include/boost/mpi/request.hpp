@@ -61,7 +61,7 @@ class BOOST_MPI_DECL request
   /**
    * For simple data of unknown size.
    */
-  static request make_dynamic() { return request(new legacy_handler()); }
+  static request make_dynamic() { return request(new dynamic_handler()); }
 
   /**
    *  Wait until the communication associated with this request has
@@ -198,6 +198,26 @@ class BOOST_MPI_DECL request
     void                    set_data(boost::shared_ptr<void> d);
     
     MPI_Request      m_request;
+    shared_ptr<void> m_data;
+  };
+  
+  struct dynamic_handler : public handler {
+    dynamic_handler();
+    
+    status wait();
+    optional<status> test();
+    void cancel();
+
+    bool active() const;
+    optional<MPI_Request&> trivial();
+    
+    MPI_Request& size_request();
+    MPI_Request& payload_request();
+    
+    boost::shared_ptr<void> data();
+    void                    set_data(boost::shared_ptr<void> d);
+    
+    MPI_Request      m_requests[2];
     shared_ptr<void> m_data;
   };
   
