@@ -13,6 +13,51 @@
 
 namespace boost { namespace mpi {
 
+struct request::legacy_handler : public request::handler {
+  legacy_handler()
+    : m_data(), m_handler(0) {
+    m_requests[0] = MPI_REQUEST_NULL;
+    m_requests[1] = MPI_REQUEST_NULL;
+  }
+  template<typename T> legacy_handler(communicator const& comm, int source, int tag, T& value);
+  template<typename T> legacy_handler(communicator const& comm, int source, int tag, T* value, int n);
+  template<typename T, class A> legacy_handler(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive);
+  
+  status wait();
+  optional<status> test();
+  void cancel();
+  
+  bool active() const;
+  optional<MPI_Request&> trivial();
+  
+  MPI_Request& size_request() { return m_requests[0]; }
+  MPI_Request& payload_request() { return m_requests[1]; }
+  
+  boost::shared_ptr<void> data() { return m_data; }
+  void                    set_data(boost::shared_ptr<void> d) { m_data = d; }
+  
+  template<class T>  boost::shared_ptr<T>    data() { return boost::static_pointer_cast<T>(m_data); }
+  template<class T>  void                    set_data(boost::shared_ptr<T> d) { m_data = d; }
+  
+  typedef optional<status> (*handler_type)(request::legacy_handler* self, 
+                                           request_action action);
+  template<typename T>
+  static optional<status> 
+  handle_serialized_irecv(legacy_handler* self, request_action action);
+  
+  template<typename T>
+  static optional<status> 
+  handle_serialized_array_irecv(legacy_handler* self, request_action action);
+  
+  template<typename T, class A>
+  static optional<status> 
+  handle_dynamic_primitive_array_irecv(legacy_handler* self, request_action action);
+  
+  MPI_Request      m_requests[2];
+  shared_ptr<void> m_data;
+  handler_type     m_handler;  
+};
+
 struct request::trivial_handler : public request::handler {
   trivial_handler();
   
