@@ -1542,7 +1542,7 @@ template<typename T>
 request
 communicator::isend_impl(int dest, int tag, const T& value, mpl::true_) const
 {
-  request req;
+  request req = request::make_trivial();
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
                          (const_cast<T*>(&value), 1, 
                           get_mpi_datatype<T>(value),
@@ -1583,10 +1583,16 @@ request
 communicator::isend_vector(int dest, int tag, const std::vector<T,A>& values,
                            mpl::true_) const
 {
-  std::size_t size = values.size();
-  request req = this->isend_impl(dest, tag, size, mpl::true_());
+  boost::shared_ptr<std::size_t> size(new std::size_t(values.size()));
+  request req = request::make_dynamic();
+  req.set_data(size);
+  
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                         (const_cast<T*>(values.data()), size, 
+                         (size.get(), 1,
+                          get_mpi_datatype(*size),
+                          dest, tag, MPI_Comm(*this), &req.size_request()));
+  BOOST_MPI_CHECK_RESULT(MPI_Isend,
+                         (const_cast<T*>(values.data()), *size, 
                           get_mpi_datatype<T>(),
                           dest, tag, MPI_Comm(*this), &req.payload_request()));
   return req;
@@ -1606,7 +1612,7 @@ request
 communicator::array_isend_impl(int dest, int tag, const T* values, int n,
                                mpl::true_) const
 {
-  request req;
+  request req = request::make_trivial();
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
                          (const_cast<T*>(values), n, 
                           get_mpi_datatype<T>(*values),
@@ -1926,7 +1932,7 @@ template<typename T>
 request 
 communicator::irecv_impl(int source, int tag, T& value, mpl::true_) const
 {
-  request req;
+  request req = request::make_trivial();
   BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                          (const_cast<T*>(&value), 1, 
                           get_mpi_datatype<T>(value),
@@ -1967,11 +1973,11 @@ request
 communicator::array_irecv_impl(int source, int tag, T* values, int n, 
                                mpl::true_) const
 {
-  request req;
+  request req = request::make_trivial();
   BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                          (const_cast<T*>(values), n, 
                           get_mpi_datatype<T>(*values),
-                          source, tag, MPI_Comm(*this), &req.size_request()));
+                          source, tag, MPI_Comm(*this), req.trivial().get_ptr()));
   return req;
 }
 

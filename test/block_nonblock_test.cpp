@@ -7,6 +7,7 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/core/demangle.hpp>
 #include <boost/test/minimal.hpp>
+//#include "debugger.cpp"
 
 namespace mpi = boost::mpi;
 
@@ -64,7 +65,11 @@ int test_main(int argc, char **argv)
 {
   mpi::environment env(argc, argv);
   mpi::communicator world;
-
+ 
+  if (world.size() == 1) {
+    return 0;
+  }
+  
   std::vector<int> integers(13); // don't assume we're lucky
   for(int i = 0; i < int(integers.size()); ++i) {
     integers[i] = i;
@@ -92,6 +97,7 @@ int test_main(int argc, char **argv)
     }
   }
   bool passed = true;
+
   if (block_to_non_block) {
     passed = passed && test(world, integers, true,  true);
     passed = passed && test(world, integers, true,  false);

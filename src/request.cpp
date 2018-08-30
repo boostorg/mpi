@@ -12,7 +12,7 @@ namespace boost { namespace mpi {
  * request                                                                 *
  ***************************************************************************/
 request::request() 
-  : m_handler(new legacy_handler()) {}
+  : m_handler() {}
 
 /***************************************************************************
  * handlers                                                                *
