@@ -62,7 +62,8 @@ class BOOST_MPI_DECL request
   template<typename T, class A>
   static request make_dynamic_primitive_array(communicator const& comm, int source, int tag, 
                                               std::vector<T,A>& values);
-  
+
+  static bool probe_messages();
   /**
    *  Wait until the communication associated with this request has
    *  completed, then return a @c status object describing the
@@ -146,6 +147,15 @@ class BOOST_MPI_DECL request
   shared_ptr<handler> m_handler;
 };
 
+inline
+bool
+request::probe_messages() {
+#ifdef BOOST_MPI_NO_IMPROBE
+  return false;
+#else
+  return true;
+#endif
+}
 } } // end namespace boost::mpi
 
 #endif // BOOST_MPI_REQUEST_HPP
