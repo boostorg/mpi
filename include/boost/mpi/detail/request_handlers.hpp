@@ -11,7 +11,7 @@
 #ifndef BOOST_MPI_REQUEST_HANDLERS_HPP
 #define BOOST_MPI_REQUEST_HANDLERS_HPP
 
-#include <boost/mpi/skeleton_and_content.hpp>
+#include <boost/mpi/skeleton_and_content_types.hpp>
 
 namespace boost { namespace mpi {
 
