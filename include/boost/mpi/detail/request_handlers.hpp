@@ -13,6 +13,62 @@
 
 namespace boost { namespace mpi {
 
+struct request::trivial_handler : public request::handler {
+  trivial_handler();
+  
+  status wait();
+  optional<status> test();
+  void cancel();
+  
+  bool active() const;
+  optional<MPI_Request&> trivial();
+  
+  MPI_Request& size_request();
+  MPI_Request& payload_request();
+  
+  boost::shared_ptr<void> data();
+  void                    set_data(boost::shared_ptr<void> d);
+  
+  MPI_Request      m_request;
+  shared_ptr<void> m_data;
+};
+
+struct request::dynamic_handler : public request::handler {
+  dynamic_handler();
+  
+  status wait();
+  optional<status> test();
+  void cancel();
+  
+  bool active() const;
+  optional<MPI_Request&> trivial();
+  
+  MPI_Request& size_request();
+  MPI_Request& payload_request();
+  
+  boost::shared_ptr<void> data();
+  void                    set_data(boost::shared_ptr<void> d);
+  
+  MPI_Request      m_requests[2];
+  shared_ptr<void> m_data;
+};
+
+template<typename T> 
+request request::make_serialized(communicator const& comm, int source, int tag, T& value) {
+  return request(new legacy_handler(comm, source, tag, value));
+}
+
+template<typename T>
+request request::make_serialized_array(communicator const& comm, int source, int tag, T* values, int n) {
+  return request(new legacy_handler(comm, source, tag, values, n));
+}
+
+template<typename T, class A>
+request request::make_dynamic_primitive_array(communicator const& comm, int source, int tag, 
+                                              std::vector<T,A>& values) {
+  return request(new legacy_handler(comm, source, tag, values, mpl::true_()));
+}
+
 namespace detail {
   /**
    * Internal data structure that stores everything required to manage

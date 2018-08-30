@@ -5,6 +5,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 #include <boost/mpi/request.hpp>
 #include <boost/mpi/status.hpp>
+#include <boost/mpi/communicator.hpp>
+#include <boost/mpi/detail/request_handlers.hpp>
 
 namespace boost { namespace mpi {
 
@@ -13,6 +15,11 @@ namespace boost { namespace mpi {
  ***************************************************************************/
 request::request() 
   : m_handler() {}
+
+request request::make_trivial() { return request(new trivial_handler()); }
+
+request request::make_dynamic() { return request(new dynamic_handler()); }
+
 
 /***************************************************************************
  * handlers                                                                *

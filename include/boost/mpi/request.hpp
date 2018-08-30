@@ -41,33 +41,27 @@ class BOOST_MPI_DECL request
   /**
    * Construct request for primitive data of statically known size.
    */
-  static request make_trivial() { return request(new trivial_handler()); }
+  static request make_trivial();
   /**
    * Construct request for simple data of unknown size.
    */
-  static request make_dynamic() { return request(new dynamic_handler()); }
+  static request make_dynamic();
   /**
    *  Constructs request for serialized data.
    */
   template<typename T>
-  static request make_serialized(communicator const& comm, int source, int tag, T& value) {
-    return request(new legacy_handler(comm, source, tag, value));
-  }
+  static request make_serialized(communicator const& comm, int source, int tag, T& value);
   /**
    *  Constructs request for array of complex data.
    */  
   template<typename T>
-  static request make_serialized_array(communicator const& comm, int source, int tag, T* values, int n) {
-    return request(new legacy_handler(comm, source, tag, values, n));
-  }
+  static request make_serialized_array(communicator const& comm, int source, int tag, T* values, int n);
   /**
    *  Constructs request for array of primitive data.
    */
   template<typename T, class A>
   static request make_dynamic_primitive_array(communicator const& comm, int source, int tag, 
-                                              std::vector<T,A>& values) {
-    return request(new legacy_handler(comm, source, tag, values, mpl::true_()));
-  }
+                                              std::vector<T,A>& values);
   
   /**
    *  Wait until the communication associated with this request has
@@ -187,45 +181,8 @@ class BOOST_MPI_DECL request
     handler_type     m_handler;  
   };
 
-  struct trivial_handler : public handler {
-    trivial_handler();
-    
-    status wait();
-    optional<status> test();
-    void cancel();
-
-    bool active() const;
-    optional<MPI_Request&> trivial();
-    
-    MPI_Request& size_request();
-    MPI_Request& payload_request();
-    
-    boost::shared_ptr<void> data();
-    void                    set_data(boost::shared_ptr<void> d);
-    
-    MPI_Request      m_request;
-    shared_ptr<void> m_data;
-  };
-  
-  struct dynamic_handler : public handler {
-    dynamic_handler();
-    
-    status wait();
-    optional<status> test();
-    void cancel();
-
-    bool active() const;
-    optional<MPI_Request&> trivial();
-    
-    MPI_Request& size_request();
-    MPI_Request& payload_request();
-    
-    boost::shared_ptr<void> data();
-    void                    set_data(boost::shared_ptr<void> d);
-    
-    MPI_Request      m_requests[2];
-    shared_ptr<void> m_data;
-  };
+  struct trivial_handler;  
+  struct dynamic_handler;
   
  private:
   shared_ptr<handler> m_handler;
