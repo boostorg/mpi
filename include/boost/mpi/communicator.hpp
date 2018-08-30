@@ -1749,7 +1749,7 @@ namespace detail {
 
 template<typename T>
 optional<status> 
-request::handle_serialized_irecv(request* self, request_action action)
+request::legacy_handler::handle_serialized_irecv(legacy_handler* self, request_action action)
 {
   typedef detail::serialized_irecv_data<T> data_t;
   shared_ptr<data_t> data = static_pointer_cast<data_t>(self->m_data);
@@ -1808,7 +1808,7 @@ request::handle_serialized_irecv(request* self, request_action action)
 
 template<typename T>
 optional<status> 
-request::handle_serialized_array_irecv(request* self, request_action action)
+request::legacy_handler::handle_serialized_array_irecv(legacy_handler* self, request_action action)
 {
   typedef detail::serialized_array_irecv_data<T> data_t;
   shared_ptr<data_t> data = static_pointer_cast<data_t>(self->m_data);
@@ -1867,7 +1867,7 @@ request::handle_serialized_array_irecv(request* self, request_action action)
 
 template<typename T, class A>
 optional<status> 
-request::handle_dynamic_primitive_array_irecv(request* self, request_action action)
+request::legacy_handler::handle_dynamic_primitive_array_irecv(legacy_handler* self, request_action action)
 {
   typedef detail::dynamic_array_irecv_data<T,A> data_t;
   shared_ptr<data_t> data = static_pointer_cast<data_t>(self->m_data);
@@ -1935,7 +1935,7 @@ communicator::irecv_impl(int source, int tag, T& value, mpl::true_) const
 }
 
 template<typename T>
-request::request(communicator const& comm, int source, int tag, T& value)
+request::legacy_handler::legacy_handler(communicator const& comm, int source, int tag, T& value)
 : m_data(new detail::serialized_irecv_data<T>(comm, source, tag, value)),
   m_handler(handle_serialized_irecv<T>) {
   m_requests[0] = MPI_REQUEST_NULL;
@@ -1976,7 +1976,7 @@ communicator::array_irecv_impl(int source, int tag, T* values, int n,
 }
 
 template<typename T>
-request::request(communicator const& comm, int source, int tag, T* values, int n)
+request::legacy_handler::legacy_handler(communicator const& comm, int source, int tag, T* values, int n)
   : m_data(new detail::serialized_array_irecv_data<T>(comm, source, tag, values, n)),
     m_handler(handle_serialized_array_irecv<T>) {
   m_requests[0] = MPI_REQUEST_NULL;
@@ -1997,7 +1997,7 @@ communicator::array_irecv_impl(int source, int tag, T* values, int n,
 }
 
 template<typename T, class A>
-request::request(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive)
+request::legacy_handler::legacy_handler(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive)
   : m_data(new detail::dynamic_array_irecv_data<T,A>(comm, source, tag, values)),
     m_handler(handle_dynamic_primitive_array_irecv<T,A>)
 {

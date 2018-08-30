@@ -13,6 +13,7 @@
 #define BOOST_MPI_REQUEST_HPP
 
 #include <boost/mpi/config.hpp>
+#include <boost/mpi/status.hpp>
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/mpi/packed_iarchive.hpp>
@@ -40,22 +41,25 @@ class BOOST_MPI_DECL request
   /**
    *  Constructs request for complex data.
    */
-  template<typename T> request(communicator const& comm, int source, int tag, T& value);
+  template<typename T> request(communicator const& comm, int source, int tag, T& value)
+    : m_handler(new legacy_handler(comm, source, tag, value)) {}
   /**
    *  Constructs request for array of complex data.
    */  
-  template<typename T> request(communicator const& comm, int source, int tag, T* value, int n);
+  template<typename T> request(communicator const& comm, int source, int tag, T* values, int n)
+    : m_handler(new legacy_handler(comm, source, tag, values, n)) {}
   /**
    *  Constructs request for array of primitive data.
    */
-  template<typename T, class A> request(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive);
+  template<typename T, class A> request(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive)
+    : m_handler(new legacy_handler(comm, source, tag, values, primitive)) {}
 
   /**
    *  Wait until the communication associated with this request has
    *  completed, then return a @c status object describing the
    *  communication.
    */
-  status wait();
+  status wait() { return m_handler->wait(); }
 
   /**
    *  Determine whether the communication associated with this request
@@ -65,78 +69,108 @@ class BOOST_MPI_DECL request
    *  yet. Note that once @c test() returns a @c status object, the
    *  request has completed and @c wait() should not be called.
    */
-  optional<status> test();
+  optional<status> test() { return m_handler->test(); }
 
   /**
    *  Cancel a pending communication, assuming it has not already been
    *  completed.
    */
-  void cancel();
+  void cancel() { m_handler->cancel(); }
   
   /**
    * The trivial MPI requet implenting this request, provided it's trivial.
    * Probably irrelevant to most users.
    */
-  optional<MPI_Request&> trivial();
+  optional<MPI_Request&> trivial() { return m_handler->trivial(); }
 
   /**
    * For two steps requests, that need to first send the size, then the payload,
    * access to the size request.
    * Probably irrelevant to most users.
    */
-  MPI_Request& size_request() { return m_requests[0]; }
+  MPI_Request& size_request() { return m_handler->size_request(); }
 
   /**
    * For two steps requests, that need to first send the size, then the payload,
    * access to the size request.
    * Probably irrelevant to most users.
    */
-  MPI_Request& payload_request() { return m_requests[1]; }
+  MPI_Request& payload_request() { return m_handler->payload_request(); }
 
   /**
    * Is this request potentialy pending ?
    */
-  bool active() const;
+  bool active() const { return m_handler->active(); }
 
-  template<class T>  boost::shared_ptr<T>    data() { return boost::static_pointer_cast<T>(m_data); }
-  template<class T>  void                    set_data(boost::shared_ptr<T>& d) { m_data = d; }
+  template<class T>  boost::shared_ptr<T>    data() { return boost::static_pointer_cast<T>(m_handler->data()); }
+  template<class T>  void                    set_data(boost::shared_ptr<T> d) { m_handler->set_data(d); }
 
+  struct handler {
+    virtual ~handler() = 0;
+    virtual status wait() = 0;
+    virtual optional<status> test() = 0;
+    virtual void cancel() = 0;
+    
+    virtual bool active() const = 0;
+    virtual optional<MPI_Request&> trivial() = 0;
+    
+    virtual MPI_Request& size_request() = 0;
+    virtual MPI_Request& payload_request() = 0;
+    
+    virtual boost::shared_ptr<void> data() = 0;
+    virtual void                    set_data(boost::shared_ptr<void> d) = 0;
+  };
+  
  private:
   enum request_action { ra_wait, ra_test, ra_cancel };
-  typedef optional<status> (*handler_type)(request* self, 
-                                           request_action action);
 
-  /**
-   * INTERNAL ONLY
-   *
-   * Handles the non-blocking receive of a serialized value.
-   */
-  template<typename T>
-  static optional<status> 
-  handle_serialized_irecv(request* self, request_action action);
+  struct legacy_handler : public handler {
+    legacy_handler()
+      : m_data(), m_handler(0) {
+      m_requests[0] = MPI_REQUEST_NULL;
+      m_requests[1] = MPI_REQUEST_NULL;
+    }
+    template<typename T> legacy_handler(communicator const& comm, int source, int tag, T& value);
+    template<typename T> legacy_handler(communicator const& comm, int source, int tag, T* value, int n);
+    template<typename T, class A> legacy_handler(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive);
 
-  /**
-   * INTERNAL ONLY
-   *
-   * Handles the non-blocking receive of an array of  serialized values.
-   */
-  template<typename T>
-  static optional<status> 
-  handle_serialized_array_irecv(request* self, request_action action);
+    status wait();
+    optional<status> test();
+    void cancel();
 
-  /**
-   * INTERNAL ONLY
-   *
-   * Handles the non-blocking receive of a dynamic array of primitive values.
-   */
-  template<typename T, class A>
-  static optional<status> 
-  handle_dynamic_primitive_array_irecv(request* self, request_action action);
+    bool active() const;
+    optional<MPI_Request&> trivial();
+    
+    MPI_Request& size_request() { return m_requests[0]; }
+    MPI_Request& payload_request() { return m_requests[1]; }
 
+    boost::shared_ptr<void> data() { return m_data; }
+    void                    set_data(boost::shared_ptr<void> d) { m_data = d; }
+
+    template<class T>  boost::shared_ptr<T>    data() { return boost::static_pointer_cast<T>(m_data); }
+    template<class T>  void                    set_data(boost::shared_ptr<T> d) { m_data = d; }
+    
+    typedef optional<status> (*handler_type)(request::legacy_handler* self, 
+					     request_action action);
+    template<typename T>
+    static optional<status> 
+    handle_serialized_irecv(legacy_handler* self, request_action action);
+    
+    template<typename T>
+    static optional<status> 
+    handle_serialized_array_irecv(legacy_handler* self, request_action action);
+    
+    template<typename T, class A>
+    static optional<status> 
+    handle_dynamic_primitive_array_irecv(legacy_handler* self, request_action action);
+    
+    MPI_Request      m_requests[2];
+    shared_ptr<void> m_data;
+    handler_type     m_handler;  
+  };
+  
  private:
-  MPI_Request      m_requests[2];
-  shared_ptr<void> m_data;
-  handler_type     m_handler;
+  shared_ptr<handler> m_handler;
 };
 
 } } // end namespace boost::mpi
