@@ -41,11 +41,11 @@ packed_archive_send(MPI_Comm comm, int dest, int tag,
                           dest, tag, comm));
 }
 
-int
+request
 packed_archive_isend(MPI_Comm comm, int dest, int tag,
-                     const packed_oarchive& ar,
-                     request& req)
+                     const packed_oarchive& ar)
 {
+  request req = request::make_dynamic();
   std::size_t const& size = ar.size();
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
                          (detail::unconst(&size), 1, 
@@ -56,14 +56,14 @@ packed_archive_isend(MPI_Comm comm, int dest, int tag,
                           MPI_PACKED,
                           dest, tag, comm, &req.payload_request()));
   
-  return 2;
+  return req;
 }
 
-int
+request
 packed_archive_isend(MPI_Comm comm, int dest, int tag,
-                     const packed_iarchive& ar,
-                     request& req)
+                     const packed_iarchive& ar)
 {
+  request req = request::make_dynamic();
   std::size_t const& size = ar.size();
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
                          (detail::unconst(&size), 1, 
@@ -74,7 +74,7 @@ packed_archive_isend(MPI_Comm comm, int dest, int tag,
                           MPI_PACKED,
                           dest, tag, comm, &req.payload_request()));
 
-  return 2;
+  return req;
 }
 
 void

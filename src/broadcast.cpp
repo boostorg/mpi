@@ -35,7 +35,7 @@ broadcast<const packed_oarchive>(const communicator& comm,
   std::vector<request>::iterator it = requests.begin();
   for (int dest = 0; dest < size; ++dest) {
     if (dest != root) {
-      detail::packed_archive_isend(comm, dest, tag, oa, *it++);
+      *it++ = detail::packed_archive_isend(comm, dest, tag, oa);
     }
   }
   wait_all(requests.begin(), requests.end());
@@ -70,7 +70,7 @@ broadcast<packed_iarchive>(const communicator& comm, packed_iarchive& ia,
     std::vector<request>::iterator it = requests.begin();
     for (int dest = 0; dest < size; ++dest) {
       if (dest != root) {
-        detail::packed_archive_isend(comm, dest, tag, ia, *it++);
+        *it++ = detail::packed_archive_isend(comm, dest, tag, ia);
       }
     }
     wait_all(requests.begin(), requests.end());

@@ -53,8 +53,16 @@ class BOOST_MPI_DECL request
    */
   template<typename T, class A> request(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive)
     : m_handler(new legacy_handler(comm, source, tag, values, primitive)) {}
-
+  
+  /**
+   * For primitive data of statically known size.
+   */
   static request make_trivial() { return request(new trivial_handler()); }
+  /**
+   * For simple data of unknown size.
+   */
+  static request make_dynamic() { return request(new legacy_handler()); }
+
   /**
    *  Wait until the communication associated with this request has
    *  completed, then return a @c status object describing the

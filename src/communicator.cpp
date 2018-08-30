@@ -274,9 +274,7 @@ request
 communicator::isend<packed_oarchive>(int dest, int tag,
                                      const packed_oarchive& ar) const
 {
-  request req;
-  detail::packed_archive_isend(MPI_Comm(*this), dest, tag, ar, req);
-  return req;
+  return detail::packed_archive_isend(MPI_Comm(*this), dest, tag, ar);
 }
 
 template<>

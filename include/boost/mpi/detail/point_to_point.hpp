@@ -31,16 +31,16 @@ packed_archive_send(MPI_Comm comm, int dest, int tag,
  * num_out_requests packets. The number of packets sent will be
  * returned from the function.
  */
-BOOST_MPI_DECL int
+BOOST_MPI_DECL request
 packed_archive_isend(MPI_Comm comm, int dest, int tag,
-                     const packed_oarchive& ar, request& req);
+                     const packed_oarchive& ar);
 
 /**
  * \overload
  */
-BOOST_MPI_DECL int
+BOOST_MPI_DECL request
 packed_archive_isend(MPI_Comm comm, int dest, int tag,
-                     const packed_iarchive& ar, request& req);
+                     const packed_iarchive& ar);
 
 /** Receives a packed archive using MPI_Recv. */
 BOOST_MPI_DECL void
