@@ -134,8 +134,6 @@ class BOOST_MPI_DECL request
   
   request(handler *h) : m_handler(h) {};
 
-  enum request_action { ra_wait, ra_test, ra_cancel };
-
   // specific implementations
   struct legacy_handler;
   struct trivial_handler;  

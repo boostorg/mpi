@@ -37,18 +37,6 @@ request::legacy_handler::active() const {
   return m_requests[0] != MPI_REQUEST_NULL || m_requests[1] != MPI_REQUEST_NULL;
 }
 
-optional<status>
-request::legacy_handler::test()
-{
-  return m_handler(this, ra_test);
-}
-
-void
-request::legacy_handler::cancel()
-{
-  m_handler(this, ra_cancel);
-}
-
 // trivial handler
 
 request::trivial_handler::trivial_handler()
