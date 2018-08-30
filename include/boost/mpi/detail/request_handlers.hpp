@@ -14,11 +14,6 @@
 namespace boost { namespace mpi {
 
 struct request::legacy_handler : public request::handler {
-  legacy_handler()
-    : m_data(), m_handler(0) {
-    m_requests[0] = MPI_REQUEST_NULL;
-    m_requests[1] = MPI_REQUEST_NULL;
-  }
   template<typename T> legacy_handler(communicator const& comm, int source, int tag, T& value);
   template<typename T> legacy_handler(communicator const& comm, int source, int tag, T* value, int n);
   template<typename T, class A> legacy_handler(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive);
