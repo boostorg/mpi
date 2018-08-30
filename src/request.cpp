@@ -37,12 +37,6 @@ request::legacy_handler::active() const {
   return m_requests[0] != MPI_REQUEST_NULL || m_requests[1] != MPI_REQUEST_NULL;
 }
 
-status
-request::legacy_handler::wait()
-{
-  return *m_handler(this, ra_wait);
-}
-
 optional<status>
 request::legacy_handler::test()
 {
