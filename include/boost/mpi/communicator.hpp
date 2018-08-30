@@ -1952,7 +1952,7 @@ template<typename T>
 request
 communicator::irecv_impl(int source, int tag, T& value, mpl::false_) const
 {
-  return request(*this, source, tag, value);
+  return request::make_serialized(*this, source, tag, value);
 }
 
 template<typename T>
@@ -1993,7 +1993,7 @@ request
 communicator::array_irecv_impl(int source, int tag, T* values, int n, 
                                mpl::false_) const
 {
-  return request(*this, source, tag, values, n);
+  return request::make_serialized_array(*this, source, tag, values, n);
 }
 
 template<typename T, class A>
@@ -2015,7 +2015,7 @@ request
 communicator::irecv_vector(int source, int tag, std::vector<T,A>& values, 
                            mpl::true_ primitive) const
 {
-  return request(*this, source, tag, values, primitive);
+  return request::make_dynamic_primitive_array(*this, source, tag, values);
 }
 
 template<typename T, class A>

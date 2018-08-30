@@ -39,30 +39,36 @@ class BOOST_MPI_DECL request
   request();
 
   /**
-   *  Constructs request for complex data.
-   */
-  template<typename T> request(communicator const& comm, int source, int tag, T& value)
-    : m_handler(new legacy_handler(comm, source, tag, value)) {}
-  /**
-   *  Constructs request for array of complex data.
-   */  
-  template<typename T> request(communicator const& comm, int source, int tag, T* values, int n)
-    : m_handler(new legacy_handler(comm, source, tag, values, n)) {}
-  /**
-   *  Constructs request for array of primitive data.
-   */
-  template<typename T, class A> request(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive)
-    : m_handler(new legacy_handler(comm, source, tag, values, primitive)) {}
-  
-  /**
-   * For primitive data of statically known size.
+   * Construct request for primitive data of statically known size.
    */
   static request make_trivial() { return request(new trivial_handler()); }
   /**
-   * For simple data of unknown size.
+   * Construct request for simple data of unknown size.
    */
   static request make_dynamic() { return request(new dynamic_handler()); }
-
+  /**
+   *  Constructs request for serialized data.
+   */
+  template<typename T>
+  static request make_serialized(communicator const& comm, int source, int tag, T& value) {
+    return request(new legacy_handler(comm, source, tag, value));
+  }
+  /**
+   *  Constructs request for array of complex data.
+   */  
+  template<typename T>
+  static request make_serialized_array(communicator const& comm, int source, int tag, T* values, int n) {
+    return request(new legacy_handler(comm, source, tag, values, n));
+  }
+  /**
+   *  Constructs request for array of primitive data.
+   */
+  template<typename T, class A>
+  static request make_dynamic_primitive_array(communicator const& comm, int source, int tag, 
+                                              std::vector<T,A>& values) {
+    return request(new legacy_handler(comm, source, tag, values, mpl::true_()));
+  }
+  
   /**
    *  Wait until the communication associated with this request has
    *  completed, then return a @c status object describing the
