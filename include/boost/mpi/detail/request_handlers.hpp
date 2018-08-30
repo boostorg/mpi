@@ -22,13 +22,9 @@ namespace detail {
    * the receipt of serialized data via a request object.
    */
   template<typename T>
-  struct serialized_irecv_data
-  {
-    serialized_irecv_data(const communicator& comm, int source, int tag, 
-                          T& value)
-      : comm(comm), source(source), tag(tag), ia(comm), value(value) 
-    { 
-    }
+  struct serialized_irecv_data {
+    serialized_irecv_data(const communicator& comm, T& value)
+      : ia(comm), value(value) {}
 
     void deserialize(status& stat) 
     { 
@@ -36,9 +32,6 @@ namespace detail {
       stat.m_count = 1;
     }
 
-    communicator comm;
-    int source;
-    int tag;
     std::size_t count;
     packed_iarchive ia;
     T& value;
@@ -47,15 +40,10 @@ namespace detail {
   template<>
   struct serialized_irecv_data<packed_iarchive>
   {
-    serialized_irecv_data(const communicator& comm, int source, int tag, 
-                          packed_iarchive& ia)
-      : comm(comm), source(source), tag(tag), ia(ia) { }
+    serialized_irecv_data(communicator const&, packed_iarchive& ia) : ia(ia) { }
 
     void deserialize(status&) { /* Do nothing. */ }
 
-    communicator comm;
-    int source;
-    int tag;
     std::size_t count;
     packed_iarchive& ia;
   };
@@ -67,17 +55,11 @@ namespace detail {
   template<typename T>
   struct serialized_array_irecv_data
   {
-    serialized_array_irecv_data(const communicator& comm, int source, int tag, 
-                                T* values, int n)
-      : comm(comm), source(source), tag(tag), ia(comm), values(values), n(n)
-    { 
-    }
+    serialized_array_irecv_data(const communicator& comm, T* values, int n)
+      : ia(comm), values(values), n(n) {}
 
     void deserialize(status& stat);
 
-    communicator comm;
-    int source;
-    int tag;
     std::size_t count;
     packed_iarchive ia;
     T* values;
@@ -114,15 +96,9 @@ namespace detail {
   {
     BOOST_STATIC_ASSERT_MSG(is_mpi_datatype<T>::value, "Can only be specialized for MPI datatypes.");
 
-    dynamic_array_irecv_data(const communicator& comm, int source, int tag, 
-                             std::vector<T,A>& values)
-      : comm(comm), source(source), tag(tag), count(-1), values(values)
-    { 
-    }
+    dynamic_array_irecv_data(std::vector<T,A>& values)
+      :  count(-1), values(values) {}
 
-    communicator comm;
-    int source;
-    int tag;
     std::size_t count;
     std::vector<T,A>& values;
   };
@@ -130,10 +106,8 @@ namespace detail {
   template<typename T>
   struct serialized_irecv_data<const skeleton_proxy<T> >
   {
-    serialized_irecv_data(const communicator& comm, int source, int tag, 
-                          skeleton_proxy<T> proxy)
-      : comm(comm), source(source), tag(tag), isa(comm), 
-        ia(isa.get_skeleton()), proxy(proxy) { }
+    serialized_irecv_data(const communicator& comm, skeleton_proxy<T> proxy)
+      : isa(comm), ia(isa.get_skeleton()), proxy(proxy) { }
 
     void deserialize(status& stat) 
     { 
@@ -141,9 +115,6 @@ namespace detail {
       stat.m_count = 1;
     }
 
-    communicator comm;
-    int source;
-    int tag;
     std::size_t count;
     packed_skeleton_iarchive isa;
     packed_iarchive& ia;
@@ -156,9 +127,8 @@ namespace detail {
   {
     typedef serialized_irecv_data<const skeleton_proxy<T> > inherited;
 
-    serialized_irecv_data(const communicator& comm, int source, int tag, 
-                          const skeleton_proxy<T>& proxy)
-      : inherited(comm, source, tag, proxy) { }
+    serialized_irecv_data(const communicator& comm, const skeleton_proxy<T>& proxy)
+      : inherited(comm, proxy) { }
   };
 }
 
@@ -190,6 +160,9 @@ struct request::legacy_handler : public request::handler {
   
   MPI_Request      m_requests[2];
   shared_ptr<void> m_data;
+  communicator     m_comm;
+  int              m_source;
+  int              m_tag;  
 };
 
 template<typename T>
@@ -212,7 +185,7 @@ struct request::legacy_serialized_handler
       BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                              (data->ia.address(), data->ia.size(), MPI_PACKED,
                               stat.source(), stat.tag(), 
-                              MPI_Comm(data->comm), m_requests + 1));
+                              MPI_Comm(m_comm), m_requests + 1));
     }
 
     // Wait until we have received the entire message
@@ -239,7 +212,7 @@ struct request::legacy_serialized_handler
         BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                                (data->ia.address(), data->ia.size(),MPI_PACKED,
                                 stat.source(), stat.tag(), 
-                                MPI_Comm(data->comm), m_requests + 1));
+                                MPI_Comm(m_comm), m_requests + 1));
       } else
         return optional<status>(); // We have not finished yet
     } 
@@ -274,7 +247,7 @@ struct request::legacy_serialized_array_handler
       BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                              (data->ia.address(), data->ia.size(), MPI_PACKED,
                               stat.source(), stat.tag(), 
-                              MPI_Comm(data->comm), m_requests + 1));
+                              MPI_Comm(m_comm), m_requests + 1));
     }
 
     // Wait until we have received the entire message
@@ -301,7 +274,7 @@ struct request::legacy_serialized_array_handler
         BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                                (data->ia.address(), data->ia.size(),MPI_PACKED,
                                 stat.source(), stat.tag(), 
-                                MPI_Comm(data->comm), m_requests + 1));
+                                MPI_Comm(m_comm), m_requests + 1));
       } else
         return optional<status>(); // We have not finished yet
     } 
@@ -336,7 +309,7 @@ struct request::legacy_dynamic_primitive_array_handler
       BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                              (&(data->values[0]), data->values.size(), get_mpi_datatype<T>(),
                               stat.source(), stat.tag(), 
-                              MPI_Comm(data->comm), m_requests + 1));
+                              MPI_Comm(m_comm), m_requests + 1));
     }
     // Wait until we have received the entire message
     BOOST_MPI_CHECK_RESULT(MPI_Wait,
@@ -360,7 +333,7 @@ struct request::legacy_dynamic_primitive_array_handler
         BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                                (&(data->values[0]), data->values.size(),MPI_PACKED,
                                 stat.source(), stat.tag(), 
-                                MPI_Comm(data->comm), m_requests + 1));
+                                MPI_Comm(m_comm), m_requests + 1));
       } else
         return optional<status>(); // We have not finished yet
     } 
@@ -433,7 +406,10 @@ request request::make_dynamic_primitive_array(communicator const& comm, int sour
 
 template<typename T>
 request::legacy_handler::legacy_handler(communicator const& comm, int source, int tag, T& value)
-: m_data(new detail::serialized_irecv_data<T>(comm, source, tag, value))
+  : m_data(new detail::serialized_irecv_data<T>(comm, value)),
+    m_comm(comm),
+    m_source(source),
+    m_tag(tag)
 {
   m_requests[0] = MPI_REQUEST_NULL;
   m_requests[1] = MPI_REQUEST_NULL;
@@ -446,7 +422,10 @@ request::legacy_handler::legacy_handler(communicator const& comm, int source, in
 
 template<typename T>
 request::legacy_handler::legacy_handler(communicator const& comm, int source, int tag, T* values, int n)
-  : m_data(new detail::serialized_array_irecv_data<T>(comm, source, tag, values, n))
+  : m_data(new detail::serialized_array_irecv_data<T>(comm, values, n)),
+    m_comm(comm),
+    m_source(source),
+    m_tag(tag)
 {
   m_requests[0] = MPI_REQUEST_NULL;
   m_requests[1] = MPI_REQUEST_NULL;
@@ -459,7 +438,10 @@ request::legacy_handler::legacy_handler(communicator const& comm, int source, in
 
 template<typename T, class A>
 request::legacy_handler::legacy_handler(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive)
-  : m_data(new detail::dynamic_array_irecv_data<T,A>(comm, source, tag, values))
+  : m_data(new detail::dynamic_array_irecv_data<T,A>(values)),
+    m_comm(comm),
+    m_source(source),
+    m_tag(tag)
 {
   m_requests[0] = MPI_REQUEST_NULL;
   m_requests[1] = MPI_REQUEST_NULL;
