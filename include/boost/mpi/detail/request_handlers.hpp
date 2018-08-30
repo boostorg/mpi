@@ -24,28 +24,28 @@ namespace detail {
   template<typename T>
   struct serialized_irecv_data {
     serialized_irecv_data(const communicator& comm, T& value)
-      : ia(comm), value(value) {}
+      : m_ia(comm), m_value(value) {}
 
     void deserialize(status& stat) 
     { 
-      ia >> value; 
+      m_ia >> m_value; 
       stat.m_count = 1;
     }
 
-    std::size_t count;
-    packed_iarchive ia;
-    T& value;
+    std::size_t     m_count;
+    packed_iarchive m_ia;
+    T&              m_value;
   };
 
   template<>
   struct serialized_irecv_data<packed_iarchive>
   {
-    serialized_irecv_data(communicator const&, packed_iarchive& ia) : ia(ia) { }
+    serialized_irecv_data(communicator const&, packed_iarchive& ia) : m_ia(ia) { }
 
     void deserialize(status&) { /* Do nothing. */ }
 
-    std::size_t count;
-    packed_iarchive& ia;
+    std::size_t      m_count;
+    packed_iarchive& m_ia;
   };
 
   /**
@@ -107,18 +107,18 @@ namespace detail {
   struct serialized_irecv_data<const skeleton_proxy<T> >
   {
     serialized_irecv_data(const communicator& comm, skeleton_proxy<T> proxy)
-      : isa(comm), ia(isa.get_skeleton()), proxy(proxy) { }
+      : m_isa(comm), m_ia(m_isa.get_skeleton()), m_proxy(proxy) { }
 
     void deserialize(status& stat) 
     { 
-      isa >> proxy.object;
+      m_isa >> m_proxy.object;
       stat.m_count = 1;
     }
 
-    std::size_t count;
-    packed_skeleton_iarchive isa;
-    packed_iarchive& ia;
-    skeleton_proxy<T> proxy;
+    std::size_t              m_count;
+    packed_skeleton_iarchive m_isa;
+    packed_iarchive&         m_ia;
+    skeleton_proxy<T>        m_proxy;
   };
 
   template<typename T>
@@ -162,28 +162,33 @@ struct request::legacy_handler : public request::handler {
   shared_ptr<void> m_data;
   communicator     m_comm;
   int              m_source;
-  int              m_tag;  
+  int              m_tag;
 };
 
 template<typename T>
 struct request::legacy_serialized_handler 
-  : public request::legacy_handler {
+  : public request::legacy_handler, protected detail::serialized_irecv_data<T> {
+  typedef detail::serialized_irecv_data<T> extra;
   legacy_serialized_handler(communicator const& comm, int source, int tag, T& value)
-    : legacy_handler(comm, source, tag, value) {}
+    : legacy_handler(comm, source, tag, value),
+      extra(comm, value)  {
+    BOOST_MPI_CHECK_RESULT(MPI_Irecv,
+			   (&this->extra::m_count, 1, 
+			    get_mpi_datatype(this->extra::m_count),
+			    source, tag, comm, &size_request()));
+    
+  }
 
   status wait() {
-    typedef detail::serialized_irecv_data<T> data_t;
-    shared_ptr<data_t> data = this->data<data_t>();
-    
     status stat;
     if (m_requests[1] == MPI_REQUEST_NULL) {
       // Wait for the count message to complete
       BOOST_MPI_CHECK_RESULT(MPI_Wait,
                              (m_requests, &stat.m_status));
       // Resize our buffer and get ready to receive its data
-      data->ia.resize(data->count);
+      this->extra::m_ia.resize(this->extra::m_count);
       BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-                             (data->ia.address(), data->ia.size(), MPI_PACKED,
+                             (this->extra::m_ia.address(), this->extra::m_ia.size(), MPI_PACKED,
                               stat.source(), stat.tag(), 
                               MPI_Comm(m_comm), m_requests + 1));
     }
@@ -192,13 +197,11 @@ struct request::legacy_serialized_handler
     BOOST_MPI_CHECK_RESULT(MPI_Wait,
                            (m_requests + 1, &stat.m_status));
 
-    data->deserialize(stat);
+    this->deserialize(stat);
     return stat;    
   }
   
   optional<status> test() {
-    typedef detail::serialized_irecv_data<T> data_t;
-    shared_ptr<data_t> data = this->data<data_t>();
     status stat;
     int flag = 0;
     
@@ -208,9 +211,9 @@ struct request::legacy_serialized_handler
                              (m_requests, &flag, &stat.m_status));
       if (flag) {
         // Resize our buffer and get ready to receive its data
-        data->ia.resize(data->count);
+        this->extra::m_ia.resize(this->extra::m_count);
         BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-                               (data->ia.address(), data->ia.size(),MPI_PACKED,
+                               (this->extra::m_ia.address(), this->extra::m_ia.size(),MPI_PACKED,
                                 stat.source(), stat.tag(), 
                                 MPI_Comm(m_comm), m_requests + 1));
       } else
@@ -221,7 +224,7 @@ struct request::legacy_serialized_handler
     BOOST_MPI_CHECK_RESULT(MPI_Test,
                            (m_requests + 1, &flag, &stat.m_status));
     if (flag) {
-      data->deserialize(stat);
+      this->deserialize(stat);
       return stat;
     } else 
       return optional<status>();
@@ -406,18 +409,13 @@ request request::make_dynamic_primitive_array(communicator const& comm, int sour
 
 template<typename T>
 request::legacy_handler::legacy_handler(communicator const& comm, int source, int tag, T& value)
-  : m_data(new detail::serialized_irecv_data<T>(comm, value)),
+  : m_data(),
     m_comm(comm),
     m_source(source),
     m_tag(tag)
 {
   m_requests[0] = MPI_REQUEST_NULL;
   m_requests[1] = MPI_REQUEST_NULL;
-  std::size_t& count = data<detail::serialized_irecv_data<T> >()->count;
-  BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-                         (&count, 1, 
-                          get_mpi_datatype(count),
-                          source, tag, comm, &size_request()));
 }
 
 template<typename T>
