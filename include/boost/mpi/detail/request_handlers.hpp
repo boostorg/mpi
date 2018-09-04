@@ -132,6 +132,69 @@ namespace detail {
   };
 }
 
+struct request::probe_handler : public request::handler {
+  probe_handler(communicator const& comm, int source, int tag)
+    : m_comm(comm), m_source(source), m_tag(tag) {}
+  
+  bool active() const { return m_source == MPI_PROC_NULL; }
+  optional<MPI_Request&> trivial() { return boost::none; }
+  MPI_Request& size_request()    { std::abort(); return *(MPI_Request*)0;}
+  MPI_Request& payload_request() { std::abort(); return *(MPI_Request*)0;}
+
+  boost::shared_ptr<void> data() { std::abort(); return boost::shared_ptr<void>(); };
+  void     set_data(boost::shared_ptr<void> d) { std::abort(); }
+  
+  communicator const& m_comm;
+  int m_source;
+  int m_tag;
+};
+
+template<class A>
+struct request::dynamic_primitive_array_handler : public request::probe_handler {
+  dynamic_primitive_array_handler(communicator const& comm, int source, int tag,
+                                A& buffer)
+    : probe_handler(comm,source,tag), m_buffer(buffer) {}
+  
+  typedef typename A::value_type value_type;
+
+  status wait() {
+    MPI_Message msg;
+    status stat;
+    BOOST_MPI_CHECK_RESULT(MPI_Mprobe, (m_source,m_tag,m_comm,&msg,&stat.m_status));
+    int count;
+    MPI_Datatype datatype = get_mpi_datatype<value_type>();
+    BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&stat.m_status, datatype, &count));
+    m_buffer.resize(count);
+    BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (m_buffer.data(), count, datatype, &msg, &stat.m_status));
+    m_source = MPI_PROC_NULL;
+    return stat;
+  }
+  
+  optional<status> test() {
+    status stat;
+    int flag = 0;
+    MPI_Message msg;
+    BOOST_MPI_CHECK_RESULT(MPI_Improbe, (m_source,m_tag,m_comm,&flag,&msg,&stat.m_status));
+    if (flag) {
+      int count;
+      MPI_Datatype datatype = get_mpi_datatype<value_type>();
+      BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&stat.m_status, datatype, &count));
+      m_buffer.resize(count);
+      BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (m_buffer.data(), count, datatype, &msg, &stat.m_status));
+      m_source = MPI_PROC_NULL;
+      return stat;
+    } else {
+      return optional<status>();
+    } 
+  }
+
+  void cancel() {
+    m_source = MPI_PROC_NULL;
+  }
+  
+  A& m_buffer;
+};
+
 struct request::legacy_handler : public request::handler {
   template<typename T> legacy_handler(communicator const& comm, int source, int tag, T& value);
   template<typename T> legacy_handler(communicator const& comm, int source, int tag, T* value, int n);
@@ -404,7 +467,11 @@ request request::make_serialized_array(communicator const& comm, int source, int
 template<typename T, class A>
 request request::make_dynamic_primitive_array(communicator const& comm, int source, int tag, 
                                               std::vector<T,A>& values) {
-  return request(new legacy_dynamic_primitive_array_handler<T,A>(comm, source, tag, values));
+  if (probe_messages()) {
+    return request(new dynamic_primitive_array_handler<std::vector<T,A> >(comm,source,tag,values));
+  } else {
+    return request(new legacy_dynamic_primitive_array_handler<T,A>(comm, source, tag, values));
+  }
 }
 
 template<typename T>

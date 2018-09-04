@@ -1312,6 +1312,7 @@ template<typename T>
 void
 communicator::send_impl(int dest, int tag, const T& value, mpl::true_) const
 {
+  // received by recv or trivial handler.
   BOOST_MPI_CHECK_RESULT(MPI_Send,
                          (const_cast<T*>(&value), 1, get_mpi_datatype<T>(value),
                           dest, tag, MPI_Comm(*this)));
@@ -1365,13 +1366,19 @@ communicator::array_send_impl(int dest, int tag, const T* values, int n,
 
 template<typename T, typename A>
 void communicator::send_vector(int dest, int tag, 
-  const std::vector<T,A>& value, mpl::true_ true_type) const
+  const std::vector<T,A>& values, mpl::true_ primitive) const
 {
-  // send the vector size
-  typename std::vector<T,A>::size_type size = value.size();
-  send(dest, tag, size);
-  // send the data
-  this->array_send_impl(dest, tag, value.data(), size, true_type);
+  if (request::probe_messages()) {
+    array_send_impl(dest, tag, values.data(), values.size(), primitive);
+  } else {
+    // non blocking recv by legacy_dynamic_primitive_array_handler
+    // blocking recv by recv_vector(source,tag,value,primitive)
+    // send the vector size
+    typename std::vector<T,A>::size_type size = values.size();
+    send(dest, tag, size);
+    // send the data
+    this->array_send_impl(dest, tag, values.data(), size, primitive);
+  }
 }
 
 template<typename T, typename A>
@@ -1471,15 +1478,26 @@ communicator::array_recv_impl(int source, int tag, T* values, int n,
 
 template<typename T, typename A>
 status communicator::recv_vector(int source, int tag, 
-  std::vector<T,A>& value, mpl::true_ true_type) const
+                                 std::vector<T,A>& values, mpl::true_ primitive) const
 {
-  // receive the vector size
-  typename std::vector<T,A>::size_type size = 0;
-  recv(source, tag, size);
-  // size the vector
-  value.resize(size);
-  // receive the data
-  return this->array_recv_impl(source, tag, value.data(), size, true_type);
+  if (request::probe_messages()) {
+    MPI_Message msg;
+    status stat;
+    BOOST_MPI_CHECK_RESULT(MPI_Mprobe, (source,tag,*this,&msg,&stat.m_status));
+    int count;
+    BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&stat.m_status,get_mpi_datatype<T>(),&count));
+    values.resize(count);
+    BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (values.data(), count, get_mpi_datatype<T>(), &msg, &stat.m_status));
+    return stat;
+  } else {
+    // receive the vector size
+    typename std::vector<T,A>::size_type size = 0;
+    recv(source, tag, size);
+    // size the vector
+    values.resize(size);
+    // receive the data
+    return this->array_recv_impl(source, tag, values.data(), size, primitive);
+  }
 }
 
 template<typename T, typename A>
@@ -1585,22 +1603,27 @@ request communicator::isend(int dest, int tag, const std::vector<T,A>& values) c
 template<typename T, class A>
 request
 communicator::isend_vector(int dest, int tag, const std::vector<T,A>& values,
-                           mpl::true_) const
+                           mpl::true_ primitive) const
 {
-  boost::shared_ptr<std::size_t> size(new std::size_t(values.size()));
-  request req = request::make_dynamic();
-  req.set_data(size);
-  
-  BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                         (size.get(), 1,
-                          get_mpi_datatype(*size),
-                          dest, tag, MPI_Comm(*this), &req.size_request()));
-  BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                         (const_cast<T*>(values.data()), *size, 
-                          get_mpi_datatype<T>(),
-                          dest, tag, MPI_Comm(*this), &req.payload_request()));
-  return req;
-  
+  if (request::probe_messages()) {
+    return array_isend_impl(dest,tag,values.data(),values.size(),primitive);
+  } else {
+    // non blocking recv by legacy_dynamic_primitive_array_handler
+    // blocking recv by status recv_vector(source,tag,value,primitive)
+    boost::shared_ptr<std::size_t> size(new std::size_t(values.size()));
+    request req = request::make_dynamic();
+    req.set_data(size);
+    
+    BOOST_MPI_CHECK_RESULT(MPI_Isend,
+                           (size.get(), 1,
+                            get_mpi_datatype(*size),
+                            dest, tag, MPI_Comm(*this), &req.size_request()));
+    BOOST_MPI_CHECK_RESULT(MPI_Isend,
+                           (const_cast<T*>(values.data()), *size, 
+                            get_mpi_datatype<T>(),
+                            dest, tag, MPI_Comm(*this), &req.payload_request()));
+    return req;
+  }  
 }
 
 template<typename T, class A>
