@@ -94,7 +94,7 @@ class BOOST_MPI_DECL request
    *  completed, then return a @c status object describing the
    *  communication.
    */
-  status wait() { return m_handler->wait(); }
+  status wait() { return m_handler ? m_handler->wait() : status(); }
 
   /**
    *  Determine whether the communication associated with this request
@@ -104,24 +104,26 @@ class BOOST_MPI_DECL request
    *  yet. Note that once @c test() returns a @c status object, the
    *  request has completed and @c wait() should not be called.
    */
-  optional<status> test() { return m_handler->test(); }
+  optional<status> test() { return active() ? m_handler->test() : optional<status>(); }
 
   /**
    *  Cancel a pending communication, assuming it has not already been
    *  completed.
    */
-  void cancel() { m_handler->cancel(); m_preserved.reset(); }
+  void cancel() { if (m_handler) { m_handler->cancel(); } m_preserved.reset(); }
   
   /**
    * The trivial MPI requet implenting this request, provided it's trivial.
    * Probably irrelevant to most users.
    */
-  optional<MPI_Request&> trivial() { return m_handler->trivial(); }
+  optional<MPI_Request&> trivial() { return (m_handler
+					     ? m_handler->trivial()
+					     : optional<MPI_Request&>()); }
 
   /**
    * Is this request potentialy pending ?
    */
-  bool active() const { return m_handler->active(); }
+  bool active() const { return bool(m_handler) && m_handler->active(); }
   
   // Some data might need protection while the reqest is processed.
   void preserve(boost::shared_ptr<void> d);

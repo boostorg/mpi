@@ -136,7 +136,7 @@ struct request::probe_handler : public request::handler {
   probe_handler(communicator const& comm, int source, int tag)
     : m_comm(comm), m_source(source), m_tag(tag) {}
   
-  bool active() const { return m_source == MPI_PROC_NULL; }
+  bool active() const { return m_source != MPI_PROC_NULL; }
   optional<MPI_Request&> trivial();
 
 
@@ -311,9 +311,8 @@ struct request::serialized_handler<const skeleton_proxy<T> > : public request::p
       m_source = MPI_PROC_NULL;
       stat.m_count = 1;
       return stat;
-    } else {
-      return optional<status>();
-    } 
+    }
+    return optional<status>();
   }
 
   skeleton_proxy<T> m_proxy;
@@ -343,7 +342,8 @@ struct request::serialized_array_handler : public request::probe_handler {
     packed_iarchive ia(m_comm);
     ia.resize(count);
     BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (ia.address(), count, MPI_PACKED, &msg, &stat.m_status));
-    for(int i = 0; i < m_nb; ++i) {
+    int nb = m_nb; 
+    for(int i = 0; i < nb; ++i) {
       ia >> m_values[i];
     }
     m_source = MPI_PROC_NULL;
@@ -361,7 +361,8 @@ struct request::serialized_array_handler : public request::probe_handler {
       packed_iarchive ia(m_comm);
       ia.resize(count);
       BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (ia.address(), count, MPI_PACKED, &msg, &stat.m_status));
-      for(int i = 0; i < m_nb; ++i) {
+      int nb = m_nb; 
+      for(int i = 0; i < nb; ++i) {
         ia >> m_values[i];
       }
       m_source = MPI_PROC_NULL;
