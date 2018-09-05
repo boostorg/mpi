@@ -501,10 +501,10 @@ request::make_trivial_recv(communicator const& comm, int dest, int tag, T& value
 }
 
 template<typename T, class A>
-request request::make_dynamic_primitive_array_send(communicator const& comm, int source, int tag, 
+request request::make_dynamic_primitive_array_send(communicator const& comm, int dest, int tag, 
                                                    std::vector<T,A>& values) {
   if (request::probe_messages()) {
-    return make_trivial_send(comm, source, tag, values.data(), values.size());
+    return make_trivial_send(comm, dest, tag, values.data(), values.size());
   } else {
     // non blocking recv by legacy_dynamic_primitive_array_handler
     // blocking recv by status recv_vector(source,tag,value,primitive)
@@ -515,11 +515,11 @@ request request::make_dynamic_primitive_array_send(communicator const& comm, int
     BOOST_MPI_CHECK_RESULT(MPI_Isend,
                            (size.get(), 1,
                             get_mpi_datatype(*size),
-                            dest, tag, MPI_Comm(*this), &req.size_request()));
+                            dest, tag, comm, &req.size_request()));
     BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                           (const_cast<T*>(values.data()), *size, 
+                           (values.data, *size, 
                             get_mpi_datatype<T>(),
-                            dest, tag, MPI_Comm(*this), &req.payload_request()));
+                            dest, tag, comm, &req.payload_request()));
     return req;
   }  
 }
