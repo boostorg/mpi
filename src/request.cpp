@@ -16,9 +16,43 @@ namespace boost { namespace mpi {
 request::request() 
   : m_handler() {}
 
-request request::make_trivial() { return request(new trivial_handler()); }
-
 request request::make_dynamic() { return request(new dynamic_handler()); }
+
+request
+request::make_bottom_send(communicator const& comm, int dest, int tag, MPI_Datatype tp) {
+  trivial_handler* handler = new trivial_handler;
+  BOOST_MPI_CHECK_RESULT(MPI_Isend,
+                         (MPI_BOTTOM, 1, tp,
+                          dest, tag, comm, &handler->m_request));
+  return request(handler);
+}
+
+request
+request::make_empty_send(communicator const& comm, int dest, int tag) {
+  trivial_handler* handler = new trivial_handler;
+  BOOST_MPI_CHECK_RESULT(MPI_Isend,
+                         (MPI_BOTTOM, 0, MPI_PACKED,
+                          dest, tag, comm, &handler->m_request));
+  return request(handler);
+}
+
+request
+request::make_bottom_recv(communicator const& comm, int dest, int tag, MPI_Datatype tp) {
+  trivial_handler* handler = new trivial_handler;
+  BOOST_MPI_CHECK_RESULT(MPI_Irecv,
+                         (MPI_BOTTOM, 1, tp,
+                          dest, tag, comm, &handler->m_request));
+  return request(handler);
+}
+
+request
+request::make_empty_recv(communicator const& comm, int dest, int tag) {
+  trivial_handler* handler = new trivial_handler;
+  BOOST_MPI_CHECK_RESULT(MPI_Irecv,
+                         (MPI_BOTTOM, 0, MPI_PACKED,
+                          dest, tag, comm, &handler->m_request));
+  return request(handler);
+}
 
 
 /***************************************************************************

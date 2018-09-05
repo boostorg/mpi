@@ -1663,12 +1663,7 @@ template<typename T>
 request 
 communicator::irecv_impl(int source, int tag, T& value, mpl::true_) const
 {
-  request req = request::make_trivial();
-  BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-                         (const_cast<T*>(&value), 1, 
-                          get_mpi_datatype<T>(value),
-                          source, tag, MPI_Comm(*this), req.trivial().get_ptr()));
-  return req;
+  return request::make_trivial_recv(*this, source, tag, value);
 }
 
 template<typename T>
@@ -1690,12 +1685,7 @@ request
 communicator::array_irecv_impl(int source, int tag, T* values, int n, 
                                mpl::true_) const
 {
-  request req = request::make_trivial();
-  BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-                         (const_cast<T*>(values), n, 
-                          get_mpi_datatype<T>(*values),
-                          source, tag, MPI_Comm(*this), req.trivial().get_ptr()));
-  return req;
+  return request::make_trivial_recv(*this, source, tag, values, n);
 }
 
 template<typename T>

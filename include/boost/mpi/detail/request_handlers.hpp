@@ -483,6 +483,22 @@ request::make_trivial_send(communicator const& comm, int dest, int tag, T& value
   return make_trivial_send(comm, dest, tag, &value, 1);
 }
 
+template<typename T>
+request
+request::make_trivial_recv(communicator const& comm, int dest, int tag, T* values, int n) {
+  trivial_handler* handler = new trivial_handler;
+  BOOST_MPI_CHECK_RESULT(MPI_Irecv,
+                         (values, n, 
+                          get_mpi_datatype<T>(),
+                          dest, tag, comm, &handler->m_request));
+  return request(handler);
+}
+
+template<typename T>
+request
+request::make_trivial_recv(communicator const& comm, int dest, int tag, T& value) {
+  return make_trivial_recv(comm, dest, tag, &value, 1);
+}
 
 template<typename T, class A>
 request request::make_dynamic_primitive_array_send(communicator const& comm, int source, int tag, 
