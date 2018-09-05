@@ -40,7 +40,7 @@ request::legacy_handler::active() const {
 // trivial handler
 
 request::trivial_handler::trivial_handler()
-    : m_request(MPI_REQUEST_NULL), m_data() {}
+    : m_request(MPI_REQUEST_NULL) {}
   
 status
 request::trivial_handler::wait()
@@ -93,26 +93,12 @@ request::trivial_handler::payload_request()
   return m_request;  // avoid warning
 }
   
-boost::shared_ptr<void>
-request::trivial_handler::data() 
-{
-  return m_data; 
-}
-
-void
-request::trivial_handler::set_data(boost::shared_ptr<void> d) 
-{
-  m_data = d; 
-}
-
 // dynamic handler
 
-
 request::dynamic_handler::dynamic_handler()
-  : m_data() {
+{
   m_requests[0] = MPI_REQUEST_NULL;
   m_requests[1] = MPI_REQUEST_NULL;
-
 }
   
 status
@@ -206,17 +192,4 @@ request::dynamic_handler::payload_request()
   return m_requests[1];
 }
   
-boost::shared_ptr<void>
-request::dynamic_handler::data()
-{
-  return m_data;
-}
-
-void 
-request::dynamic_handler::set_data(boost::shared_ptr<void> d) 
-{
-  m_data = d;
-}
-
-
 } } // end namespace boost::mpi

@@ -85,7 +85,7 @@ class BOOST_MPI_DECL request
    *  Cancel a pending communication, assuming it has not already been
    *  completed.
    */
-  void cancel() { m_handler->cancel(); }
+  void cancel() { m_handler->cancel(); m_preserved.reset(); }
   
   /**
    * The trivial MPI requet implenting this request, provided it's trivial.
@@ -99,23 +99,23 @@ class BOOST_MPI_DECL request
    * Probably irrelevant to most users.
    */
   MPI_Request& size_request() { return m_handler->size_request(); }
-
+  
   /**
    * For two steps requests, that need to first send the size, then the payload,
    * access to the size request.
    * Probably irrelevant to most users.
    */
   MPI_Request& payload_request() { return m_handler->payload_request(); }
-
   /**
    * Is this request potentialy pending ?
    */
   bool active() const { return m_handler->active(); }
+  
+  // Some data might need protection while the reqest is processed.
+  void preserve(boost::shared_ptr<void> d) { m_preserved = d; }
 
-  template<class T>  boost::shared_ptr<T>    data() { return boost::static_pointer_cast<T>(m_handler->data()); }
-  template<class T>  void                    set_data(boost::shared_ptr<T> d) { m_handler->set_data(d); }
-
-  struct handler {
+  class handler {
+  public:
     virtual ~handler() = 0;
     virtual status wait() = 0;
     virtual optional<status> test() = 0;
@@ -126,9 +126,6 @@ class BOOST_MPI_DECL request
     
     virtual MPI_Request& size_request() = 0;
     virtual MPI_Request& payload_request() = 0;
-    
-    virtual boost::shared_ptr<void> data() = 0;
-    virtual void                    set_data(boost::shared_ptr<void> d) = 0;
   };
   
  private:
@@ -147,6 +144,7 @@ class BOOST_MPI_DECL request
   
  private:
   shared_ptr<handler> m_handler;
+  shared_ptr<void>    m_preserved;
 };
 
 inline

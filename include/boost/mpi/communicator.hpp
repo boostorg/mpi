@@ -1582,7 +1582,7 @@ communicator::isend_impl(int dest, int tag, const T& value, mpl::false_) const
   shared_ptr<packed_oarchive> archive(new packed_oarchive(*this));
   *archive << value;
   request result = isend(dest, tag, *archive);
-  result.set_data(archive);
+  result.preserve(archive);
   return result;
 }
 
@@ -1612,7 +1612,7 @@ communicator::isend_vector(int dest, int tag, const std::vector<T,A>& values,
     // blocking recv by status recv_vector(source,tag,value,primitive)
     boost::shared_ptr<std::size_t> size(new std::size_t(values.size()));
     request req = request::make_dynamic();
-    req.set_data(size);
+    req.preserve(size);
     
     BOOST_MPI_CHECK_RESULT(MPI_Isend,
                            (size.get(), 1,
@@ -1655,7 +1655,7 @@ communicator::array_isend_impl(int dest, int tag, const T* values, int n,
   shared_ptr<packed_oarchive> archive(new packed_oarchive(*this));
   *archive << n << boost::serialization::make_array(values, n);
   request result = isend(dest, tag, *archive);
-  result.set_data(archive);
+  result.preserve(archive);
   return result;
 }
 

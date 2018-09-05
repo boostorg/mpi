@@ -204,7 +204,6 @@ struct request::legacy_handler : public request::handler {
         BOOST_MPI_CHECK_RESULT(MPI_Cancel, (m_requests+i));
       }
     }
-    m_data.reset();
   }
   
   bool active() const;
@@ -213,14 +212,7 @@ struct request::legacy_handler : public request::handler {
   MPI_Request& size_request() { return m_requests[0]; }
   MPI_Request& payload_request() { return m_requests[1]; }
   
-  boost::shared_ptr<void> data() { return m_data; }
-  void                    set_data(boost::shared_ptr<void> d) { m_data = d; }
-  
-  template<class T>  boost::shared_ptr<T>    data() { return boost::static_pointer_cast<T>(m_data); }
-  template<class T>  void                    set_data(boost::shared_ptr<T> d) { m_data = d; }
-  
   MPI_Request      m_requests[2];
-  shared_ptr<void> m_data;
   communicator     m_comm;
   int              m_source;
   int              m_tag;
@@ -330,8 +322,6 @@ struct request::legacy_serialized_array_handler
   }
   
   optional<status> test() {
-    typedef detail::serialized_array_irecv_data<T> data_t;
-    shared_ptr<data_t> data = this->data<data_t>();
     status stat;
     int flag = 0;
     
@@ -396,8 +386,6 @@ struct request::legacy_dynamic_primitive_array_handler
   }
 
   optional<status> test() {
-    typedef detail::dynamic_array_irecv_data<T,A> data_t;
-    shared_ptr<data_t> data = this->data<data_t>();
     status stat;
     int flag = 0;
     
@@ -439,11 +427,7 @@ struct request::trivial_handler : public request::handler {
   MPI_Request& size_request();
   MPI_Request& payload_request();
   
-  boost::shared_ptr<void> data();
-  void                    set_data(boost::shared_ptr<void> d);
-  
   MPI_Request      m_request;
-  shared_ptr<void> m_data;
 };
 
 struct request::dynamic_handler : public request::handler {
@@ -459,11 +443,7 @@ struct request::dynamic_handler : public request::handler {
   MPI_Request& size_request();
   MPI_Request& payload_request();
   
-  boost::shared_ptr<void> data();
-  void                    set_data(boost::shared_ptr<void> d);
-  
   MPI_Request      m_requests[2];
-  shared_ptr<void> m_data;
 };
 
 template<typename T> 
@@ -488,8 +468,7 @@ request request::make_dynamic_primitive_array(communicator const& comm, int sour
 
 inline
 request::legacy_handler::legacy_handler(communicator const& comm, int source, int tag)
-  : m_data(),
-    m_comm(comm),
+  : m_comm(comm),
     m_source(source),
     m_tag(tag)
 {
