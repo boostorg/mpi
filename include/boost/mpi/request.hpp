@@ -151,6 +151,7 @@ class BOOST_MPI_DECL request
   template<typename T, class A> struct legacy_dynamic_primitive_array_handler;
   template<class A> struct dynamic_primitive_array_handler;
   template<typename A> struct serialized_handler;
+  template<typename A> struct serialized_array_handler;
   
  private:
   shared_ptr<handler> m_handler;

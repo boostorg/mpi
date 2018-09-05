@@ -1383,9 +1383,9 @@ void communicator::send_vector(int dest, int tag,
 
 template<typename T, typename A>
 void communicator::send_vector(int dest, int tag, 
-  const std::vector<T,A>& value, mpl::false_ false_type) const
+  const std::vector<T,A>& value, mpl::false_ primitive) const
 {
-  this->send_impl(dest, tag, value, false_type);
+  this->send_impl(dest, tag, value, primitive);
 }
 
 template<typename T, typename A>
