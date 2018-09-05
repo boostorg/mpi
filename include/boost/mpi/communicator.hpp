@@ -1564,12 +1564,7 @@ template<typename T>
 request
 communicator::isend_impl(int dest, int tag, const T& value, mpl::true_) const
 {
-  request req = request::make_trivial();
-  BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                         (const_cast<T*>(&value), 1, 
-                          get_mpi_datatype<T>(value),
-                          dest, tag, MPI_Comm(*this), req.trivial().get_ptr()));
-  return req;
+  return request::make_trivial_send(*this, dest, tag, value);
 }
 
 // We're sending a type that does not have an associated MPI
@@ -1639,12 +1634,7 @@ request
 communicator::array_isend_impl(int dest, int tag, const T* values, int n,
                                mpl::true_) const
 {
-  request req = request::make_trivial();
-  BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                         (const_cast<T*>(values), n, 
-                          get_mpi_datatype<T>(*values),
-                          dest, tag, MPI_Comm(*this), req.trivial().get_ptr()));
-  return req;
+  return request::make_trivial_send(*this, dest, tag, values, n);
 }
 
 template<typename T>

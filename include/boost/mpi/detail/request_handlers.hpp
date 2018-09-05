@@ -471,16 +471,16 @@ request
 request::make_trivial_send(communicator const& comm, int dest, int tag, T* values, int n) {
   trivial_handler* handler = new trivial_handler;
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                         (const_cast<T*>(values), n, 
+                         (values, n, 
                           get_mpi_datatype<T>(),
-                          dest, tag, MPI_Comm(*this), &handler.m_request));
+                          dest, tag, comm, &handler->m_request));
   return request(handler);
 }
 
 template<typename T>
 request
 request::make_trivial_send(communicator const& comm, int dest, int tag, T& value) {
-  return make_trivial(comm, source, tag, &value, 1);
+  return make_trivial_send(comm, dest, tag, &value, 1);
 }
 
 
