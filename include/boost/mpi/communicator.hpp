@@ -1721,7 +1721,7 @@ request
 communicator::irecv_vector(int source, int tag, std::vector<T,A>& values, 
                            mpl::true_ primitive) const
 {
-  return request::make_dynamic_primitive_array(*this, source, tag, values);
+  return request::make_dynamic_primitive_array_recv(*this, source, tag, values);
 }
 
 template<typename T, class A>

@@ -60,8 +60,8 @@ class BOOST_MPI_DECL request
    *  Constructs request for array of primitive data.
    */
   template<typename T, class A>
-  static request make_dynamic_primitive_array(communicator const& comm, int source, int tag, 
-                                              std::vector<T,A>& values);
+  static request make_dynamic_primitive_array_recv(communicator const& comm, int source, int tag, 
+                                                   std::vector<T,A>& values);
 
   static bool probe_messages();
   /**

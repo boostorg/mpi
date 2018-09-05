@@ -457,8 +457,8 @@ request request::make_serialized_array(communicator const& comm, int source, int
 }
 
 template<typename T, class A>
-request request::make_dynamic_primitive_array(communicator const& comm, int source, int tag, 
-                                              std::vector<T,A>& values) {
+request request::make_dynamic_primitive_array_recv(communicator const& comm, int source, int tag, 
+                                                   std::vector<T,A>& values) {
   if (probe_messages()) {
     return request(new dynamic_primitive_array_handler<std::vector<T,A> >(comm,source,tag,values));
   } else {
