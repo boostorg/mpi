@@ -196,6 +196,7 @@ struct request::dynamic_primitive_array_handler : public request::probe_handler 
 };
 
 struct request::legacy_handler : public request::handler {
+  legacy_handler(communicator const& comm, int source, int tag);
   template<typename T> legacy_handler(communicator const& comm, int source, int tag, T& value);
   template<typename T> legacy_handler(communicator const& comm, int source, int tag, T* value, int n);
   template<typename T, class A> legacy_handler(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive);
@@ -233,7 +234,7 @@ struct request::legacy_serialized_handler
   : public request::legacy_handler, protected detail::serialized_irecv_data<T> {
   typedef detail::serialized_irecv_data<T> extra;
   legacy_serialized_handler(communicator const& comm, int source, int tag, T& value)
-    : legacy_handler(comm, source, tag, value),
+    : legacy_handler(comm, source, tag),
       extra(comm, value)  {
     BOOST_MPI_CHECK_RESULT(MPI_Irecv,
 			   (&this->extra::m_count, 1, 
@@ -474,6 +475,17 @@ request request::make_dynamic_primitive_array(communicator const& comm, int sour
   }
 }
 
+inline
+request::legacy_handler::legacy_handler(communicator const& comm, int source, int tag)
+  : m_data(),
+    m_comm(comm),
+    m_source(source),
+    m_tag(tag)
+{
+  m_requests[0] = MPI_REQUEST_NULL;
+  m_requests[1] = MPI_REQUEST_NULL;
+}
+    
 template<typename T>
 request::legacy_handler::legacy_handler(communicator const& comm, int source, int tag, T& value)
   : m_data(),
