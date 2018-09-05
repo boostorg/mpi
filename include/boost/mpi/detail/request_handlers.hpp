@@ -197,7 +197,6 @@ struct request::dynamic_primitive_array_handler : public request::probe_handler 
 
 struct request::legacy_handler : public request::handler {
   legacy_handler(communicator const& comm, int source, int tag);
-  //template<typename T> legacy_handler(communicator const& comm, int source, int tag, T* value, int n);
   template<typename T, class A> legacy_handler(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive);
   
   void cancel() {
