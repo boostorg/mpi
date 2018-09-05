@@ -225,5 +225,10 @@ request::dynamic_handler::payload_request()
 {
   return m_requests[1];
 }
-  
+
+optional<MPI_Request&>
+request::probe_handler::trivial() {
+  return boost::none; 
+}
+
 } } // end namespace boost::mpi

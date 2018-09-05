@@ -137,7 +137,7 @@ struct request::probe_handler : public request::handler {
     : m_comm(comm), m_source(source), m_tag(tag) {}
   
   bool active() const { return m_source == MPI_PROC_NULL; }
-  optional<MPI_Request&> trivial() { return boost::none; }
+  optional<MPI_Request&> trivial();
   MPI_Request& size_request()    { std::abort(); return *(MPI_Request*)0;}
   MPI_Request& payload_request() { std::abort(); return *(MPI_Request*)0;}
 
