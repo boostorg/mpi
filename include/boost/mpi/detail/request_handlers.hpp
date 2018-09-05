@@ -56,14 +56,14 @@ namespace detail {
   struct serialized_array_irecv_data
   {
     serialized_array_irecv_data(const communicator& comm, T* values, int n)
-      : ia(comm), values(values), n(n) {}
+      : m_count(0), m_ia(comm), m_values(values), m_nb(n) {}
 
     void deserialize(status& stat);
 
-    std::size_t count;
-    packed_iarchive ia;
-    T* values;
-    int n;
+    std::size_t     m_count;
+    packed_iarchive m_ia;
+    T*              m_values;
+    int             m_nb;
   };
 
   template<typename T>
@@ -71,13 +71,13 @@ namespace detail {
   {
     // Determine how much data we are going to receive
     int count;
-    ia >> count;
+    m_ia >> count;
     
-    // Deserialize the data in the message
-    boost::serialization::array_wrapper<T> arr(values, count > n? n : count);
-    ia >> arr;
+    // Maybe we do not want all the elements...
+    boost::serialization::array_wrapper<T> arr(m_values, count > m_nb ? m_nb : count);
+    m_ia >> arr;
     
-    if (count > n) {
+    if (count > m_nb) {
       boost::throw_exception(
         std::range_error("communicator::recv: message receive overflow"));
     }
@@ -197,7 +197,7 @@ struct request::dynamic_primitive_array_handler : public request::probe_handler 
 
 struct request::legacy_handler : public request::handler {
   legacy_handler(communicator const& comm, int source, int tag);
-  template<typename T> legacy_handler(communicator const& comm, int source, int tag, T* value, int n);
+  //template<typename T> legacy_handler(communicator const& comm, int source, int tag, T* value, int n);
   template<typename T, class A> legacy_handler(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive);
   
   void cancel() {
@@ -297,22 +297,28 @@ struct request::legacy_serialized_handler
 
 template<typename T>
 struct request::legacy_serialized_array_handler 
-  : public request::legacy_handler {
+  : public    request::legacy_handler,
+    protected detail::serialized_array_irecv_data<T> {
+  typedef detail::serialized_array_irecv_data<T> extra;
   legacy_serialized_array_handler(communicator const& comm, int source, int tag, T* values, int n)
-    : legacy_handler(comm, source, tag, values, n) {}
+    : legacy_handler(comm, source, tag),
+      extra(comm, values, n) {
+    BOOST_MPI_CHECK_RESULT(MPI_Irecv,
+                           (&this->extra::m_count, 1, 
+                            get_mpi_datatype(this->extra::m_count),
+                            source, tag, comm, &size_request()));
+  }
 
   status wait() {
-    typedef detail::serialized_array_irecv_data<T> data_t;
-    shared_ptr<data_t> data = this->data<data_t>();
     status stat;
     if (m_requests[1] == MPI_REQUEST_NULL) {
       // Wait for the count message to complete
       BOOST_MPI_CHECK_RESULT(MPI_Wait,
                              (m_requests, &stat.m_status));
       // Resize our buffer and get ready to receive its data
-      data->ia.resize(data->count);
+      this->extra::m_ia.resize(this->extra::m_count);
       BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-                             (data->ia.address(), data->ia.size(), MPI_PACKED,
+                             (this->extra::m_ia.address(), this->extra::m_ia.size(), MPI_PACKED,
                               stat.source(), stat.tag(), 
                               MPI_Comm(m_comm), m_requests + 1));
     }
@@ -321,7 +327,7 @@ struct request::legacy_serialized_array_handler
     BOOST_MPI_CHECK_RESULT(MPI_Wait,
                            (m_requests + 1, &stat.m_status));
 
-    data->deserialize(stat);
+    this->deserialize(stat);
     return stat;
   }
   
@@ -337,9 +343,9 @@ struct request::legacy_serialized_array_handler
                              (m_requests, &flag, &stat.m_status));
       if (flag) {
         // Resize our buffer and get ready to receive its data
-        data->ia.resize(data->count);
+        this->extra::m_ia.resize(this->extra::m_count);
         BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-                               (data->ia.address(), data->ia.size(),MPI_PACKED,
+                               (this->extra::m_ia.address(), this->extra::m_ia.size(),MPI_PACKED,
                                 stat.source(), stat.tag(), 
                                 MPI_Comm(m_comm), m_requests + 1));
       } else
@@ -350,7 +356,7 @@ struct request::legacy_serialized_array_handler
     BOOST_MPI_CHECK_RESULT(MPI_Test,
                            (m_requests + 1, &flag, &stat.m_status));
     if (flag) {
-      data->deserialize(stat);
+      this->deserialize(stat);
       return stat;
     } else 
       return optional<status>();
@@ -486,22 +492,6 @@ request::legacy_handler::legacy_handler(communicator const& comm, int source, in
   m_requests[1] = MPI_REQUEST_NULL;
 }
     
-template<typename T>
-request::legacy_handler::legacy_handler(communicator const& comm, int source, int tag, T* values, int n)
-  : m_data(new detail::serialized_array_irecv_data<T>(comm, values, n)),
-    m_comm(comm),
-    m_source(source),
-    m_tag(tag)
-{
-  m_requests[0] = MPI_REQUEST_NULL;
-  m_requests[1] = MPI_REQUEST_NULL;
-  std::size_t& count = data<detail::serialized_array_irecv_data<T> >()->count;
-  BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-			 (&count, 1, 
-                          get_mpi_datatype(count),
-                          source, tag, comm, &size_request()));
-}
-
 template<typename T, class A>
 request::legacy_handler::legacy_handler(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive)
   : m_data(new detail::dynamic_array_irecv_data<T,A>(values)),
