@@ -138,11 +138,6 @@ struct request::probe_handler : public request::handler {
   
   bool active() const { return m_source == MPI_PROC_NULL; }
   optional<MPI_Request&> trivial();
-  MPI_Request& size_request()    { std::abort(); return *(MPI_Request*)0;}
-  MPI_Request& payload_request() { std::abort(); return *(MPI_Request*)0;}
-
-  boost::shared_ptr<void> data() { std::abort(); return boost::shared_ptr<void>(); };
-  void     set_data(boost::shared_ptr<void> d) { std::abort(); }
   
   communicator const& m_comm;
   int m_source;
@@ -209,9 +204,6 @@ struct request::legacy_handler : public request::handler {
   bool active() const;
   optional<MPI_Request&> trivial();
   
-  MPI_Request& size_request() { return m_requests[0]; }
-  MPI_Request& payload_request() { return m_requests[1]; }
-  
   MPI_Request      m_requests[2];
   communicator     m_comm;
   int              m_source;
@@ -229,7 +221,7 @@ struct request::legacy_serialized_handler
     BOOST_MPI_CHECK_RESULT(MPI_Irecv,
 			   (&this->extra::m_count, 1, 
 			    get_mpi_datatype(this->extra::m_count),
-			    source, tag, comm, &size_request()));
+			    source, tag, comm, m_requests+0));
     
   }
 
@@ -296,7 +288,7 @@ struct request::legacy_serialized_array_handler
     BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                            (&this->extra::m_count, 1, 
                             get_mpi_datatype(this->extra::m_count),
-                            source, tag, comm, &size_request()));
+                            source, tag, comm, m_requests+0));
   }
 
   status wait() {
@@ -363,7 +355,7 @@ struct request::legacy_dynamic_primitive_array_handler
     BOOST_MPI_CHECK_RESULT(MPI_Irecv,
                            (&this->extra::m_count, 1, 
                             get_mpi_datatype(this->extra::m_count),
-                            source, tag, comm, &size_request()));
+                            source, tag, comm, m_requests+0));
   }
 
   status wait() {
@@ -424,9 +416,6 @@ struct request::trivial_handler : public request::handler {
   bool active() const;
   optional<MPI_Request&> trivial();
   
-  MPI_Request& size_request();
-  MPI_Request& payload_request();
-  
   MPI_Request      m_request;
 };
 
@@ -439,9 +428,6 @@ struct request::dynamic_handler : public request::handler {
   
   bool active() const;
   optional<MPI_Request&> trivial();
-  
-  MPI_Request& size_request();
-  MPI_Request& payload_request();
   
   MPI_Request      m_requests[2];
 };
@@ -468,10 +454,10 @@ request request::make_dynamic_primitive_array_recv(communicator const& comm, int
 
 template<typename T>
 request
-request::make_trivial_send(communicator const& comm, int dest, int tag, T* values, int n) {
+request::make_trivial_send(communicator const& comm, int dest, int tag, T const* values, int n) {
   trivial_handler* handler = new trivial_handler;
   BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                         (values, n, 
+                         (const_cast<T*>(values), n, 
                           get_mpi_datatype<T>(),
                           dest, tag, comm, &handler->m_request));
   return request(handler);
@@ -479,7 +465,7 @@ request::make_trivial_send(communicator const& comm, int dest, int tag, T* value
 
 template<typename T>
 request
-request::make_trivial_send(communicator const& comm, int dest, int tag, T& value) {
+request::make_trivial_send(communicator const& comm, int dest, int tag, T const& value) {
   return make_trivial_send(comm, dest, tag, &value, 1);
 }
 
@@ -509,17 +495,18 @@ request request::make_dynamic_primitive_array_send(communicator const& comm, int
     // non blocking recv by legacy_dynamic_primitive_array_handler
     // blocking recv by status recv_vector(source,tag,value,primitive)
     boost::shared_ptr<std::size_t> size(new std::size_t(values.size()));
-    request req = request::make_dynamic();
+    dynamic_handler* handler = new dynamic_handler;
+    request req(handler);
     req.preserve(size);
     
     BOOST_MPI_CHECK_RESULT(MPI_Isend,
                            (size.get(), 1,
                             get_mpi_datatype(*size),
-                            dest, tag, comm, &req.size_request()));
+                            dest, tag, comm, handler->m_requests+0));
     BOOST_MPI_CHECK_RESULT(MPI_Isend,
                            (values.data(), *size, 
                             get_mpi_datatype<T>(),
-                            dest, tag, comm, &req.payload_request()));
+                            dest, tag, comm, handler->m_requests+1));
     return req;
   }  
 }

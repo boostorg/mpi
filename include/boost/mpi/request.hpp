@@ -42,9 +42,10 @@ class BOOST_MPI_DECL request
    * Send a known number of primitive objects in one MPI request.
    */
   template<typename T>
-  static request make_trivial_send(communicator const& comm, int dest, int tag, T& value);
+  static request make_trivial_send(communicator const& comm, int dest, int tag, T const& value);
   template<typename T>
-  static request make_trivial_send(communicator const& comm, int dest, int tag, T* values, int n);
+  static request make_trivial_send(communicator const& comm, int dest, int tag, T const* values, int n);
+  static request make_packed_send(communicator const& comm, int dest, int tag, void const* values, std::size_t n);
 
   static request make_bottom_send(communicator const& comm, int dest, int tag, MPI_Datatype tp);
   static request make_empty_send(communicator const& comm, int dest, int tag);
@@ -118,25 +119,12 @@ class BOOST_MPI_DECL request
   optional<MPI_Request&> trivial() { return m_handler->trivial(); }
 
   /**
-   * For two steps requests, that need to first send the size, then the payload,
-   * access to the size request.
-   * Probably irrelevant to most users.
-   */
-  MPI_Request& size_request() { return m_handler->size_request(); }
-  
-  /**
-   * For two steps requests, that need to first send the size, then the payload,
-   * access to the size request.
-   * Probably irrelevant to most users.
-   */
-  MPI_Request& payload_request() { return m_handler->payload_request(); }
-  /**
    * Is this request potentialy pending ?
    */
   bool active() const { return m_handler->active(); }
   
   // Some data might need protection while the reqest is processed.
-  void preserve(boost::shared_ptr<void> d) { m_preserved = d; }
+  void preserve(boost::shared_ptr<void> d);
 
   class handler {
   public:
@@ -147,9 +135,6 @@ class BOOST_MPI_DECL request
     
     virtual bool active() const = 0;
     virtual optional<MPI_Request&> trivial() = 0;
-    
-    virtual MPI_Request& size_request() = 0;
-    virtual MPI_Request& payload_request() = 0;
   };
   
  private:

@@ -16,6 +16,17 @@ namespace boost { namespace mpi {
 request::request() 
   : m_handler() {}
 
+void
+request::preserve(boost::shared_ptr<void> d) {
+  if (!m_preserved) {
+    m_preserved = d; 
+  } else {
+    boost::shared_ptr<void> cdr = m_preserved;
+    typedef std::pair<boost::shared_ptr<void>, boost::shared_ptr<void> > cons;
+    boost::shared_ptr<cons> p(new cons(d, cdr));
+    m_preserved = p;
+  }
+}
 request request::make_dynamic() { return request(new dynamic_handler()); }
 
 request
@@ -54,6 +65,30 @@ request::make_empty_recv(communicator const& comm, int dest, int tag) {
   return request(handler);
 }
 
+request
+request::make_packed_send(communicator const& comm, int dest, int tag, void const* buffer, std::size_t n) {
+  if (probe_messages()) {
+    trivial_handler* handler = new trivial_handler;
+    BOOST_MPI_CHECK_RESULT(MPI_Irecv,
+                           (MPI_BOTTOM, 0, MPI_PACKED,
+                            dest, tag, comm, &handler->m_request));
+    return request(handler);
+  } else {
+    dynamic_handler *handler = new dynamic_handler;
+    request req(handler);
+    shared_ptr<std::size_t> size(new std::size_t(n));
+    req.preserve(size);
+    BOOST_MPI_CHECK_RESULT(MPI_Isend,
+                           (size.get(), 1, 
+                            get_mpi_datatype(*size), 
+                            dest, tag, comm, handler->m_requests));
+    BOOST_MPI_CHECK_RESULT(MPI_Isend,
+                           (buffer, *size,
+                            MPI_PACKED,
+                            dest, tag, comm, handler->m_requests+1));
+    return req;
+  }
+}
 
 /***************************************************************************
  * handlers                                                                *
@@ -111,20 +146,6 @@ optional<MPI_Request&>
 request::trivial_handler::trivial() 
 { 
   return m_request; 
-}
-  
-MPI_Request&
-request::trivial_handler::size_request()
-{
-  std::abort(); 
-  return m_request; // avoid warning
-}
-
-MPI_Request&
-request::trivial_handler::payload_request()
-{
-  std::abort();
-  return m_request;  // avoid warning
 }
   
 // dynamic handler
@@ -214,18 +235,6 @@ request::dynamic_handler::trivial() {
   return boost::none;
 }
   
-MPI_Request&
-request::dynamic_handler::size_request()
-{
-  return m_requests[0];
-}
-
-MPI_Request&
-request::dynamic_handler::payload_request()
-{
-  return m_requests[1];
-}
-
 optional<MPI_Request&>
 request::probe_handler::trivial() {
   return boost::none; 

@@ -31,68 +31,64 @@ void
 packed_archive_send(communicator const& comm, int dest, int tag,
                     const packed_oarchive& ar)
 {
-  std::size_t const& size = ar.size();
-  BOOST_MPI_CHECK_RESULT(MPI_Send,
-                         (detail::unconst(&size), 1, 
-                          get_mpi_datatype(size), 
-                          dest, tag, comm));
-  BOOST_MPI_CHECK_RESULT(MPI_Send,
-                         (detail::unconst(ar.address()), size,
-                          MPI_PACKED,
-                          dest, tag, comm));
+  if (request::probe_messages()) {
+    void *buf = detail::unconst(ar.address());
+    BOOST_MPI_CHECK_RESULT(MPI_Send,
+                           (buf, ar.size(), MPI_PACKED,
+                            dest, tag, comm));
+  } else {
+    std::size_t const& size = ar.size();
+    BOOST_MPI_CHECK_RESULT(MPI_Send,
+                           (detail::unconst(&size), 1, 
+                            get_mpi_datatype(size), 
+                            dest, tag, comm));
+    BOOST_MPI_CHECK_RESULT(MPI_Send,
+                           (detail::unconst(ar.address()), size,
+                            MPI_PACKED,
+                            dest, tag, comm));
+  }
 }
 
 request
 packed_archive_isend(communicator const& comm, int dest, int tag,
                      const packed_oarchive& ar)
 {
-  request req = request::make_dynamic();
-  std::size_t const& size = ar.size();
-  BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                         (detail::unconst(&size), 1, 
-                          get_mpi_datatype(size),
-                          dest, tag, comm, &req.size_request()));
-  BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                         (detail::unconst(ar.address()), size,
-                          MPI_PACKED,
-                          dest, tag, comm, &req.payload_request()));
-  
-  return req;
+  return request::make_packed_send(comm, dest, tag, 
+                                   detail::unconst(ar.address()), ar.size());
 }
 
 request
 packed_archive_isend(communicator const& comm, int dest, int tag,
                      const packed_iarchive& ar)
 {
-  request req = request::make_dynamic();
-  std::size_t const& size = ar.size();
-  BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                         (detail::unconst(&size), 1, 
-                          get_mpi_datatype(size), 
-                          dest, tag, comm, &req.size_request()));
-  BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                         (detail::unconst(ar.address()), size,
-                          MPI_PACKED,
-                          dest, tag, comm, &req.payload_request()));
-
-  return req;
+  return request::make_packed_send(comm, dest, tag, 
+                                   detail::unconst(ar.address()), ar.size());
 }
 
 void
 packed_archive_recv(communicator const& comm, int source, int tag, packed_iarchive& ar,
                     MPI_Status& status)
 {
-  std::size_t count;
-  BOOST_MPI_CHECK_RESULT(MPI_Recv,
-                         (&count, 1, get_mpi_datatype(count),
-                          source, tag, comm, &status));
-
-  // Prepare input buffer and receive the message
-  ar.resize(count);
-  BOOST_MPI_CHECK_RESULT(MPI_Recv,
-                         (ar.address(), count, MPI_PACKED,
-                          status.MPI_SOURCE, status.MPI_TAG,
-                          comm, &status));
+  if (request::probe_messages()) {
+    MPI_Message msg;
+    BOOST_MPI_CHECK_RESULT(MPI_Mprobe, (source, tag, comm, &msg, &status));
+    int count;
+    BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&status, MPI_PACKED, &count));
+    ar.resize(count);
+    BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (ar.address(), count, MPI_PACKED, &msg, &status));
+  } else {
+    std::size_t count;
+    BOOST_MPI_CHECK_RESULT(MPI_Recv,
+                           (&count, 1, get_mpi_datatype(count),
+                            source, tag, comm, &status));
+    
+    // Prepare input buffer and receive the message
+    ar.resize(count);
+    BOOST_MPI_CHECK_RESULT(MPI_Recv,
+                           (ar.address(), count, MPI_PACKED,
+                            status.MPI_SOURCE, status.MPI_TAG,
+                            comm, &status));
+  }
 }
 
 } } } // end namespace boost::mpi::detail
