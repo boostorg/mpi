@@ -97,10 +97,10 @@ namespace detail {
     BOOST_STATIC_ASSERT_MSG(is_mpi_datatype<T>::value, "Can only be specialized for MPI datatypes.");
 
     dynamic_array_irecv_data(std::vector<T,A>& values)
-      :  count(-1), values(values) {}
+      : m_count(-1), m_values(values) {}
 
-    std::size_t count;
-    std::vector<T,A>& values;
+    std::size_t       m_count;
+    std::vector<T,A>& m_values;
   };
 
   template<typename T>
@@ -152,7 +152,7 @@ struct request::probe_handler : public request::handler {
 template<class A>
 struct request::dynamic_primitive_array_handler : public request::probe_handler {
   dynamic_primitive_array_handler(communicator const& comm, int source, int tag,
-                                A& buffer)
+                                  A& buffer)
     : probe_handler(comm,source,tag), m_buffer(buffer) {}
   
   typedef typename A::value_type value_type;
@@ -197,7 +197,6 @@ struct request::dynamic_primitive_array_handler : public request::probe_handler 
 
 struct request::legacy_handler : public request::handler {
   legacy_handler(communicator const& comm, int source, int tag);
-  template<typename T, class A> legacy_handler(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive);
   
   void cancel() {
     for (int i = 0; i < 2; ++i) {
@@ -364,22 +363,29 @@ struct request::legacy_serialized_array_handler
 
 template<typename T, class A>
 struct request::legacy_dynamic_primitive_array_handler 
-  : public request::legacy_handler {
+  : public request::legacy_handler,
+    protected detail::dynamic_array_irecv_data<T,A>
+{
+  typedef detail::dynamic_array_irecv_data<T,A> extra;
   legacy_dynamic_primitive_array_handler(communicator const& comm, int source, int tag, std::vector<T,A>& values)
-    : legacy_handler(comm, source, tag, values, mpl::true_()) {}
+    : legacy_handler(comm, source, tag),
+      extra(values) {
+    BOOST_MPI_CHECK_RESULT(MPI_Irecv,
+                           (&this->extra::m_count, 1, 
+                            get_mpi_datatype(this->extra::m_count),
+                            source, tag, comm, &size_request()));
+  }
 
   status wait() {
-    typedef detail::dynamic_array_irecv_data<T,A> data_t;
-    shared_ptr<data_t> data = this->data<data_t>();
     status stat;
     if (m_requests[1] == MPI_REQUEST_NULL) {
       // Wait for the count message to complete
       BOOST_MPI_CHECK_RESULT(MPI_Wait,
                              (m_requests, &stat.m_status));
       // Resize our buffer and get ready to receive its data
-      data->values.resize(data->count);
+      this->extra::m_values.resize(this->extra::m_count);
       BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-                             (&(data->values[0]), data->values.size(), get_mpi_datatype<T>(),
+                             (&(this->extra::m_values[0]), this->extra::m_values.size(), get_mpi_datatype<T>(),
                               stat.source(), stat.tag(), 
                               MPI_Comm(m_comm), m_requests + 1));
     }
@@ -401,9 +407,9 @@ struct request::legacy_dynamic_primitive_array_handler
                              (m_requests, &flag, &stat.m_status));
       if (flag) {
         // Resize our buffer and get ready to receive its data
-        data->values.resize(data->count);
+        this->extra::m_values.resize(this->extra::m_count);
         BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-                               (&(data->values[0]), data->values.size(),MPI_PACKED,
+                               (&(this->extra::m_values[0]), this->extra::m_values.size(),MPI_PACKED,
                                 stat.source(), stat.tag(), 
                                 MPI_Comm(m_comm), m_requests + 1));
       } else
@@ -491,22 +497,6 @@ request::legacy_handler::legacy_handler(communicator const& comm, int source, in
   m_requests[1] = MPI_REQUEST_NULL;
 }
     
-template<typename T, class A>
-request::legacy_handler::legacy_handler(communicator const& comm, int source, int tag, std::vector<T,A>& values, mpl::true_ primitive)
-  : m_data(new detail::dynamic_array_irecv_data<T,A>(values)),
-    m_comm(comm),
-    m_source(source),
-    m_tag(tag)
-{
-  m_requests[0] = MPI_REQUEST_NULL;
-  m_requests[1] = MPI_REQUEST_NULL;
-  std::size_t& count = data<detail::dynamic_array_irecv_data<T,A> >()->count;
-  BOOST_MPI_CHECK_RESULT(MPI_Irecv,
-                         (&count, 1, 
-                          get_mpi_datatype(count),
-                          source, tag, comm, &size_request()));
-}
-
 }}
 
 #endif // BOOST_MPI_REQUEST_HANDLERS_HPP
