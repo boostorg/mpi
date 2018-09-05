@@ -42,6 +42,12 @@ class BOOST_MPI_DECL request
    * Construct request for primitive data of statically known size.
    */
   static request make_trivial();
+
+  template<typename T>
+  static request make_trivial_send(communicator const& comm, int dest, int tag, T& value);
+
+  template<typename T>
+  static request make_trivial_send(communicator const& comm, int dest, int tag, T* values, int n);
   /**
    * Construct request for simple data of unknown size.
    */
@@ -57,11 +63,19 @@ class BOOST_MPI_DECL request
   template<typename T>
   static request make_serialized_array(communicator const& comm, int source, int tag, T* values, int n);
   /**
-   *  Constructs request for array of primitive data.
+   *  Request to recv array of primitive data.
    */
   template<typename T, class A>
-  static request make_dynamic_primitive_array_recv(communicator const& comm, int source, int tag, 
-                                                   std::vector<T,A>& values);
+  static request
+  make_dynamic_primitive_array_recv(communicator const& comm, int source, int tag, 
+                                    std::vector<T,A>& values);
+  /**
+   *  Request to send array of primitive data.
+   */
+  template<typename T, class A>
+  static request
+  make_dynamic_primitive_array_send(communicator const& comm, int source, int tag, 
+                                    std::vector<T,A>& values);
 
   static bool probe_messages();
   /**
