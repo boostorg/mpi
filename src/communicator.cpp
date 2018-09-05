@@ -217,7 +217,7 @@ void
 communicator::send<packed_oarchive>(int dest, int tag,
                                     const packed_oarchive& ar) const
 {
-  detail::packed_archive_send(MPI_Comm(*this), dest, tag, ar);
+  detail::packed_archive_send(*this, dest, tag, ar);
 }
 
 template<>
@@ -242,7 +242,7 @@ communicator::recv<packed_iarchive>(int source, int tag,
                                     packed_iarchive& ar) const
 {
   status stat;
-  detail::packed_archive_recv(MPI_Comm(*this), source, tag, ar,
+  detail::packed_archive_recv(*this, source, tag, ar,
                               stat.m_status);
   return stat;
 }
@@ -274,7 +274,7 @@ request
 communicator::isend<packed_oarchive>(int dest, int tag,
                                      const packed_oarchive& ar) const
 {
-  return detail::packed_archive_isend(MPI_Comm(*this), dest, tag, ar);
+  return detail::packed_archive_isend(*this, dest, tag, ar);
 }
 
 template<>
@@ -321,7 +321,7 @@ bool operator==(const communicator& comm1, const communicator& comm2)
 {
   int result;
   BOOST_MPI_CHECK_RESULT(MPI_Comm_compare,
-                         ((MPI_Comm)comm1, (MPI_Comm)comm2, &result));
+                         (MPI_Comm(comm1), MPI_Comm(comm2), &result));
   return result == MPI_IDENT;
 }
 

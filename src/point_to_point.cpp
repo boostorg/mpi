@@ -21,13 +21,14 @@
 #include <boost/mpi/datatype.hpp>
 #include <boost/mpi/exception.hpp>
 #include <boost/mpi/request.hpp>
+#include <boost/mpi/communicator.hpp>
 #include <boost/mpi/detail/antiques.hpp>
 #include <cassert>
 
 namespace boost { namespace mpi { namespace detail {
 
 void
-packed_archive_send(MPI_Comm comm, int dest, int tag,
+packed_archive_send(communicator const& comm, int dest, int tag,
                     const packed_oarchive& ar)
 {
   std::size_t const& size = ar.size();
@@ -42,7 +43,7 @@ packed_archive_send(MPI_Comm comm, int dest, int tag,
 }
 
 request
-packed_archive_isend(MPI_Comm comm, int dest, int tag,
+packed_archive_isend(communicator const& comm, int dest, int tag,
                      const packed_oarchive& ar)
 {
   request req = request::make_dynamic();
@@ -60,7 +61,7 @@ packed_archive_isend(MPI_Comm comm, int dest, int tag,
 }
 
 request
-packed_archive_isend(MPI_Comm comm, int dest, int tag,
+packed_archive_isend(communicator const& comm, int dest, int tag,
                      const packed_iarchive& ar)
 {
   request req = request::make_dynamic();
@@ -78,7 +79,7 @@ packed_archive_isend(MPI_Comm comm, int dest, int tag,
 }
 
 void
-packed_archive_recv(MPI_Comm comm, int source, int tag, packed_iarchive& ar,
+packed_archive_recv(communicator const& comm, int source, int tag, packed_iarchive& ar,
                     MPI_Status& status)
 {
   std::size_t count;

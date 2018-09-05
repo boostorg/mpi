@@ -1407,7 +1407,6 @@ template<typename T>
 status communicator::recv_impl(int source, int tag, T& value, mpl::true_) const
 {
   status stat;
-
   BOOST_MPI_CHECK_RESULT(MPI_Recv,
                          (const_cast<T*>(&value), 1, 
                           get_mpi_datatype<T>(value),

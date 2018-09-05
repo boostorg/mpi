@@ -16,12 +16,13 @@
 namespace boost { namespace mpi {
 
 class request;
+class communicator;
 
 namespace detail {
 
 /** Sends a packed archive using MPI_Send. */
 BOOST_MPI_DECL void
-packed_archive_send(MPI_Comm comm, int dest, int tag,
+packed_archive_send(communicator const& comm, int dest, int tag,
                     const packed_oarchive& ar);
 
 /** Sends a packed archive using MPI_Isend.
@@ -32,19 +33,19 @@ packed_archive_send(MPI_Comm comm, int dest, int tag,
  * returned from the function.
  */
 BOOST_MPI_DECL request
-packed_archive_isend(MPI_Comm comm, int dest, int tag,
+packed_archive_isend(communicator const& comm, int dest, int tag,
                      const packed_oarchive& ar);
 
 /**
  * \overload
  */
 BOOST_MPI_DECL request
-packed_archive_isend(MPI_Comm comm, int dest, int tag,
+packed_archive_isend(communicator const& comm, int dest, int tag,
                      const packed_iarchive& ar);
 
 /** Receives a packed archive using MPI_Recv. */
 BOOST_MPI_DECL void
-packed_archive_recv(MPI_Comm comm, int source, int tag, packed_iarchive& ar,
+packed_archive_recv(communicator const& comm, int source, int tag, packed_iarchive& ar,
                     MPI_Status& status);
 
 } } } // end namespace boost::mpi::detail
