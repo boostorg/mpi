@@ -502,7 +502,7 @@ request::make_trivial_recv(communicator const& comm, int dest, int tag, T& value
 
 template<typename T, class A>
 request request::make_dynamic_primitive_array_send(communicator const& comm, int dest, int tag, 
-                                                   std::vector<T,A>& values) {
+                                                   std::vector<T,A> const& values) {
   if (request::probe_messages()) {
     return make_trivial_send(comm, dest, tag, values.data(), values.size());
   } else {
@@ -517,7 +517,7 @@ request request::make_dynamic_primitive_array_send(communicator const& comm, int
                             get_mpi_datatype(*size),
                             dest, tag, comm, &req.size_request()));
     BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                           (values.data, *size, 
+                           (values.data(), *size, 
                             get_mpi_datatype<T>(),
                             dest, tag, comm, &req.payload_request()));
     return req;

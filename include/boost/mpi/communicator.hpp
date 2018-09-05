@@ -1600,25 +1600,7 @@ request
 communicator::isend_vector(int dest, int tag, const std::vector<T,A>& values,
                            mpl::true_ primitive) const
 {
-  if (request::probe_messages()) {
-    return array_isend_impl(dest,tag,values.data(),values.size(),primitive);
-  } else {
-    // non blocking recv by legacy_dynamic_primitive_array_handler
-    // blocking recv by status recv_vector(source,tag,value,primitive)
-    boost::shared_ptr<std::size_t> size(new std::size_t(values.size()));
-    request req = request::make_dynamic();
-    req.preserve(size);
-    
-    BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                           (size.get(), 1,
-                            get_mpi_datatype(*size),
-                            dest, tag, MPI_Comm(*this), &req.size_request()));
-    BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                           (const_cast<T*>(values.data()), *size, 
-                            get_mpi_datatype<T>(),
-                            dest, tag, MPI_Comm(*this), &req.payload_request()));
-    return req;
-  }  
+  return request::make_dynamic_primitive_array_send(*this, dest, tag, values);
 }
 
 template<typename T, class A>

@@ -85,7 +85,7 @@ class BOOST_MPI_DECL request
   template<typename T, class A>
   static request
   make_dynamic_primitive_array_send(communicator const& comm, int source, int tag, 
-                                    std::vector<T,A>& values);
+                                    std::vector<T,A> const& values);
 
   static bool probe_messages();
   /**
