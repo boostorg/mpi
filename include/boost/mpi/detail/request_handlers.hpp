@@ -16,111 +16,111 @@
 namespace boost { namespace mpi {
 
 namespace detail {
-  /**
-   * Internal data structure that stores everything required to manage
-   * the receipt of serialized data via a request object.
-   */
-  template<typename T>
-  struct serialized_irecv_data {
-    serialized_irecv_data(const communicator& comm, T& value)
-      : m_ia(comm), m_value(value) {}
+/**
+ * Internal data structure that stores everything required to manage
+ * the receipt of serialized data via a request object.
+ */
+template<typename T>
+struct serialized_irecv_data {
+  serialized_irecv_data(const communicator& comm, T& value)
+    : m_ia(comm), m_value(value) {}
 
-    void deserialize(status& stat) 
-    { 
-      m_ia >> m_value; 
-      stat.m_count = 1;
-    }
-
-    std::size_t     m_count;
-    packed_iarchive m_ia;
-    T&              m_value;
-  };
-
-  template<>
-  struct serialized_irecv_data<packed_iarchive>
-  {
-    serialized_irecv_data(communicator const&, packed_iarchive& ia) : m_ia(ia) { }
-
-    void deserialize(status&) { /* Do nothing. */ }
-
-    std::size_t      m_count;
-    packed_iarchive& m_ia;
-  };
-
-  /**
-   * Internal data structure that stores everything required to manage
-   * the receipt of an array of serialized data via a request object.
-   */
-  template<typename T>
-  struct serialized_array_irecv_data
-  {
-    serialized_array_irecv_data(const communicator& comm, T* values, int n)
-      : m_count(0), m_ia(comm), m_values(values), m_nb(n) {}
-
-    void deserialize(status& stat);
-
-    std::size_t     m_count;
-    packed_iarchive m_ia;
-    T*              m_values;
-    int             m_nb;
-  };
-
-  template<typename T>
-  void serialized_array_irecv_data<T>::deserialize(status& stat)
-  {
-    T* v = m_values;
-    T* end =  m_values+m_nb;
-    while (v < end) {
-      m_ia >> *v++;
-    }
-    stat.m_count = m_nb;
+  void deserialize(status& stat) 
+  { 
+    m_ia >> m_value; 
+    stat.m_count = 1;
   }
 
-  /**
-   * Internal data structure that stores everything required to manage
-   * the receipt of an array of primitive data but unknown size.
-   * Such an array can have been send with blocking operation and so must
-   * be compatible with the (size_t,raw_data[]) format.
-   */
-  template<typename T, class A>
-  struct dynamic_array_irecv_data
-  {
-    BOOST_STATIC_ASSERT_MSG(is_mpi_datatype<T>::value, "Can only be specialized for MPI datatypes.");
+  std::size_t     m_count;
+  packed_iarchive m_ia;
+  T&              m_value;
+};
 
-    dynamic_array_irecv_data(std::vector<T,A>& values)
-      : m_count(-1), m_values(values) {}
+template<>
+struct serialized_irecv_data<packed_iarchive>
+{
+  serialized_irecv_data(communicator const&, packed_iarchive& ia) : m_ia(ia) { }
 
-    std::size_t       m_count;
-    std::vector<T,A>& m_values;
-  };
+  void deserialize(status&) { /* Do nothing. */ }
 
-  template<typename T>
-  struct serialized_irecv_data<const skeleton_proxy<T> >
-  {
-    serialized_irecv_data(const communicator& comm, skeleton_proxy<T> proxy)
-      : m_isa(comm), m_ia(m_isa.get_skeleton()), m_proxy(proxy) { }
+  std::size_t      m_count;
+  packed_iarchive& m_ia;
+};
 
-    void deserialize(status& stat) 
-    { 
-      m_isa >> m_proxy.object;
-      stat.m_count = 1;
-    }
+/**
+ * Internal data structure that stores everything required to manage
+ * the receipt of an array of serialized data via a request object.
+ */
+template<typename T>
+struct serialized_array_irecv_data
+{
+  serialized_array_irecv_data(const communicator& comm, T* values, int n)
+    : m_count(0), m_ia(comm), m_values(values), m_nb(n) {}
 
-    std::size_t              m_count;
-    packed_skeleton_iarchive m_isa;
-    packed_iarchive&         m_ia;
-    skeleton_proxy<T>        m_proxy;
-  };
+  void deserialize(status& stat);
 
-  template<typename T>
-  struct serialized_irecv_data<skeleton_proxy<T> >
-    : public serialized_irecv_data<const skeleton_proxy<T> >
-  {
-    typedef serialized_irecv_data<const skeleton_proxy<T> > inherited;
+  std::size_t     m_count;
+  packed_iarchive m_ia;
+  T*              m_values;
+  int             m_nb;
+};
 
-    serialized_irecv_data(const communicator& comm, const skeleton_proxy<T>& proxy)
-      : inherited(comm, proxy) { }
-  };
+template<typename T>
+void serialized_array_irecv_data<T>::deserialize(status& stat)
+{
+  T* v = m_values;
+  T* end =  m_values+m_nb;
+  while (v < end) {
+    m_ia >> *v++;
+  }
+  stat.m_count = m_nb;
+}
+
+/**
+ * Internal data structure that stores everything required to manage
+ * the receipt of an array of primitive data but unknown size.
+ * Such an array can have been send with blocking operation and so must
+ * be compatible with the (size_t,raw_data[]) format.
+ */
+template<typename T, class A>
+struct dynamic_array_irecv_data
+{
+  BOOST_STATIC_ASSERT_MSG(is_mpi_datatype<T>::value, "Can only be specialized for MPI datatypes.");
+
+  dynamic_array_irecv_data(std::vector<T,A>& values)
+    : m_count(-1), m_values(values) {}
+
+  std::size_t       m_count;
+  std::vector<T,A>& m_values;
+};
+
+template<typename T>
+struct serialized_irecv_data<const skeleton_proxy<T> >
+{
+  serialized_irecv_data(const communicator& comm, skeleton_proxy<T> proxy)
+    : m_isa(comm), m_ia(m_isa.get_skeleton()), m_proxy(proxy) { }
+
+  void deserialize(status& stat) 
+  { 
+    m_isa >> m_proxy.object;
+    stat.m_count = 1;
+  }
+
+  std::size_t              m_count;
+  packed_skeleton_iarchive m_isa;
+  packed_iarchive&         m_ia;
+  skeleton_proxy<T>        m_proxy;
+};
+
+template<typename T>
+struct serialized_irecv_data<skeleton_proxy<T> >
+  : public serialized_irecv_data<const skeleton_proxy<T> >
+{
+  typedef serialized_irecv_data<const skeleton_proxy<T> > inherited;
+
+  serialized_irecv_data(const communicator& comm, const skeleton_proxy<T>& proxy)
+    : inherited(comm, proxy) { }
+};
 }
 
 template<class Data>
@@ -341,7 +341,7 @@ template<typename T>
 struct request::serialized_array_handler
   : public request::probe_handler<void> {
   serialized_array_handler(communicator const& comm, int source, int tag,
-                     T* values, int n)
+			   T* values, int n)
     : probe_handler(comm,source,tag), m_values(values), m_nb(n) {}
   
   status wait() {
