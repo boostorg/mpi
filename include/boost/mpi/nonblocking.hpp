@@ -255,7 +255,7 @@ wait_all(ForwardIterator first, ForwardIterator last)
 
   difference_type num_outstanding_requests = distance(first, last);
 
-  std::vector<bool> completed(num_outstanding_requests);
+  std::vector<bool> completed(num_outstanding_requests, false);
 
   while (num_outstanding_requests > 0) {
     bool all_trivial_requests = true;
