@@ -129,8 +129,9 @@ class request::probe_handler
     protected Data {
 
 protected:
-  probe_handler(communicator const& comm, int source, int tag, Data const& d)
-    : Data(d),
+  template<typename I1>
+  probe_handler(communicator const& comm, int source, int tag, I1& d)
+    : Data(comm, d),
       m_comm(comm),
       m_source(source),
       m_tag(tag) {}
@@ -205,70 +206,37 @@ protected:
 namespace detail {
 template<class A>
 struct dynamic_primitive_array_data {
-  dynamic_primitive_array_data(A& arr) : m_buffer(arr) {}
+  dynamic_primitive_array_data(communicator const&, A& arr) : m_buffer(arr) {}
   
   void* buffer() { return m_buffer.data(); }
   void  resize(std::size_t sz) { m_buffer.resize(sz); }
   void  deserialize() {}
   MPI_Datatype datatype() { return get_mpi_datatype<typename A::value_type>(); }
-
+  
   A& m_buffer;
-};
-}
-
-template<class A>
-class request::dynamic_primitive_array_handler
-  : public request::probe_handler<detail::dynamic_primitive_array_data<A> > {
-  typedef detail::dynamic_primitive_array_data<A> data;
-  
-public:
-  
-  dynamic_primitive_array_handler(communicator const& comm, int source, int tag, A& buffer)
-    : probe_handler<data>(comm, source, tag, data(buffer)) {}
 };
 
 template<typename T>
-class request::serialized_handler
-  : public request::probe_handler<void> {
-public:
-  serialized_handler(communicator const& comm, int source, int tag,
-                     T& value)
-    : probe_handler(comm,source,tag), m_value(value) {}
-  
-  status wait() {
-    MPI_Message msg;
-    status stat;
-    BOOST_MPI_CHECK_RESULT(MPI_Mprobe, (m_source, m_tag, m_comm, &msg, &stat.m_status));
-    int count;
-    BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&stat.m_status, MPI_PACKED, &count));
-    packed_iarchive ia(m_comm);
-    ia.resize(count);
-    BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (ia.address(), count, MPI_PACKED, &msg, &stat.m_status));
-    ia >> m_value;
-    m_source = MPI_PROC_NULL;
-    return stat;
-  }
-  
-  optional<status> test() {
-    int flag = 0;
-    MPI_Message msg;
-    status stat;
-    BOOST_MPI_CHECK_RESULT(MPI_Improbe, (m_source,m_tag,m_comm,&flag,&msg,&stat.m_status));
-    if (flag) {
-      int count;
-      BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&stat.m_status, MPI_PACKED, &count));
-      packed_iarchive ia(m_comm);
-      ia.resize(count);
-      BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (ia.address(), count, MPI_PACKED, &msg, &stat.m_status));
-      ia >> m_value;
-      m_source = MPI_PROC_NULL;
-      return stat;
-    } else {
-      return optional<status>();
-    } 
-  }
+struct serialized_data {
+  serialized_data(communicator const& comm, T& value) : m_archive(comm), m_value(value) {}
 
+  void* buffer() { return m_archive.address(); }
+  void  resize(std::size_t sz) { m_archive.resize(sz); }
+  void  deserialize() { m_archive >> m_value; }
+  MPI_Datatype datatype() { return MPI_PACKED; }
+
+  packed_iarchive m_archive;
   T& m_value;
+};
+}
+
+template<typename T>
+class request::serialized_handler
+  : public request::probe_handler<detail::serialized_data<T> > {
+  typedef detail::serialized_data<T> data;
+public:
+  serialized_handler(communicator const& comm, int source, int tag, T& value)
+    : probe_handler<data>(comm, source, tag, value) {}
 };
 
 template<>
@@ -698,7 +666,7 @@ template<typename T, class A>
 request request::make_dynamic_primitive_array_recv(communicator const& comm, int source, int tag, 
                                                    std::vector<T,A>& values) {
   if (probe_messages()) {
-    return request(new dynamic_primitive_array_handler<std::vector<T,A> >(comm,source,tag,values));
+    return request(new probe_handler<detail::dynamic_primitive_array_data<std::vector<T,A> > >(comm,source,tag,values));
   } else {
     return request(new legacy_dynamic_primitive_array_handler<T,A>(comm, source, tag, values));
   }
