@@ -15,6 +15,7 @@
 #include "gps_position.hpp"
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/list.hpp>
+//#include "debugger.cpp"
 
 using boost::mpi::communicator;
 using boost::mpi::status;
