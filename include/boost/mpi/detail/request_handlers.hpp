@@ -124,16 +124,20 @@ struct serialized_irecv_data<skeleton_proxy<T> >
 }
 
 template<class Data>
-struct request::probe_handler
+class request::probe_handler
   : public request::handler,
     protected Data {
+protected:
   probe_handler(communicator const& comm, int source, int tag, Data& d)
     : m_comm(comm), m_source(source), m_tag(tag),
       Data(d) {}
-  
+public:
   bool active() const { return m_source != MPI_PROC_NULL; }
   optional<MPI_Request&> trivial() { return boost::none; }
   void cancel() { m_source = MPI_PROC_NULL; }
+
+protected:
+  friend class request;
   
   communicator const& m_comm;
   int m_source;
@@ -141,14 +145,19 @@ struct request::probe_handler
 };
 
 template<>
-struct request::probe_handler<void>
+class request::probe_handler<void>
   : public request::handler {
+protected:
   probe_handler(communicator const& comm, int source, int tag)
     : m_comm(comm), m_source(source), m_tag(tag) {}
   
+public:
   bool active() const { return m_source != MPI_PROC_NULL; }
   optional<MPI_Request&> trivial() { return boost::none; }
   void cancel() { m_source = MPI_PROC_NULL; }
+
+protected:
+  friend class request;
   
   communicator const& m_comm;
   int m_source;
@@ -156,8 +165,9 @@ struct request::probe_handler<void>
 };
 
 template<class A>
-struct request::dynamic_primitive_array_handler
+class request::dynamic_primitive_array_handler
   : public request::probe_handler<void> {
+public:
   dynamic_primitive_array_handler(communicator const& comm, int source, int tag,
                                   A& buffer)
     : probe_handler(comm,source,tag), m_buffer(buffer) {}
@@ -195,13 +205,14 @@ struct request::dynamic_primitive_array_handler
       return optional<status>();
     } 
   }
-  
+
   A& m_buffer;
 };
 
 template<typename T>
-struct request::serialized_handler
+class request::serialized_handler
   : public request::probe_handler<void> {
+public:
   serialized_handler(communicator const& comm, int source, int tag,
                      T& value)
     : probe_handler(comm,source,tag), m_value(value) {}
@@ -243,8 +254,9 @@ struct request::serialized_handler
 };
 
 template<>
-struct request::serialized_handler<packed_iarchive>
+class request::serialized_handler<packed_iarchive>
   : public request::probe_handler<void> {
+public:
   serialized_handler(communicator const& comm, int source, int tag,
                      packed_iarchive& archive)
     : probe_handler(comm,source,tag), m_ia(archive) {}
@@ -284,8 +296,9 @@ struct request::serialized_handler<packed_iarchive>
 };
 
 template<typename T>
-struct request::serialized_handler<const skeleton_proxy<T> >
+class request::serialized_handler<const skeleton_proxy<T> >
   : public request::probe_handler<void> {
+public:
   serialized_handler(communicator const& comm, int source, int tag,
                      skeleton_proxy<T> skel)
     : probe_handler(comm,source,tag), 
@@ -329,17 +342,21 @@ struct request::serialized_handler<const skeleton_proxy<T> >
 };
 
 template<typename T>
-struct request::serialized_handler<skeleton_proxy<T> > 
+class request::serialized_handler<skeleton_proxy<T> > 
   : public request::serialized_handler<const skeleton_proxy<T> > {
   typedef request::serialized_handler<const skeleton_proxy<T> > super;
+
+public:
   serialized_handler(communicator const& comm, int source, int tag,
                      skeleton_proxy<T> skel)
     : super(comm, source, tag, skel) {}
 };
 
 template<typename T>
-struct request::serialized_array_handler
+class request::serialized_array_handler
   : public request::probe_handler<void> {
+
+public:
   serialized_array_handler(communicator const& comm, int source, int tag,
 			   T* values, int n)
     : probe_handler(comm,source,tag), m_values(values), m_nb(n) {}
@@ -387,7 +404,8 @@ struct request::serialized_array_handler
   std::size_t m_nb;
 };
 
-struct request::legacy_handler : public request::handler {
+class request::legacy_handler : public request::handler {
+public:
   legacy_handler(communicator const& comm, int source, int tag);
   
   void cancel() {
@@ -408,9 +426,10 @@ struct request::legacy_handler : public request::handler {
 };
 
 template<typename T>
-struct request::legacy_serialized_handler 
+class request::legacy_serialized_handler 
   : public request::legacy_handler, 
     protected detail::serialized_irecv_data<T> {
+public:
   typedef detail::serialized_irecv_data<T> extra;
   legacy_serialized_handler(communicator const& comm, int source, int tag, T& value)
     : legacy_handler(comm, source, tag),
@@ -475,10 +494,12 @@ struct request::legacy_serialized_handler
 };
 
 template<typename T>
-struct request::legacy_serialized_array_handler 
+class request::legacy_serialized_array_handler 
   : public    request::legacy_handler,
     protected detail::serialized_array_irecv_data<T> {
   typedef detail::serialized_array_irecv_data<T> extra;
+
+public:
   legacy_serialized_array_handler(communicator const& comm, int source, int tag, T* values, int n)
     : legacy_handler(comm, source, tag),
       extra(comm, values, n) {
@@ -541,11 +562,13 @@ struct request::legacy_serialized_array_handler
 };
 
 template<typename T, class A>
-struct request::legacy_dynamic_primitive_array_handler 
+class request::legacy_dynamic_primitive_array_handler 
   : public request::legacy_handler,
     protected detail::dynamic_array_irecv_data<T,A>
 {
   typedef detail::dynamic_array_irecv_data<T,A> extra;
+
+public:
   legacy_dynamic_primitive_array_handler(communicator const& comm, int source, int tag, std::vector<T,A>& values)
     : legacy_handler(comm, source, tag),
       extra(values) {
@@ -603,7 +626,9 @@ struct request::legacy_dynamic_primitive_array_handler
   }
 };
 
-struct request::trivial_handler : public request::handler {
+class request::trivial_handler : public request::handler {
+
+public:
   trivial_handler();
   
   status wait();
@@ -612,11 +637,13 @@ struct request::trivial_handler : public request::handler {
   
   bool active() const;
   optional<MPI_Request&> trivial();
-  
+
+private:
+  friend class request;
   MPI_Request      m_request;
 };
 
-struct request::dynamic_handler : public request::handler {
+class request::dynamic_handler : public request::handler {
   dynamic_handler();
   
   status wait();
@@ -625,7 +652,9 @@ struct request::dynamic_handler : public request::handler {
   
   bool active() const;
   optional<MPI_Request&> trivial();
-  
+
+private:
+  friend class request;
   MPI_Request      m_requests[2];
 };
 
