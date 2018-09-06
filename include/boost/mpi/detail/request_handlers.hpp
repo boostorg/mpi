@@ -228,6 +228,42 @@ struct serialized_data {
   packed_iarchive m_archive;
   T& m_value;
 };
+
+template<>
+struct serialized_data<packed_iarchive> {
+  serialized_data(communicator const& comm, packed_iarchive& ar) : m_archive(ar) {}
+  
+  void* buffer() { return m_archive.address(); }
+  void  resize(std::size_t sz) { m_archive.resize(sz); }
+  void  deserialize() {}
+  MPI_Datatype datatype() { return MPI_PACKED; }
+
+  packed_iarchive& m_archive;
+};
+
+template<typename T>
+struct serialized_data<const skeleton_proxy<T> > {
+  serialized_data(communicator const& comm, skeleton_proxy<T> skel)
+    : m_proxy(skel),
+      m_archive(comm) {}
+  
+  void* buffer() { return m_archive.get_skeleton().address(); }
+  void  resize(std::size_t sz) { m_archive.get_skeleton().resize(sz); }
+  void  deserialize() { m_archive >> m_proxy.object; }
+  MPI_Datatype datatype() { return MPI_PACKED; }
+
+  skeleton_proxy<T> m_proxy;
+  packed_skeleton_iarchive m_archive;
+};
+
+template<typename T>
+struct serialized_data<skeleton_proxy<T> >
+  : public serialized_data<const skeleton_proxy<T> > {
+  typedef serialized_data<const skeleton_proxy<T> > super;
+  serialized_data(communicator const& comm, skeleton_proxy<T> skel)
+    : super(comm, skel) {}
+};
+
 }
 
 template<typename T>
@@ -237,105 +273,6 @@ class request::serialized_handler
 public:
   serialized_handler(communicator const& comm, int source, int tag, T& value)
     : probe_handler<data>(comm, source, tag, value) {}
-};
-
-template<>
-class request::serialized_handler<packed_iarchive>
-  : public request::probe_handler<void> {
-public:
-  serialized_handler(communicator const& comm, int source, int tag,
-                     packed_iarchive& archive)
-    : probe_handler(comm,source,tag), m_ia(archive) {}
-  
-  status wait() {
-    MPI_Message msg;
-    status stat;
-    BOOST_MPI_CHECK_RESULT(MPI_Mprobe, (m_source, m_tag, m_comm, &msg, &stat.m_status));
-    int count;
-    BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&stat.m_status, MPI_PACKED, &count));
-    packed_iarchive ia(m_comm);
-    ia.resize(count);
-    BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (ia.address(), count, MPI_PACKED, &msg, &stat.m_status));
-    m_source = MPI_PROC_NULL;
-    return stat;
-  }
-  
-  optional<status> test() {
-    int flag = 0;
-    MPI_Message msg;
-    status stat;
-    BOOST_MPI_CHECK_RESULT(MPI_Improbe, (m_source,m_tag,m_comm,&flag,&msg,&stat.m_status));
-    if (flag) {
-      int count;
-      BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&stat.m_status, MPI_PACKED, &count));
-      packed_iarchive ia(m_comm);
-      ia.resize(count);
-      BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (ia.address(), count, MPI_PACKED, &msg, &stat.m_status));
-      m_source = MPI_PROC_NULL;
-      return stat;
-    } else {
-      return optional<status>();
-    } 
-  }
-
-  packed_iarchive& m_ia;
-};
-
-template<typename T>
-class request::serialized_handler<const skeleton_proxy<T> >
-  : public request::probe_handler<void> {
-public:
-  serialized_handler(communicator const& comm, int source, int tag,
-                     skeleton_proxy<T> skel)
-    : probe_handler(comm,source,tag), 
-      m_proxy(skel) {}
-  
-  status wait() {
-    MPI_Message msg;
-    status stat;
-    BOOST_MPI_CHECK_RESULT(MPI_Mprobe, (m_source, m_tag, m_comm, &msg, &stat.m_status));
-    int count;
-    BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&stat.m_status, MPI_PACKED, &count));
-    packed_skeleton_iarchive isa(m_comm);
-    isa.get_skeleton().resize(count);
-    BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (isa.get_skeleton().address(), count, MPI_PACKED, &msg, &stat.m_status));
-    isa >> m_proxy.object;
-    m_source = MPI_PROC_NULL;
-    stat.m_count = 1;
-    return stat;
-  }
-  
-  optional<status> test() {
-    int flag = 0;
-    MPI_Message msg;
-    status stat;
-    BOOST_MPI_CHECK_RESULT(MPI_Improbe, (m_source,m_tag,m_comm,&flag,&msg,&stat.m_status));
-    if (flag) {
-      int count;
-      BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&stat.m_status, MPI_PACKED, &count));
-      packed_skeleton_iarchive isa(m_comm);
-      isa.get_skeleton().resize(count);
-      BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (isa.get_skeleton().address(), count, MPI_PACKED, &msg, &stat.m_status));
-      isa >> m_proxy.object;      
-      m_source = MPI_PROC_NULL;
-      stat.m_count = 1;
-      return stat;
-    }
-    return optional<status>();
-  }
-
-  skeleton_proxy<T> m_proxy;
-};
-
-template<typename T>
-class request::serialized_handler<skeleton_proxy<T> > 
-  : public request::serialized_handler<const skeleton_proxy<T> > {
-  typedef request::serialized_handler<const skeleton_proxy<T> > super;
-
-public:
-  serialized_handler(communicator const& comm, int source, int tag,
-                     skeleton_proxy<T> skel)
-    : super(comm, source, tag, skel) {}
 };
 
 template<typename T>
