@@ -127,14 +127,52 @@ template<class Data>
 class request::probe_handler
   : public request::handler,
     protected Data {
+
 protected:
-  probe_handler(communicator const& comm, int source, int tag, Data& d)
-    : m_comm(comm), m_source(source), m_tag(tag),
-      Data(d) {}
+  probe_handler(communicator const& comm, int source, int tag, Data const& d)
+    : Data(d),
+      m_comm(comm),
+      m_source(source),
+      m_tag(tag) {}
+
 public:
   bool active() const { return m_source != MPI_PROC_NULL; }
   optional<MPI_Request&> trivial() { return boost::none; }
   void cancel() { m_source = MPI_PROC_NULL; }
+
+  status wait() {
+    MPI_Message msg;
+    status stat;
+    BOOST_MPI_CHECK_RESULT(MPI_Mprobe, (m_source,m_tag,m_comm,&msg,&stat.m_status));
+    int count;
+    MPI_Datatype datatype = this->Data::datatype();
+    BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&stat.m_status, datatype, &count));
+    this->Data::resize(count);
+    BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (this->Data::buffer(), count, datatype, &msg, &stat.m_status));
+    this->Data::deserialize();
+    m_source = MPI_PROC_NULL;
+    stat.m_count = 1;
+    return stat;
+  }
+  
+  optional<status> test() {
+    status stat;
+    int flag = 0;
+    MPI_Message msg;
+    BOOST_MPI_CHECK_RESULT(MPI_Improbe, (m_source,m_tag,m_comm,&flag,&msg,&stat.m_status));
+    if (flag) {
+      int count;
+      MPI_Datatype datatype = this->Data::datatype();
+      BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&stat.m_status, datatype, &count));
+      this->Data::resize(count);
+      BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (this->Data::buffer(), count, datatype, &msg, &stat.m_status));
+      this->Data::deserialize();
+      m_source = MPI_PROC_NULL;
+      return stat;
+    } else {
+      return optional<status>();
+    } 
+  }
 
 protected:
   friend class request;
@@ -164,49 +202,29 @@ protected:
   int m_tag;
 };
 
+namespace detail {
 template<class A>
-class request::dynamic_primitive_array_handler
-  : public request::probe_handler<void> {
-public:
-  dynamic_primitive_array_handler(communicator const& comm, int source, int tag,
-                                  A& buffer)
-    : probe_handler(comm,source,tag), m_buffer(buffer) {}
+struct dynamic_primitive_array_data {
+  dynamic_primitive_array_data(A& arr) : m_buffer(arr) {}
   
-  typedef typename A::value_type value_type;
-
-  status wait() {
-    MPI_Message msg;
-    status stat;
-    BOOST_MPI_CHECK_RESULT(MPI_Mprobe, (m_source,m_tag,m_comm,&msg,&stat.m_status));
-    int count;
-    MPI_Datatype datatype = get_mpi_datatype<value_type>();
-    BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&stat.m_status, datatype, &count));
-    m_buffer.resize(count);
-    BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (m_buffer.data(), count, datatype, &msg, &stat.m_status));
-    m_source = MPI_PROC_NULL;
-    stat.m_count = 1;
-    return stat;
-  }
-  
-  optional<status> test() {
-    status stat;
-    int flag = 0;
-    MPI_Message msg;
-    BOOST_MPI_CHECK_RESULT(MPI_Improbe, (m_source,m_tag,m_comm,&flag,&msg,&stat.m_status));
-    if (flag) {
-      int count;
-      MPI_Datatype datatype = get_mpi_datatype<value_type>();
-      BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&stat.m_status, datatype, &count));
-      m_buffer.resize(count);
-      BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (m_buffer.data(), count, datatype, &msg, &stat.m_status));
-      m_source = MPI_PROC_NULL;
-      return stat;
-    } else {
-      return optional<status>();
-    } 
-  }
+  void* buffer() { return m_buffer.data(); }
+  void  resize(std::size_t sz) { m_buffer.resize(sz); }
+  void  deserialize() {}
+  MPI_Datatype datatype() { return get_mpi_datatype<typename A::value_type>(); }
 
   A& m_buffer;
+};
+}
+
+template<class A>
+class request::dynamic_primitive_array_handler
+  : public request::probe_handler<detail::dynamic_primitive_array_data<A> > {
+  typedef detail::dynamic_primitive_array_data<A> data;
+  
+public:
+  
+  dynamic_primitive_array_handler(communicator const& comm, int source, int tag, A& buffer)
+    : probe_handler<data>(comm, source, tag, data(buffer)) {}
 };
 
 template<typename T>
