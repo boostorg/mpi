@@ -144,16 +144,16 @@ class BOOST_MPI_DECL request
   request(handler *h) : m_handler(h) {};
 
   // specific implementations
-  struct legacy_handler;
-  struct probe_handler;
-  struct trivial_handler;  
-  struct dynamic_handler;
-  template<typename T> struct legacy_serialized_handler;
-  template<typename T> struct legacy_serialized_array_handler;
-  template<typename T, class A> struct legacy_dynamic_primitive_array_handler;
-  template<class A> struct dynamic_primitive_array_handler;
-  template<typename A> struct serialized_handler;
-  template<typename A> struct serialized_array_handler;
+  class legacy_handler;
+  template<class Data> class probe_handler;
+  class trivial_handler;  
+  class dynamic_handler;
+  template<typename T> class legacy_serialized_handler;
+  template<typename T> class legacy_serialized_array_handler;
+  template<typename T, class A> class legacy_dynamic_primitive_array_handler;
+  template<class A> class dynamic_primitive_array_handler;
+  template<typename A> class serialized_handler;
+  template<typename A> class serialized_array_handler;
   
  private:
   shared_ptr<handler> m_handler;

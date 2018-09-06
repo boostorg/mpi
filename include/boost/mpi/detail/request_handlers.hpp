@@ -15,7 +15,6 @@
 
 namespace boost { namespace mpi {
 
-
 namespace detail {
   /**
    * Internal data structure that stores everything required to manage
@@ -124,17 +123,32 @@ namespace detail {
   };
 }
 
-struct request::probe_handler : public request::handler {
+template<class Data>
+struct request::probe_handler
+  : public request::handler,
+    protected Data {
+  probe_handler(communicator const& comm, int source, int tag, Data& d)
+    : m_comm(comm), m_source(source), m_tag(tag),
+      Data(d) {}
+  
+  bool active() const { return m_source != MPI_PROC_NULL; }
+  optional<MPI_Request&> trivial() { return boost::none; }
+  void cancel() { m_source = MPI_PROC_NULL; }
+  
+  communicator const& m_comm;
+  int m_source;
+  int m_tag;
+};
+
+template<>
+struct request::probe_handler<void>
+  : public request::handler {
   probe_handler(communicator const& comm, int source, int tag)
     : m_comm(comm), m_source(source), m_tag(tag) {}
   
   bool active() const { return m_source != MPI_PROC_NULL; }
-  optional<MPI_Request&> trivial();
-
-
-  void cancel() {
-    m_source = MPI_PROC_NULL;
-  }
+  optional<MPI_Request&> trivial() { return boost::none; }
+  void cancel() { m_source = MPI_PROC_NULL; }
   
   communicator const& m_comm;
   int m_source;
@@ -142,7 +156,8 @@ struct request::probe_handler : public request::handler {
 };
 
 template<class A>
-struct request::dynamic_primitive_array_handler : public request::probe_handler {
+struct request::dynamic_primitive_array_handler
+  : public request::probe_handler<void> {
   dynamic_primitive_array_handler(communicator const& comm, int source, int tag,
                                   A& buffer)
     : probe_handler(comm,source,tag), m_buffer(buffer) {}
@@ -185,7 +200,8 @@ struct request::dynamic_primitive_array_handler : public request::probe_handler 
 };
 
 template<typename T>
-struct request::serialized_handler : public request::probe_handler {
+struct request::serialized_handler
+  : public request::probe_handler<void> {
   serialized_handler(communicator const& comm, int source, int tag,
                      T& value)
     : probe_handler(comm,source,tag), m_value(value) {}
@@ -227,7 +243,8 @@ struct request::serialized_handler : public request::probe_handler {
 };
 
 template<>
-struct request::serialized_handler<packed_iarchive> : public request::probe_handler {
+struct request::serialized_handler<packed_iarchive>
+  : public request::probe_handler<void> {
   serialized_handler(communicator const& comm, int source, int tag,
                      packed_iarchive& archive)
     : probe_handler(comm,source,tag), m_ia(archive) {}
@@ -267,7 +284,8 @@ struct request::serialized_handler<packed_iarchive> : public request::probe_hand
 };
 
 template<typename T>
-struct request::serialized_handler<const skeleton_proxy<T> > : public request::probe_handler {
+struct request::serialized_handler<const skeleton_proxy<T> >
+  : public request::probe_handler<void> {
   serialized_handler(communicator const& comm, int source, int tag,
                      skeleton_proxy<T> skel)
     : probe_handler(comm,source,tag), 
@@ -320,7 +338,8 @@ struct request::serialized_handler<skeleton_proxy<T> >
 };
 
 template<typename T>
-struct request::serialized_array_handler : public request::probe_handler {
+struct request::serialized_array_handler
+  : public request::probe_handler<void> {
   serialized_array_handler(communicator const& comm, int source, int tag,
                      T* values, int n)
     : probe_handler(comm,source,tag), m_values(values), m_nb(n) {}

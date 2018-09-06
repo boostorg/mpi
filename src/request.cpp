@@ -251,9 +251,4 @@ request::dynamic_handler::trivial() {
   return boost::none;
 }
   
-optional<MPI_Request&>
-request::probe_handler::trivial() {
-  return boost::none; 
-}
-
 } } // end namespace boost::mpi
