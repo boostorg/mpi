@@ -160,15 +160,6 @@ class BOOST_MPI_DECL request
   shared_ptr<void>    m_preserved;
 };
 
-inline
-bool
-request::probe_messages() {
-#ifdef BOOST_MPI_NO_IMPROBE
-  return false;
-#else
-  return true;
-#endif
-}
 } } // end namespace boost::mpi
 
 #endif // BOOST_MPI_REQUEST_HPP

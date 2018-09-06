@@ -10,9 +10,25 @@
 
 namespace boost { namespace mpi {
 
-/***************************************************************************
- * request                                                                 *
- ***************************************************************************/
+namespace detail {
+
+bool
+choose_probe_usage() {
+#ifdef BOOST_MPI_NO_IMPROBE
+  return false;
+#else
+  return true;
+#endif
+}
+
+} // detail
+
+bool
+request::probe_messages() {
+  static bool enabled = detail::choose_probe_usage();
+  return enabled;
+}
+
 request::request() 
   : m_handler() {}
 
