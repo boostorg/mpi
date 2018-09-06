@@ -130,8 +130,15 @@ class request::probe_handler
 
 protected:
   template<typename I1>
-  probe_handler(communicator const& comm, int source, int tag, I1& d)
-    : Data(comm, d),
+  probe_handler(communicator const& comm, int source, int tag, I1& i1)
+    : Data(comm, i1),
+      m_comm(comm),
+      m_source(source),
+      m_tag(tag) {}
+
+  template<typename I1, typename I2>
+  probe_handler(communicator const& comm, int source, int tag, I1& i1, I2& i2)
+    : Data(comm, i1, i2),
       m_comm(comm),
       m_source(source),
       m_tag(tag) {}
@@ -169,6 +176,7 @@ public:
       BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (this->Data::buffer(), count, datatype, &msg, &stat.m_status));
       this->Data::deserialize();
       m_source = MPI_PROC_NULL;
+      stat.m_count = 1;
       return stat;
     } else {
       return optional<status>();
@@ -264,6 +272,27 @@ struct serialized_data<skeleton_proxy<T> >
     : super(comm, skel) {}
 };
 
+template<typename T>
+struct serialized_array_data {
+  serialized_array_data(communicator const& comm, T* values, int nb)
+    : m_archive(comm), m_values(values), m_nb(nb) {}
+
+  void* buffer() { return m_archive.address(); }
+  void  resize(std::size_t sz) { m_archive.resize(sz); }
+  void  deserialize() {
+    T* end = m_values + m_nb;
+    T* v = m_values;
+    while (v != end) {
+      m_archive >> *v++;
+    }
+  }
+  MPI_Datatype datatype() { return MPI_PACKED; }
+
+  packed_iarchive m_archive;
+  T*  m_values;
+  int m_nb;
+};
+
 }
 
 template<typename T>
@@ -277,54 +306,12 @@ public:
 
 template<typename T>
 class request::serialized_array_handler
-  : public request::probe_handler<void> {
-
+  : public request::probe_handler<detail::serialized_array_data<T> > {
+  typedef detail::serialized_array_data<T> data;
 public:
   serialized_array_handler(communicator const& comm, int source, int tag,
 			   T* values, int n)
-    : probe_handler(comm,source,tag), m_values(values), m_nb(n) {}
-  
-  status wait() {
-    MPI_Message msg;
-    status stat;
-    BOOST_MPI_CHECK_RESULT(MPI_Mprobe, (m_source, m_tag, m_comm, &msg, &stat.m_status));
-    int count;
-    BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&stat.m_status, MPI_PACKED, &count));
-    packed_iarchive ia(m_comm);
-    ia.resize(count);
-    BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (ia.address(), count, MPI_PACKED, &msg, &stat.m_status));
-    int nb = m_nb; 
-    for(int i = 0; i < nb; ++i) {
-      ia >> m_values[i];
-    }
-    m_source = MPI_PROC_NULL;
-    return stat;
-  }
-  
-  optional<status> test() {
-    int flag = 0;
-    MPI_Message msg;
-    status stat;
-    BOOST_MPI_CHECK_RESULT(MPI_Improbe, (m_source,m_tag,m_comm,&flag,&msg,&stat.m_status));
-    if (flag) {
-      int count;
-      BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&stat.m_status, MPI_PACKED, &count));
-      packed_iarchive ia(m_comm);
-      ia.resize(count);
-      BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (ia.address(), count, MPI_PACKED, &msg, &stat.m_status));
-      int nb = m_nb; 
-      for(int i = 0; i < nb; ++i) {
-        ia >> m_values[i];
-      }
-      m_source = MPI_PROC_NULL;
-      return stat;
-    } else {
-      return optional<status>();
-    } 
-  }
-
-  T*          m_values;
-  std::size_t m_nb;
+    : probe_handler<data>(comm,source,tag, values, n) {}
 };
 
 class request::legacy_handler : public request::handler {
