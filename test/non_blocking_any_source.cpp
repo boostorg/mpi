@@ -1,0 +1,49 @@
+#include <vector>
+#include <iostream>
+#include <iterator>
+#include <boost/mpi.hpp>
+#include <boost/test/minimal.hpp>
+#include <boost/serialization/vector.hpp>
+
+namespace mpi = boost::mpi;
+
+std::string ok(bool b) {
+  return b ? "ok" : "ko";
+}
+
+int
+test_main(int argc, char **argv)
+{
+  mpi::environment env(argc, argv);
+  mpi::communicator world;
+  int rank = world.rank();
+  if (rank == 0) {
+    std::vector<boost::mpi::request> req;
+    std::vector<std::vector<int> > data(world.size() - 1);
+    for (int i = 1; i < world.size(); ++i) {
+      req.push_back(world.irecv(mpi::any_source, 0, data[i - 1]));
+    }
+    boost::mpi::wait_all(std::begin(req), std::end(req));
+
+    std::vector<bool> check(world.size()-1, false);
+    for (int i = 0; i < world.size() - 1; ++i) {
+      std::cout << "Process 0 received:" << std::endl;
+      std::copy(std::begin(data[i]), std::end(data[i]), std::ostream_iterator<int>(std::cout, " "));
+      std::cout << std::endl;
+      int idx = data[i].size();
+      BOOST_CHECK(std::equal_range(data[i].begin(), data[i].end(), idx)
+		  == std::make_pair(data[i].begin(), data[i].end()));
+      check[idx-1] = true;
+    }
+    for(int i = 0; i < world.size() - 1; ++i) {
+      std::cout << "Received from " << i+1 << " is " << ok(check[i]) << '\n';
+    }
+    BOOST_CHECK(std::equal_range(check.begin(), check.end(), true)
+		== std::make_pair(check.begin(), check.end())); 
+  } else {
+    std::vector<int> vec(rank, rank);
+    auto req = world.isend(0, 0, vec);
+    req.wait();
+  }
+  return 0;
+}
