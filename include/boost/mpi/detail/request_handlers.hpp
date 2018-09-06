@@ -191,26 +191,6 @@ protected:
   int m_tag;
 };
 
-template<>
-class request::probe_handler<void>
-  : public request::handler {
-protected:
-  probe_handler(communicator const& comm, int source, int tag)
-    : m_comm(comm), m_source(source), m_tag(tag) {}
-  
-public:
-  bool active() const { return m_source != MPI_PROC_NULL; }
-  optional<MPI_Request&> trivial() { return boost::none; }
-  void cancel() { m_source = MPI_PROC_NULL; }
-
-protected:
-  friend class request;
-  
-  communicator const& m_comm;
-  int m_source;
-  int m_tag;
-};
-
 namespace detail {
 template<class A>
 struct dynamic_primitive_array_data {
