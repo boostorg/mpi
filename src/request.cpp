@@ -70,7 +70,7 @@ request::make_packed_send(communicator const& comm, int dest, int tag, void cons
   if (probe_messages()) {
     trivial_handler* handler = new trivial_handler;
     BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                           (MPI_BOTTOM, 0, MPI_PACKED,
+                           (const_cast<void*>(buffer), n, MPI_PACKED,
                             dest, tag, comm, &handler->m_request));
     return request(handler);
   } else {
