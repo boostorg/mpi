@@ -25,7 +25,7 @@ void wait_for_debugger(std::vector<int> const& processes, boost::mpi::communicat
       if (waiting) {
         std::cout << " and is waiting.";
       }
-      std::cout << std::flush;
+      std::cout << std::endl;
     }
     comm.barrier();
   }
