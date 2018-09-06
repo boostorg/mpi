@@ -1454,24 +1454,13 @@ status
 communicator::array_recv_impl(int source, int tag, T* values, int n, 
                               mpl::false_) const
 {
-  // Receive the message
   packed_iarchive ia(*this);
   status stat = recv(source, tag, ia);
-
-  // Determine how much data we are going to receive
-  int count;
-  ia >> count;
-
-  // Deserialize the data in the message
-  boost::serialization::array_wrapper<T> arr(values, count > n? n : count);
-  ia >> arr;
-
-  if (count > n) {
-    boost::throw_exception(
-      std::range_error("communicator::recv: message receive overflow"));
+  T* v = values;
+  while (v != values+n) {
+    ia >> *v++;
   }
-
-  stat.m_count = count;
+  stat.m_count = n;
   return stat;
 }
 
