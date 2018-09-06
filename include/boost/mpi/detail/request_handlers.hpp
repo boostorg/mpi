@@ -152,6 +152,25 @@ public:
     MPI_Message msg;
     status stat;
     BOOST_MPI_CHECK_RESULT(MPI_Mprobe, (m_source,m_tag,m_comm,&msg,&stat.m_status));
+    return unpack(msg, stat);
+  }
+  
+  optional<status> test() {
+    status stat;
+    int flag = 0;
+    MPI_Message msg;
+    BOOST_MPI_CHECK_RESULT(MPI_Improbe, (m_source,m_tag,m_comm,&flag,&msg,&stat.m_status));
+    if (flag) {
+      return unpack(msg, stat);
+    } else {
+      return optional<status>();
+    } 
+  }
+
+protected:
+  friend class request;
+
+  status unpack(MPI_Message& msg, status& stat) {
     int count;
     MPI_Datatype datatype = this->Data::datatype();
     BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&stat.m_status, datatype, &count));
@@ -162,29 +181,6 @@ public:
     stat.m_count = 1;
     return stat;
   }
-  
-  optional<status> test() {
-    status stat;
-    int flag = 0;
-    MPI_Message msg;
-    BOOST_MPI_CHECK_RESULT(MPI_Improbe, (m_source,m_tag,m_comm,&flag,&msg,&stat.m_status));
-    if (flag) {
-      int count;
-      MPI_Datatype datatype = this->Data::datatype();
-      BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&stat.m_status, datatype, &count));
-      this->Data::resize(count);
-      BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (this->Data::buffer(), count, datatype, &msg, &stat.m_status));
-      this->Data::deserialize();
-      m_source = MPI_PROC_NULL;
-      stat.m_count = 1;
-      return stat;
-    } else {
-      return optional<status>();
-    } 
-  }
-
-protected:
-  friend class request;
   
   communicator const& m_comm;
   int m_source;
