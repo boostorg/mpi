@@ -15,6 +15,7 @@
 #include <boost/serialization/list.hpp>
 #include <iterator>
 #include <algorithm>
+//#include "debugger.cpp"
 
 using boost::mpi::communicator;
 using boost::mpi::request;
@@ -48,6 +49,7 @@ nonblocking_tests( const communicator& comm, const T* values, int num_values,
 {
   nonblocking_test(comm, values, num_values, kind, mk_wait_any);
   nonblocking_test(comm, values, num_values, kind, mk_test_any);
+  //wait_for_debugger(comm);
   nonblocking_test(comm, values, num_values, kind, mk_wait_all);
   nonblocking_test(comm, values, num_values, kind, mk_wait_all_keep);
   if (!composite) {
@@ -72,6 +74,9 @@ nonblocking_test(const communicator& comm, const T* values, int num_values,
   using boost::mpi::wait_some;
   using boost::mpi::test_some;
 
+  int next = (comm.rank() + 1) % comm.size();
+  int prev = (comm.rank() + comm.size() - 1) % comm.size();
+			    
   if (comm.rank() == 0) {
     std::cout << "Testing " << method_kind_names[method] 
               << " with " << kind << "...";
@@ -83,12 +88,10 @@ nonblocking_test(const communicator& comm, const T* values, int num_values,
   
   T incoming_value;
   std::vector<T> incoming_values(num_values);
-  
   std::vector<request> reqs;
   // Send/receive the first value
-  reqs.push_back(comm.isend((comm.rank() + 1) % comm.size(), 0, values[0]));
-  reqs.push_back(comm.irecv((comm.rank() + comm.size() - 1) % comm.size(),
-                            0, incoming_value));
+  reqs.push_back(comm.isend(next, 0, values[0]));
+  reqs.push_back(comm.irecv(prev, 0, incoming_value));
   
   if (method != mk_wait_any && method != mk_test_any) {
 #ifndef LAM_MPI
@@ -98,16 +101,13 @@ nonblocking_test(const communicator& comm, const T* values, int num_values,
     // when using shared memory, not TCP.
     
     // Send/receive an empty message
-    reqs.push_back(comm.isend((comm.rank() + 1) % comm.size(), 1));
-    reqs.push_back(comm.irecv((comm.rank() + comm.size() - 1) % comm.size(),
-                              1));
+    reqs.push_back(comm.isend(next, 1));
+    reqs.push_back(comm.irecv(prev, 1));
 #endif
     
     // Send/receive an array
-    reqs.push_back(comm.isend((comm.rank() + 1) % comm.size(), 2, values,
-                              num_values));
-    reqs.push_back(comm.irecv((comm.rank() + comm.size() - 1) % comm.size(),
-                              2, &incoming_values.front(), num_values));
+    reqs.push_back(comm.isend(next, 2, values, num_values));
+    reqs.push_back(comm.irecv(prev, 2, &incoming_values.front(), num_values));
   }
   
   switch (method) {
