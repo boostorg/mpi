@@ -135,7 +135,7 @@ protected:
       m_comm(comm),
       m_source(source),
       m_tag(tag) {}
-
+  // no variadic template for now
   template<typename I1, typename I2>
   probe_handler(communicator const& comm, int source, int tag, I1& i1, I2& i2)
     : Data(comm, i1, i2),
@@ -270,25 +270,6 @@ struct serialized_array_data {
 };
 
 }
-
-template<typename T>
-class request::serialized_handler
-  : public request::probe_handler<detail::serialized_data<T> > {
-  typedef detail::serialized_data<T> data;
-public:
-  serialized_handler(communicator const& comm, int source, int tag, T& value)
-    : probe_handler<data>(comm, source, tag, value) {}
-};
-
-template<typename T>
-class request::serialized_array_handler
-  : public request::probe_handler<detail::serialized_array_data<T> > {
-  typedef detail::serialized_array_data<T> data;
-public:
-  serialized_array_handler(communicator const& comm, int source, int tag,
-			   T* values, int n)
-    : probe_handler<data>(comm,source,tag, values, n) {}
-};
 
 class request::legacy_handler : public request::handler {
 public:
@@ -547,7 +528,7 @@ private:
 template<typename T> 
 request request::make_serialized(communicator const& comm, int source, int tag, T& value) {
   if (probe_messages()) {
-    return request(new serialized_handler<T>(comm, source, tag, value));
+    return request(new probe_handler<detail::serialized_data<T> >(comm, source, tag, value));
   } else {
     return request(new legacy_serialized_handler<T>(comm, source, tag, value));
   }
@@ -556,7 +537,7 @@ request request::make_serialized(communicator const& comm, int source, int tag, 
 template<typename T>
 request request::make_serialized_array(communicator const& comm, int source, int tag, T* values, int n) {
   if (probe_messages()) {
-    return request(new serialized_array_handler<T>(comm, source, tag, values, n));
+    return request(new probe_handler<detail::serialized_array_data<T> >(comm, source, tag, values, n));
   } else {
     return request(new legacy_serialized_array_handler<T>(comm, source, tag, values, n));
   }
