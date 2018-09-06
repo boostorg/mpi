@@ -34,9 +34,6 @@
 // For (de-)serializing skeletons and content
 #include <boost/mpi/skeleton_and_content_fwd.hpp>
 
-// For (de-)serializing arrays
-#include <boost/serialization/array.hpp>
-
 #include <boost/mpi/detail/point_to_point.hpp>
 #include <boost/mpi/status.hpp>
 #include <boost/mpi/request.hpp>
@@ -1360,7 +1357,10 @@ communicator::array_send_impl(int dest, int tag, const T* values, int n,
                               mpl::false_) const
 {
   packed_oarchive oa(*this);
-  oa << n << boost::serialization::make_array(values, n);
+  T const* v = values;
+  while (v < values+n) {
+    oa << *v++;
+  }
   send(dest, tag, oa);
 }
 
@@ -1624,7 +1624,10 @@ communicator::array_isend_impl(int dest, int tag, const T* values, int n,
                                mpl::false_) const
 {
   shared_ptr<packed_oarchive> archive(new packed_oarchive(*this));
-  *archive << n << boost::serialization::make_array(values, n);
+  T const* v = values;
+  while (v < values+n) {
+    *archive << *v++;
+  }
   request result = isend(dest, tag, *archive);
   result.preserve(archive);
   return result;
