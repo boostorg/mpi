@@ -69,20 +69,12 @@ namespace detail {
   template<typename T>
   void serialized_array_irecv_data<T>::deserialize(status& stat)
   {
-    // Determine how much data we are going to receive
-    int count;
-    m_ia >> count;
-    
-    // Maybe we do not want all the elements...
-    boost::serialization::array_wrapper<T> arr(m_values, count > m_nb ? m_nb : count);
-    m_ia >> arr;
-    
-    if (count > m_nb) {
-      boost::throw_exception(
-        std::range_error("communicator::recv: message receive overflow"));
+    T* v = m_values;
+    T* end =  m_values+m_nb;
+    while (v < end) {
+      m_ia >> *v++;
     }
-    
-    stat.m_count = count;
+    stat.m_count = m_nb;
   }
 
   /**
