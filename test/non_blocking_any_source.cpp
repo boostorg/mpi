@@ -30,12 +30,11 @@ test_main(int argc, char **argv)
     for (int i = 1; i < world.size(); ++i) {
       req.push_back(world.irecv(mpi::any_source, 0, data[i - 1]));
     }
-    boost::mpi::wait_all(std::begin(req), std::end(req));
-
+    boost::mpi::wait_all(req.begin(), req.end());
     std::vector<bool> check(world.size()-1, false);
     for (int i = 0; i < world.size() - 1; ++i) {
       std::cout << "Process 0 received:" << std::endl;
-      std::copy(std::begin(data[i]), std::end(data[i]), std::ostream_iterator<int>(std::cout, " "));
+      std::copy(data[i].begin(), data[i].end(), std::ostream_iterator<int>(std::cout, " "));
       std::cout << std::endl;
       int idx = data[i].size();
       BOOST_CHECK(std::equal_range(data[i].begin(), data[i].end(), idx)
@@ -49,7 +48,7 @@ test_main(int argc, char **argv)
 		== std::make_pair(check.begin(), check.end())); 
   } else {
     std::vector<int> vec(rank, rank);
-    auto req = world.isend(0, 0, vec);
+    mpi::request req = world.isend(0, 0, vec);
     req.wait();
   }
   return 0;
