@@ -211,30 +211,35 @@ using mpi
    : \[<mpi runner>\] ;
 ]
 
-* [* If you're lucky]
-
-For those who uses _MPICH_, _OpenMPI_ or some of their derivatives,  configuration can be
-almost automatic. In fact, if your `mpicxx` command is in your path, you just need to use:
+Depending on your installation and MPI distribution, the build system might be able to find all the required informations and you just need to specify:	
 
 [pre
 using mpi ;
 ]
- 
-The directive will find the wrapper and deduce the options to use.
 
-* [*If your wrapper is not in your path]
+[section:mpi_setup_troubleshooting Trouble shooting]
 
-...or if it does not have a usual wrapper name, you will need to tell the build system where to find it:
+Most of the time, specially with production HPC clusters, some work will need to be done.
+
+Here is a list of the most common issues and suggestions on how to fix those.
+
+* [*If your wrapper is not in your path or does ot have a standard name ]
+
+You will need to tell the build system where to find it:
 
 [pre
 using mpi : /opt/mpi/bullxmpi/1.2.8.3/bin/mpicc ;
 ]
 
+[warning
+Boost.MPI only uses the C interface, so specifying the C wrapper should be enough. But some implementations will insist on using the C++ bindings.
+]
+
 * [*If your wrapper is really eccentric]
 
-or does not exist at all (it happens), you need to 
+Or if it does not exist at all (it happens), you need to 
 provide the compilation and build options to the build environment using `jam` directives.
-For example, the following could be used for a specific Intel MPI implementation:
+The following type configuration used to be required for some specific Intel MPI implementation:
 
 [pre
 using mpi : mpiicc : 
@@ -248,9 +253,7 @@ using mpi : mpiicc :
       <find-shared-library>rt ;
 ]
 
-To do that, you need to guess the libraries and include directories associated with your environment.
-You can refer to the your specific MPI environment documentation. 
-Most of the time though, your wrapper have an option that provide that information, it usually starts with `--show`:
+MPI wrappers usually have an options that provide the required informations, and, it usually starts with `--show`:
 [pre
 $ mpiicc -show
 icc -I/softs/...\/include ... -L/softs/...\/lib ... -Xlinker -rpath -Xlinker \/softs/...\/lib .... -lmpi -ldl -lrt -lpthread
@@ -269,9 +272,14 @@ $
 To see the results of MPI auto-detection, pass `--debug-configuration` on
 the bjam command line.
 
-* [*If you want to run the regression tests]
+[endsect]
+[section:mpi_regression_testing Running the tests]
 
-...Which is a good thing.
+You can run the regression tests with:
+[pre
+$cd <boost distribution/lib/mpi/test
+$../../../b2
+]
 
 The (optional) third argument configures Boost.MPI for running
 regression tests. These parameters specify the executable used to
@@ -301,37 +309,10 @@ using mpi : mpiicc :
 [endsect]
 [section:installation Build and Install]
 
-To build the whole Boost distribution:
+To install the whole Boost distribution:
 [pre
 $cd <boost distribution>
 $./b2 install
-]
-
-[tip
-Or, if you have a multi-cpu machine (say 24):
-
-[pre
-$cd <boost distribution>
-$./b2 -j24 install
-]
-]
-
-Installation of Boost.MPI can be performed in the build step by
-specifying `install` on the command line and (optionally) providing an
-installation location, e.g.,
-
-[pre
-$./b2 install
-]
-
-This command will install libraries into a default system location. To
-change the path where libraries will be installed, add the option
-`--prefix=PATH`.
-
-Then, you can run the regression tests with:
-[pre
-$cd <boost distribution/lib/mpi/test
-$../../../b2
 ]
 
 [endsect]
