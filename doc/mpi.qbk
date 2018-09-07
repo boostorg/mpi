@@ -32,7 +32,7 @@
 [def _accumulate_   [@http://www.sgi.com/tech/stl/accumulate.html
                      `accumulate`]]
 
-[/ QuickBook Document version 1.0 ]
+[/ QuickBook Document version 1.6 ]
 
 [section:intro Introduction]
 
@@ -93,7 +93,7 @@ through its alternative, [link mpi.python Python interface].
 Getting started with Boost.MPI requires a working MPI implementation,
 a recent version of Boost, and some configuration information.
 
-[section:mpi_impl MPI Implementation]
+[section:implementation MPI Implementation]
 To get started with Boost.MPI, you will first need a working
 MPI implementation. There are many conforming _MPI_implementations_
 available. Boost.MPI should work with any of the
@@ -161,8 +161,6 @@ appears to be working with a C++ compiler and we're ready to move on.
 
 [section:config Configure and Build]
 
-[section:bjam Build Environment]
-
 As the rest of Boost, Boost.MPI uses version 2 of the
 [@http://www.boost.org/doc/html/bbv2.html Boost.Build] system for
 configuring and building the library binary.
@@ -172,14 +170,10 @@ Please refer to the general Boost installation instructions for
 (including Unix, Linux and MacOS) or
 [@http://www.boost.org/doc/libs/1_58_0/more/getting_started/windows.html#prepare-to-use-a-boost-library-binary Windows]. 
 The simplified build instructions should apply on most platforms with a few specific modifications described below.
-[endsect]
 
-[section:bootstraping Bootstrap]
+[section:bootstrap Bootstrap]
 
-As described in the boost installation instructions, go to to root of your Boost source distribution 
-and run the `bootstrap` script (`./bootstrap.sh` for unix variants or `bootstrap.bat` for Windows).
-That will generate a 'project-config.jam` file in the root directory.
-Use your favourite text editor and add the following line:
+As explained in the boost installation instructions, running the bootstrap  (`./bootstrap.sh` for unix variants or `bootstrap.bat` for Windows) from the boost root directory will produce a 'project-config.jam` file. You need to edit that file and add the following line:
 
   using mpi ;
 
@@ -187,7 +181,7 @@ Alternatively, you can provided explicitly the list of Boost libraries you want 
 Please refer to the `--help` option` of the `bootstrap` script.
 [endsect]
 
-[section:mpi_setup Setting up your MPI Implementation]
+[section:settup Setting up your MPI Implementation]
 
 First, you need to scan the =include/boost/mpi/config.hpp= file and check if some 
 settings needs to be modified for your MPI implementation or preferences. 
@@ -196,13 +190,11 @@ In particular, the [macroref BOOST_MPI_HOMOGENEOUS] macro, that you will need to
 if you plan to run on an heterogeneous set of machines. See the [link mpi.homogeneous_machines optimization] notes below.
 
 Most MPI implementations requires specific compilation and link options. 
-In order to mask theses options to the user, most MPI implementations provides 
+In order to mask theses details to the user, most MPI implementations provides 
 wrappers which silently pass those options to the compiler.
 
 Depending on your MPI implementation, some work might be needed to tell Boost which 
-specific MPI option to use. This is done through the `using mpi ;` directive of the `project-config.jam` file.
-
-The general form is the following (do not forget to leave spaces around *:* and before *;*):
+specific MPI option to use. This is done through the `using mpi ;` directive in the `project-config.jam` file those general form is  (do not forget to leave spaces around *:* and before *;*):
 
 [pre
 using mpi 
@@ -217,15 +209,15 @@ Depending on your installation and MPI distribution, the build system might be a
 using mpi ;
 ]
 
-[section:mpi_setup_troubleshooting Trouble shooting]
+[section:settup_troubleshooting Trouble shooting]
 
 Most of the time, specially with production HPC clusters, some work will need to be done.
 
 Here is a list of the most common issues and suggestions on how to fix those.
 
-* [*If your wrapper is not in your path or does ot have a standard name ]
+* [*Your wrapper is not in your path or does ot have a standard name ]
 
-You will need to tell the build system where to find it:
+You will need to tell the build system how to call it using the first parameter:
 
 [pre
 using mpi : /opt/mpi/bullxmpi/1.2.8.3/bin/mpicc ;
@@ -235,10 +227,9 @@ using mpi : /opt/mpi/bullxmpi/1.2.8.3/bin/mpicc ;
 Boost.MPI only uses the C interface, so specifying the C wrapper should be enough. But some implementations will insist on using the C++ bindings.
 ]
 
-* [*If your wrapper is really eccentric]
+* [*Your wrapper is really eccentric or does not exist]
 
-Or if it does not exist at all (it happens), you need to 
-provide the compilation and build options to the build environment using `jam` directives.
+You will need to provide the compilation and link options through de second parameter using 'jam' directives.
 The following type configuration used to be required for some specific Intel MPI implementation:
 
 [pre
@@ -253,7 +244,7 @@ using mpi : mpiicc :
       <find-shared-library>rt ;
 ]
 
-MPI wrappers usually have an options that provide the required informations, and, it usually starts with `--show`:
+As a convenience, MPI wrappers usually have an options that provide the required informations, and, it usually starts with `--show`. You can use those to find out the the requested jam directive:
 [pre
 $ mpiicc -show
 icc -I/softs/...\/include ... -L/softs/...\/lib ... -Xlinker -rpath -Xlinker \/softs/...\/lib .... -lmpi -ldl -lrt -lpthread
@@ -272,42 +263,52 @@ $
 To see the results of MPI auto-detection, pass `--debug-configuration` on
 the bjam command line.
 
-[endsect]
-[section:mpi_regression_testing Running the tests]
+* [*The launch syntax cannot be detected]
 
-You can run the regression tests with:
-[pre
-$cd <boost distribution/lib/mpi/test
-$../../../b2
-]
+[note This is only used when [link mpi.tests running the tests].]
 
-The (optional) third argument configures Boost.MPI for running
-regression tests. These parameters specify the executable used to
-launch jobs (the default is "mpirun") followed by any necessary arguments
-to this to run tests and tell the program to expect the number of
-processors to follow (default: "-np").  With the default parameters,
-for instance, the test harness will execute, e.g.,
+If you need to use a special command to launch an MPI program, you will need to specify it through the third parameter of the `using mpi` directive.
 
-[pre  
-mpirun -np 4 all_gather_test
-]
-
-Some implementations provides alternative launcher that can be more convenient. For example, Intel's MPI provides the `mpiexec.hydra`:
+So, assuming you launch the `all_gather_test` program with:
 
 [pre
 $mpiexec.hydra -np 4 all_gather_test
 ]
 
-which does not requires any daemon to be running (as opposed to their `mpirun` command). Such a launcher need to be specified though:
+The directive will look like:
 
 [pre
 using mpi : mpiicc : 
-      .....
+     \[<compilation and link options>\]
  : mpiexec.hydra -n  ;
 ]
 
 [endsect]
-[section:installation Build and Install]
+[endsect]
+[section:build Build]
+
+To build the whole Boost distribution:
+[pre
+$cd <boost distribution>
+$./b2 
+]
+To build the Boost.MPI library and dependancies:
+[pre
+$cd <boost distribution>\/lib/mpi/build
+$..\/../../b2 
+]
+
+[endsect]
+[section:tests Tests]
+
+You can run the regression tests with:
+[pre
+$cd <boost distribution>\/lib/mpi/test
+$..\/../../b2
+]
+
+[endsect]
+[section:installation Installation]
 
 To install the whole Boost distribution:
 [pre
@@ -338,7 +339,6 @@ mpi.python_skeleton_content skeleton/content mechanism] from
 within Python.
 
 [endsect]
-
 [endsect]
 
 [section:tutorial Tutorial]
@@ -1174,7 +1174,7 @@ A communicator can be organised as a cartesian grid, here a basic example:
   }
 
 
-
+[endsect]
 [section:skeleton_and_content Separating structure from content]
 
 When communicating data types over MPI that are not fundamental to MPI
