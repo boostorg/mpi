@@ -1,5 +1,7 @@
 [section:point_to_point Point-to-Point communication]
 
+[section:blocking Blocking communication]
+
 As a message passing library, MPI's primary purpose is to routine
 messages from one process to another, i.e., point-to-point. MPI
 contains routines that can send messages, receive messages, and query
@@ -50,6 +52,8 @@ communicator::send] method and all receives use a corresponding
 [memberref boost::mpi::communicator::recv
 communicator::recv] call.
 
+[endsect:blocking]
+
 [section:nonblocking Non-blocking communication]
 
 The default MPI communication operations--`send` and `recv`--may have
@@ -62,7 +66,8 @@ occur simultaneously, e.g., a process will both send and receive at
 the same time.
 
 Let's revisit our "Hello, world!" program from the previous
-section. The core of this program transmits two messages:
+[link mpi.tutorial.point_to_point.blocking section].
+The core of this program transmits two messages:
 
     if (world.rank() == 0) {
       world.send(1, 0, std::string("Hello"));
