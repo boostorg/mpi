@@ -799,23 +799,7 @@ class BOOST_MPI_DECL communicator
    * Split the communicator into multiple, disjoint communicators
    * each of which is based on a particular color. This is a
    * collective operation that returns a new communicator that is a
-   * subgroup of @p this. This routine is functionally equivalent to
-   * @c MPI_Comm_split.
-   *
-   *   @param color The color of this process. All processes with the
-   *   same @p color value will be placed into the same group.
-   *
-   *   @returns A new communicator containing all of the processes in
-   *   @p this that have the same @p color.
-   */
-  communicator split(int color) const;
-
-  /**
-   * Split the communicator into multiple, disjoint communicators
-   * each of which is based on a particular color. This is a
-   * collective operation that returns a new communicator that is a
-   * subgroup of @p this. This routine is functionally equivalent to
-   * @c MPI_Comm_split.
+   * subgroup of @p this.
    *
    *   @param color The color of this process. All processes with the
    *   same @p color value will be placed into the same group.
@@ -830,6 +814,7 @@ class BOOST_MPI_DECL communicator
    *   @p this that have the same @p color.
    */
   communicator split(int color, int key) const;
+  communicator split(int color) const;
 
   /**
    * Determine if the communicator is in fact an intercommunicator
