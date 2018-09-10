@@ -830,8 +830,8 @@ A communicator can be organised as a cartesian grid, here a basic example:
     return 0;
   }
 
-
 [endsect:cartesian_communicator]
+[include threading.qbk]
 [section:skeleton_and_content Separating structure from content]
 
 When communicating data types over MPI that are not fundamental to MPI
