@@ -131,7 +131,7 @@ install:
 script:
   - |-
     echo "using $TOOLSET : : $COMPILER ;" > ~/user-config.jam
-    echo "using mpi ;" >> ~/user-config.jam
+    echo "using mpi : mpic++.openmpi ;" >> ~/user-config.jam
   - ./b2 -j3 libs/mpi/test toolset=$TOOLSET cxxstd=$CXXSTD variant=release
 
 notifications:
