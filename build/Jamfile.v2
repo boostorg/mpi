@@ -79,7 +79,7 @@ if [ mpi.configured ]
 
 project boost/mpi
   : source-location ../src
-    requirements <local-visibility>global
+    requirements <visibility>global
   ;
 
 lib boost_mpi
