@@ -9,8 +9,7 @@
 # Authors: Douglas Gregor
 #          Andrew Lumsdaine
 
-use-project /boost/mpi : ../build ;
-project /boost/mpi/test ;
+project : requirements <library>/boost//mpi ;
 import mpi : mpi-test ;
 
 if [ mpi.configured ]

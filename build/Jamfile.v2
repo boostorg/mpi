@@ -110,6 +110,7 @@ lib boost_mpi
     <library>/mpi//mpi [ mpi.extra-requirements ]
     <define>BOOST_MPI_SOURCE=1
     <link>shared:<define>BOOST_MPI_DYN_LINK=1
+    <local-visibility>global
   : # Default build
     <link>shared
   : # Usage requirements
@@ -134,6 +135,7 @@ lib boost_mpi
                 -<tag>@$(BOOST_JAMROOT_MODULE)%$(BOOST_JAMROOT_MODULE).tag
                 <tag>@$(__name__).python-tag
                 <conditional>@python.require-py
+                <local-visibility>global
 
               : # Default build
                 <link>shared
