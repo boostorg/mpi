@@ -179,3 +179,9 @@ else if ! ( --without-mpi in  [ modules.peek : ARGV ] )
       : "note: otherwise, you can safely ignore this message." 
       ;
 }
+else
+{
+  alias boost_mpi ;
+}
+
+boost-install boost_mpi ;
