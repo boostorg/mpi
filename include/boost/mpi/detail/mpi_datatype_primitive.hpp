@@ -53,7 +53,7 @@ public:
 #if defined(MPI_VERSION) && MPI_VERSION >= 2
       BOOST_MPI_CHECK_RESULT(MPI_Get_address,(const_cast<void*>(orig), &origin));
 #else
-      BOOST_MPI_CHECK_RESULT(MPI_Address,(const_cast<void*>(orig), &origin));
+      BOOST_MPI_CHECK_RESULT(MPI_Get_address,(const_cast<void*>(orig), &origin));
 #endif
     }
 
@@ -123,7 +123,7 @@ private:
 #if defined(MPI_VERSION) && MPI_VERSION >= 2
      BOOST_MPI_CHECK_RESULT(MPI_Get_address,(const_cast<void*>(p), &a));
 #else
-     BOOST_MPI_CHECK_RESULT(MPI_Address,(const_cast<void*>(p), &a));
+     BOOST_MPI_CHECK_RESULT(MPI_Get_address,(const_cast<void*>(p), &a));
 #endif
       addresses.push_back(a-origin);
       types.push_back(t);
