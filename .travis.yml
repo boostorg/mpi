@@ -141,7 +141,6 @@ script:
   - |-
     echo "using $TOOLSET : : $COMPILER ;" > ~/user-config.jam
     echo "using mpi : mpic++.openmpi : : mpirun.openmpi ;" >> ~/user-config.jam
-    mpirun.openmpi --version
   - ./b2 -j3 libs/mpi/test toolset=$TOOLSET cxxstd=$CXXSTD variant=release
 
 notifications:
