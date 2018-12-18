@@ -87,8 +87,6 @@ class BOOST_MPI_DECL request
   static request
   make_dynamic_primitive_array_send(communicator const& comm, int source, int tag, 
                                     std::vector<T,A> const& values);
-
-  static bool probe_messages();
   /**
    *  Wait until the communication associated with this request has
    *  completed, then return a @c status object describing the
@@ -145,13 +143,14 @@ class BOOST_MPI_DECL request
 
   // specific implementations
   class legacy_handler;
-  template<class Data> class probe_handler;
   class trivial_handler;  
   class dynamic_handler;
   template<typename T> class legacy_serialized_handler;
   template<typename T> class legacy_serialized_array_handler;
   template<typename T, class A> class legacy_dynamic_primitive_array_handler;
-  
+#if BOOST_MPI_VERSION >= 3
+  template<class Data> class probe_handler;
+#endif
  private:
   shared_ptr<handler> m_handler;
   shared_ptr<void>    m_preserved;

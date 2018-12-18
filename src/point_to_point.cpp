@@ -31,12 +31,15 @@ void
 packed_archive_send(communicator const& comm, int dest, int tag,
                     const packed_oarchive& ar)
 {
-  if (request::probe_messages()) {
+#if defined(BOOST_MPI_USE_IMPROBE)
+  {
     void *buf = detail::unconst(ar.address());
     BOOST_MPI_CHECK_RESULT(MPI_Send,
                            (buf, ar.size(), MPI_PACKED,
                             dest, tag, comm));
-  } else {
+  }
+#else
+  {
     std::size_t const& size = ar.size();
     BOOST_MPI_CHECK_RESULT(MPI_Send,
                            (detail::unconst(&size), 1, 
@@ -47,6 +50,7 @@ packed_archive_send(communicator const& comm, int dest, int tag,
                             MPI_PACKED,
                             dest, tag, comm));
   }
+#endif
 }
 
 request
@@ -69,14 +73,17 @@ void
 packed_archive_recv(communicator const& comm, int source, int tag, packed_iarchive& ar,
                     MPI_Status& status)
 {
-  if (request::probe_messages()) {
+#if defined(BOOST_MPI_USE_IMPROBE)
+  {
     MPI_Message msg;
     BOOST_MPI_CHECK_RESULT(MPI_Mprobe, (source, tag, comm, &msg, &status));
     int count;
     BOOST_MPI_CHECK_RESULT(MPI_Get_count, (&status, MPI_PACKED, &count));
     ar.resize(count);
     BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (ar.address(), count, MPI_PACKED, &msg, &status));
-  } else {
+  } 
+#else
+  {
     std::size_t count;
     BOOST_MPI_CHECK_RESULT(MPI_Recv,
                            (&count, 1, get_mpi_datatype(count),
@@ -89,6 +96,7 @@ packed_archive_recv(communicator const& comm, int source, int tag, packed_iarchi
                             status.MPI_SOURCE, status.MPI_TAG,
                             comm, &status));
   }
+#endif
 }
 
 } } } // end namespace boost::mpi::detail

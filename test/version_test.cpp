@@ -39,7 +39,12 @@ yesno(bool b) {
 void
 report_features(mpi::communicator const& comm) {
   if (comm.rank() == 0) {
-    std::cout << "Assuming working MPI_Improbe:" << yesno(mpi::request::probe_messages()) << '\n';
+    std::cout << "Assuming working MPI_Improbe:" <<
+#if defined(BOOST_MPI_USE_IMPROBE)
+      "yes" << '\n';
+#else
+      "no"  << '\n';
+#endif
   }
 }
 

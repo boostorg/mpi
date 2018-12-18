@@ -10,25 +10,6 @@
 
 namespace boost { namespace mpi {
 
-namespace detail {
-
-bool
-choose_probe_usage() {
-#ifdef BOOST_MPI_NO_IMPROBE
-  return false;
-#else
-  return true;
-#endif
-}
-
-} // detail
-
-bool
-request::probe_messages() {
-  static bool enabled = detail::choose_probe_usage();
-  return enabled;
-}
-
 request::request() 
   : m_handler() {}
 
@@ -83,13 +64,16 @@ request::make_empty_recv(communicator const& comm, int dest, int tag) {
 
 request
 request::make_packed_send(communicator const& comm, int dest, int tag, void const* buffer, std::size_t n) {
-  if (probe_messages()) {
+#if defined(BOOST_MPI_USE_IMPROBE)
+  {
     trivial_handler* handler = new trivial_handler;
     BOOST_MPI_CHECK_RESULT(MPI_Isend,
                            (const_cast<void*>(buffer), n, MPI_PACKED,
                             dest, tag, comm, &handler->m_request));
     return request(handler);
-  } else {
+  }
+#else
+  {
     dynamic_handler *handler = new dynamic_handler;
     request req(handler);
     shared_ptr<std::size_t> size(new std::size_t(n));
@@ -99,11 +83,12 @@ request::make_packed_send(communicator const& comm, int dest, int tag, void cons
                             get_mpi_datatype(*size), 
                             dest, tag, comm, handler->m_requests));
     BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                           (buffer, *size,
+                           (const_cast<void*>(buffer), *size,
                             MPI_PACKED,
                             dest, tag, comm, handler->m_requests+1));
     return req;
   }
+#endif
 }
 
 /***************************************************************************

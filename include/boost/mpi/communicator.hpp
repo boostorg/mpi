@@ -1353,9 +1353,10 @@ template<typename T, typename A>
 void communicator::send_vector(int dest, int tag, 
   const std::vector<T,A>& values, mpl::true_ primitive) const
 {
-  if (request::probe_messages()) {
-    array_send_impl(dest, tag, values.data(), values.size(), primitive);
-  } else {
+#if defined(BOOST_MPI_USE_IMPROBE)
+  array_send_impl(dest, tag, values.data(), values.size(), primitive);
+#else
+  {
     // non blocking recv by legacy_dynamic_primitive_array_handler
     // blocking recv by recv_vector(source,tag,value,primitive)
     // send the vector size
@@ -1364,6 +1365,7 @@ void communicator::send_vector(int dest, int tag,
     // send the data
     this->array_send_impl(dest, tag, values.data(), size, primitive);
   }
+#endif
 }
 
 template<typename T, typename A>
@@ -1453,7 +1455,8 @@ template<typename T, typename A>
 status communicator::recv_vector(int source, int tag, 
                                  std::vector<T,A>& values, mpl::true_ primitive) const
 {
-  if (request::probe_messages()) {
+#if defined(BOOST_MPI_USE_IMPROBE)
+  {
     MPI_Message msg;
     status stat;
     BOOST_MPI_CHECK_RESULT(MPI_Mprobe, (source,tag,*this,&msg,&stat.m_status));
@@ -1462,7 +1465,9 @@ status communicator::recv_vector(int source, int tag,
     values.resize(count);
     BOOST_MPI_CHECK_RESULT(MPI_Mrecv, (values.data(), count, get_mpi_datatype<T>(), &msg, &stat.m_status));
     return stat;
-  } else {
+  }
+#else
+  {
     // receive the vector size
     typename std::vector<T,A>::size_type size = 0;
     recv(source, tag, size);
@@ -1471,6 +1476,7 @@ status communicator::recv_vector(int source, int tag,
     // receive the data
     return this->array_recv_impl(source, tag, values.data(), size, primitive);
   }
+#endif
 }
 
 template<typename T, typename A>

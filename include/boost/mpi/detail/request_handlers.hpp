@@ -123,6 +123,7 @@ struct serialized_irecv_data<skeleton_proxy<T> >
 };
 }
 
+#if BOOST_MPI_VERSION >= 3
 template<class Data>
 class request::probe_handler
   : public request::handler,
@@ -186,6 +187,7 @@ protected:
   int m_source;
   int m_tag;
 };
+#endif // BOOST_MPI_VERSION >= 3
 
 namespace detail {
 template<class A>
@@ -527,30 +529,30 @@ private:
 
 template<typename T> 
 request request::make_serialized(communicator const& comm, int source, int tag, T& value) {
-  if (probe_messages()) {
-    return request(new probe_handler<detail::serialized_data<T> >(comm, source, tag, value));
-  } else {
-    return request(new legacy_serialized_handler<T>(comm, source, tag, value));
-  }
+#if defined(BOOST_MPI_USE_IMPROBE)
+  return request(new probe_handler<detail::serialized_data<T> >(comm, source, tag, value));
+#else
+  return request(new legacy_serialized_handler<T>(comm, source, tag, value));
+#endif
 }
 
 template<typename T>
 request request::make_serialized_array(communicator const& comm, int source, int tag, T* values, int n) {
-  if (probe_messages()) {
-    return request(new probe_handler<detail::serialized_array_data<T> >(comm, source, tag, values, n));
-  } else {
-    return request(new legacy_serialized_array_handler<T>(comm, source, tag, values, n));
-  }
+#if defined(BOOST_MPI_USE_IMPROBE)
+  return request(new probe_handler<detail::serialized_array_data<T> >(comm, source, tag, values, n));
+#else
+  return request(new legacy_serialized_array_handler<T>(comm, source, tag, values, n));
+#endif
 }
 
 template<typename T, class A>
 request request::make_dynamic_primitive_array_recv(communicator const& comm, int source, int tag, 
                                                    std::vector<T,A>& values) {
-  if (probe_messages()) {
-    return request(new probe_handler<detail::dynamic_primitive_array_data<std::vector<T,A> > >(comm,source,tag,values));
-  } else {
-    return request(new legacy_dynamic_primitive_array_handler<T,A>(comm, source, tag, values));
-  }
+#if defined(BOOST_MPI_USE_IMPROBE)
+  return request(new probe_handler<detail::dynamic_primitive_array_data<std::vector<T,A> > >(comm,source,tag,values));
+#else
+  return request(new legacy_dynamic_primitive_array_handler<T,A>(comm, source, tag, values));
+#endif
 }
 
 template<typename T>
@@ -590,9 +592,10 @@ request::make_trivial_recv(communicator const& comm, int dest, int tag, T& value
 template<typename T, class A>
 request request::make_dynamic_primitive_array_send(communicator const& comm, int dest, int tag, 
                                                    std::vector<T,A> const& values) {
-  if (request::probe_messages()) {
-    return make_trivial_send(comm, dest, tag, values.data(), values.size());
-  } else {
+#if defined(BOOST_MPI_USE_IMPROBE)
+  return make_trivial_send(comm, dest, tag, values.data(), values.size());
+#else
+  {
     // non blocking recv by legacy_dynamic_primitive_array_handler
     // blocking recv by status recv_vector(source,tag,value,primitive)
     boost::shared_ptr<std::size_t> size(new std::size_t(values.size()));
@@ -609,7 +612,8 @@ request request::make_dynamic_primitive_array_send(communicator const& comm, int
                             get_mpi_datatype<T>(),
                             dest, tag, comm, handler->m_requests+1));
     return req;
-  }  
+  }
+#endif
 }
 
 inline
