@@ -50,10 +50,10 @@ public:
      : is_committed(false),
        origin()
     {
-#if defined(MPI_VERSION) && MPI_VERSION >= 2
+#if BOOST_MPI_VERSION >= 2
       BOOST_MPI_CHECK_RESULT(MPI_Get_address,(const_cast<void*>(orig), &origin));
 #else
-      BOOST_MPI_CHECK_RESULT(MPI_Get_address,(const_cast<void*>(orig), &origin));
+      BOOST_MPI_CHECK_RESULT(MPI_Address,(const_cast<void*>(orig), &origin));
 #endif
     }
 
@@ -77,7 +77,7 @@ public:
     {
       if (!is_committed)
       {
-#if defined(MPI_VERSION) && MPI_VERSION >= 2
+#if BOOST_MPI_VERSION >= 2
        BOOST_MPI_CHECK_RESULT(MPI_Type_create_struct,
                     (
                       addresses.size(),
@@ -120,10 +120,10 @@ private:
       // store address, type and length
 
       MPI_Aint a;
-#if defined(MPI_VERSION) && MPI_VERSION >= 2
+#if BOOST_MPI_VERSION >= 2
      BOOST_MPI_CHECK_RESULT(MPI_Get_address,(const_cast<void*>(p), &a));
 #else
-     BOOST_MPI_CHECK_RESULT(MPI_Get_address,(const_cast<void*>(p), &a));
+     BOOST_MPI_CHECK_RESULT(MPI_Address,(const_cast<void*>(p), &a));
 #endif
       addresses.push_back(a-origin);
       types.push_back(t);
