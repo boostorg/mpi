@@ -608,7 +608,7 @@ request request::make_dynamic_primitive_array_send(communicator const& comm, int
                             get_mpi_datatype(*size),
                             dest, tag, comm, handler->m_requests+0));
     BOOST_MPI_CHECK_RESULT(MPI_Isend,
-                           (values.data(), *size, 
+                           (const_cast<T*>(values.data()), *size, 
                             get_mpi_datatype<T>(),
                             dest, tag, comm, handler->m_requests+1));
     return req;
