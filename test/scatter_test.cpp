@@ -10,14 +10,16 @@
 #include <boost/mpi/collectives/scatterv.hpp>
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
-#include <boost/test/minimal.hpp>
 #include "gps_position.hpp"
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/list.hpp>
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/lexical_cast.hpp>
 
-using boost::mpi::communicator;
+#define BOOST_TEST_MODULE mpi_scatter
+#include <boost/test/included/unit_test.hpp>
+
+using namespace boost::mpi;
 
 template<typename Generator>
 void
@@ -51,7 +53,7 @@ scatter_test(const communicator& comm, Generator generator,
     BOOST_CHECK(value == generator(comm.rank()));
   }
 
-  (comm.barrier)();
+  comm.barrier();
 }
 
 
@@ -150,14 +152,13 @@ scatterv_test(const communicator& comm, Generator generator,
       BOOST_CHECK(myvalues[i] == generator(comm.rank()));
   }
 
-  (comm.barrier)();
+  comm.barrier();
 }
 
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(simple_scatter)
 {
-  boost::mpi::environment env(argc, argv);
-
+  environment env;
   communicator comm;
 
   scatter_test(comm, int_generator(), "integers");
@@ -169,6 +170,4 @@ int test_main(int argc, char* argv[])
   scatterv_test(comm, gps_generator(), "GPS positions");
   scatterv_test(comm, string_generator(), "string");
   scatterv_test(comm, string_list_generator(), "list of strings");
-
-  return 0;
 }

@@ -9,8 +9,10 @@
 #include <iostream>
 #include <iterator>
 #include <boost/mpi.hpp>
-#include <boost/test/minimal.hpp>
 #include <boost/serialization/vector.hpp>
+
+#define BOOST_TEST_MODULE mpi_non_blockin_any_source
+#include <boost/test/included/unit_test.hpp>
 
 namespace mpi = boost::mpi;
 
@@ -18,10 +20,9 @@ std::string ok(bool b) {
   return b ? "ok" : "ko";
 }
 
-int
-test_main(int argc, char **argv)
+BOOST_AUTO_TEST_CASE(non_blocking_any)
 {
-  mpi::environment env(argc, argv);
+mpi::environment env;
   mpi::communicator world;
   int rank = world.rank();
   if (rank == 0) {
@@ -56,5 +57,4 @@ test_main(int argc, char **argv)
     mpi::request req = world.isend(0, 0, vec);
     req.wait();
   }
-  return 0;
 }

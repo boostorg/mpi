@@ -17,7 +17,8 @@
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/cartesian_communicator.hpp>
 
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE mpi_cartesian_topolohy
+#include <boost/test/included/unit_test.hpp>
 
 namespace mpi = boost::mpi;
 
@@ -160,11 +161,11 @@ void test_cartesian_topology( mpi::communicator const& world, mpi::cartesian_top
   }
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(cartesian_topology)
 {
-  mpi::environment env(argc, argv);
-
+  mpi::environment env;
   mpi::communicator world;
+
   int const ndim = world.size() >= 24 ? 3 : 2;
   mpi::cartesian_topology topo(ndim);
   typedef mpi::cartesian_dimension cd;
@@ -189,5 +190,4 @@ int test_main(int argc, char* argv[])
   }
   test_cartesian_topology( world, std::move(topo));
 #endif
-  return 0;
 }

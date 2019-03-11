@@ -8,13 +8,15 @@
 // content for data types.
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
-#include <boost/test/minimal.hpp>
 #include <boost/serialization/list.hpp>
 #include <boost/mpi/skeleton_and_content.hpp>
 #include <boost/mpi/nonblocking.hpp>
 #include <algorithm>
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/mpi/collectives/broadcast.hpp>
+
+#define BOOST_TEST_MODULE mpi_skeleton_content
+#include <boost/test/included/unit_test.hpp>
 
 using boost::mpi::communicator;
 
@@ -183,17 +185,11 @@ test_skeleton_and_content_nonblocking(const communicator& comm, int root)
   (comm.barrier)();
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(sendrecv)
 {
-  boost::mpi::environment env(argc, argv);
-
+  boost::mpi::environment env;
   communicator comm;
-  if (comm.size() == 1) {
-    std::cerr << "ERROR: Must run the skeleton and content test with more "
-      "than one process."
-              << std::endl;
-    MPI_Abort(comm, -1);
-  }
+  BOOST_TEST_REQUIRE(comm.size() > 1);
 
   test_skeleton_and_content(comm, 0, true);
   test_skeleton_and_content(comm, 0, false);
@@ -201,6 +197,4 @@ int test_main(int argc, char* argv[])
   test_skeleton_and_content(comm, 1, false);
   test_skeleton_and_content_nonblocking(comm, 0);
   test_skeleton_and_content_nonblocking(comm, 1);
-
-  return 0;
 }

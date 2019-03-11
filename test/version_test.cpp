@@ -8,8 +8,10 @@
 
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/communicator.hpp>
-#include <boost/test/minimal.hpp>
 #include <iostream>
+
+#define BOOST_TEST_MODULE mpi_version
+#include <boost/test/included/unit_test.hpp>
 
 namespace mpi = boost::mpi;
 
@@ -48,13 +50,11 @@ report_features(mpi::communicator const& comm) {
   }
 }
 
-int
-test_main(int argc, char* argv[]) {
-  mpi::environment env(argc,argv);
+BOOST_AUTO_TEST_CASE(version)
+{
+  mpi::environment env;
   mpi::communicator world;
 
   test_version(world);
   report_features(world);
-    
-  return 0;
 }

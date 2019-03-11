@@ -8,7 +8,6 @@
 #include <boost/mpi/nonblocking.hpp>
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
-#include <boost/test/minimal.hpp>
 #include "gps_position.hpp"
 #include <boost/lexical_cast.hpp>
 #include <boost/serialization/string.hpp>
@@ -16,6 +15,9 @@
 #include <iterator>
 #include <algorithm>
 //#include "debugger.cpp"
+
+#define BOOST_TEST_MODULE mpi_non_blockin_test
+#include <boost/test/included/unit_test.hpp>
 
 using boost::mpi::communicator;
 using boost::mpi::request;
@@ -220,10 +222,9 @@ nonblocking_test(const communicator& comm, const T* values, int num_values,
                            values));
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(nonblocking)
 {
-  boost::mpi::environment env(argc, argv);
-
+  boost::mpi::environment env;
   communicator comm;
 
   int int_array[3] = {17, 42, 256};
@@ -243,6 +244,4 @@ int test_main(int argc, char* argv[])
     lst_of_strings.push_back(boost::lexical_cast<std::string>(i));
 
   nonblocking_tests(comm, &lst_of_strings, 1, "list of strings", true);
-
-  return 0;
 }

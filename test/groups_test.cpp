@@ -9,12 +9,13 @@
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/group.hpp>
-#include <boost/test/minimal.hpp>
 #include <vector>
 #include <algorithm>
 
-namespace mpi = boost::mpi;
+#define BOOST_TEST_MODULE mpi_group_test
+#include <boost/test/included/unit_test.hpp>
 
+namespace mpi = boost::mpi;
 
 template <typename T>
 struct iota
@@ -50,10 +51,9 @@ void group_test(const mpi::communicator& comm)
     }
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(group)
 {
-    mpi::environment env(argc,argv);
+    mpi::environment env;
     mpi::communicator comm;
     group_test(comm);
-    return 0;
 }

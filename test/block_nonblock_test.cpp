@@ -12,7 +12,6 @@
 #define BOOST_TEST_MODULE mpi_nonblocking
 #include <boost/test/included/unit_test.hpp>
 
-
 namespace mpi = boost::mpi;
 
 template<typename T>
