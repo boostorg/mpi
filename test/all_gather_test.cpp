@@ -23,7 +23,6 @@
 #include "gps_position.hpp"
 
 namespace mpi = boost::mpi;
-using namespace boost::unit_test;
 
 template<typename Generator>
 void
