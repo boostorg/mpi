@@ -8,13 +8,15 @@
 #include <boost/mpi/collectives/all_reduce.hpp>
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
-#include <boost/test/minimal.hpp>
 #include <vector>
 #include <algorithm>
 #include <boost/serialization/string.hpp>
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/lexical_cast.hpp>
 #include <numeric>
+
+#define BOOST_TEST_MODULE mpi_all_reduce
+#include <boost/test/included/unit_test.hpp>
 
 using boost::mpi::communicator;
 
@@ -276,30 +278,25 @@ struct is_commutative<std::plus<wrapped_int>, wrapped_int>
 
 } } // end namespace boost::mpi
 
-int test_main(int argc, char* argv[])
-{
+BOOST_AUTO_TEST_CASE(test_all_reduce)
+{ 
   using namespace boost::mpi;
-  environment env(argc, argv);
-
+  environment env;
   communicator comm;
 
   // Built-in MPI datatypes with built-in MPI operations
-  all_reduce_test(comm, int_generator(), "integers", std::plus<int>(), "sum",
-                  0);
-  all_reduce_test(comm, int_generator(), "integers", std::multiplies<int>(),
-                  "product", 1);
-  all_reduce_test(comm, int_generator(), "integers", maximum<int>(),
-                  "maximum", 0);
-  all_reduce_test(comm, int_generator(), "integers", minimum<int>(),
-                  "minimum", 2);
+  all_reduce_test(comm, int_generator(), "integers", std::plus<int>(), "sum", 0);
+  all_reduce_test(comm, int_generator(), "integers", std::multiplies<int>(), "product", 1);
+  all_reduce_test(comm, int_generator(), "integers", maximum<int>(), "maximum", 0);
+  all_reduce_test(comm, int_generator(), "integers", minimum<int>(), "minimum", 2);
 
   // User-defined MPI datatypes with operations that have the
   // same name as built-in operations.
-  all_reduce_test(comm, point_generator(point(0,0,0)), "points",
-                  std::plus<point>(), "sum", point());
+  all_reduce_test(comm, point_generator(point(0,0,0)), "points", std::plus<point>(),
+                  "sum", point());
 
   // Built-in MPI datatypes with user-defined operations
-  all_reduce_test(comm, int_generator(17), "integers", secret_int_bit_and(),
+  all_reduce_test(comm, int_generator(17), "integers", secret_int_bit_and(), 
                   "bitwise and", -1);
   
   // Arbitrary types with user-defined, commutative operations.
@@ -309,6 +306,4 @@ int test_main(int argc, char* argv[])
   // Arbitrary types with (non-commutative) user-defined operations
   all_reduce_test(comm, string_generator(), "strings",
                   std::plus<std::string>(), "concatenation", std::string());
-
-  return 0;
 }
