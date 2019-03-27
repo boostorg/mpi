@@ -213,40 +213,50 @@ struct is_mpi_op<minimum<T>, T>
   static MPI_Op op() { return MPI_MIN; }
 };
 
+namespace detail {
+  template<typename T, typename U>
+  struct is_same_or_void : public boost::mpl::or_<boost::mpl::is_same<T, U>,
+                                                  boost::mpl::is_same<U, void>> { };
+}
+
 /// INTERNAL ONLY
-template<typename T>
- struct is_mpi_op<std::plus<T>, T>
-  : public boost::mpl::or_<is_mpi_integer_datatype<T>,
-                           is_mpi_floating_point_datatype<T>,
-                           is_mpi_complex_datatype<T> >
+template<typename T, typename U>
+ struct is_mpi_op<std::plus<U>, T>
+  : public boost::mpl::and_<detail::is_same_or_void<T, U>,
+                            boost::mpl::or_<is_mpi_integer_datatype<T>,
+                                            is_mpi_floating_point_datatype<T>,
+                                            is_mpi_complex_datatype<T> > >
 {
   static MPI_Op op() { return MPI_SUM; }
 };
 
 /// INTERNAL ONLY
-template<typename T>
- struct is_mpi_op<std::multiplies<T>, T>
-  : public boost::mpl::or_<is_mpi_integer_datatype<T>,
-                           is_mpi_floating_point_datatype<T>,
-                           is_mpi_complex_datatype<T> >
+template<typename T, typename U>
+struct is_mpi_op<std::multiplies<U>, T>
+  : public boost::mpl::and_<detail::is_same_or_void<T, U>,
+                            boost::mpl::or_<is_mpi_integer_datatype<T>,
+                                            is_mpi_floating_point_datatype<T>,
+                                            is_mpi_complex_datatype<T> > >
 {
   static MPI_Op op() { return MPI_PROD; }
 };
 
 /// INTERNAL ONLY
-template<typename T>
- struct is_mpi_op<std::logical_and<T>, T>
-  : public boost::mpl::or_<is_mpi_integer_datatype<T>,
-                           is_mpi_logical_datatype<T> >
+template<typename T, typename U>
+ struct is_mpi_op<std::logical_and<U>, T>
+  : public boost::mpl::and_<detail::is_same_or_void<T, U>,
+                            boost::mpl::or_<is_mpi_integer_datatype<T>,
+                                            is_mpi_logical_datatype<T> > >
 {
   static MPI_Op op() { return MPI_LAND; }
 };
 
 /// INTERNAL ONLY
-template<typename T>
- struct is_mpi_op<std::logical_or<T>, T>
-  : public boost::mpl::or_<is_mpi_integer_datatype<T>,
-                           is_mpi_logical_datatype<T> >
+template<typename T, typename U>
+ struct is_mpi_op<std::logical_or<U>, T>
+  : public boost::mpl::and_<detail::is_same_or_void<T, U>,
+                            boost::mpl::or_<is_mpi_integer_datatype<T>,
+                                            is_mpi_logical_datatype<T> > >
 {
   static MPI_Op op() { return MPI_LOR; }
 };
