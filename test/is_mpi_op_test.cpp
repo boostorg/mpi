@@ -32,10 +32,14 @@ BOOST_AUTO_TEST_CASE(mpi_basic_op)
   test_op<minimum<float>, float>(MPI_MIN);
   BOOST_TEST((is_mpi_op<minimum<float>, float>::op() == MPI_MIN));
   BOOST_TEST((is_mpi_op<plus<double>, double>::op() == MPI_SUM));
+  BOOST_TEST((is_mpi_op<plus<void>, double>::op() == MPI_SUM));
   BOOST_TEST((is_mpi_op<multiplies<long>, long>::op() == MPI_PROD));
+  BOOST_TEST((is_mpi_op<multiplies<void>, long>::op() == MPI_PROD));
   BOOST_TEST((is_mpi_op<logical_and<int>, int>::op() == MPI_LAND));
+  BOOST_TEST((is_mpi_op<logical_and<void>, int>::op() == MPI_LAND));
   BOOST_TEST((is_mpi_op<bitwise_and<int>, int>::op() == MPI_BAND));
   BOOST_TEST((is_mpi_op<logical_or<int>, int>::op() == MPI_LOR));
+  BOOST_TEST((is_mpi_op<logical_or<void>, int>::op() == MPI_LOR));
   BOOST_TEST((is_mpi_op<bitwise_or<int>, int>::op() == MPI_BOR));
   BOOST_TEST((is_mpi_op<logical_xor<int>, int>::op() == MPI_LXOR));
   BOOST_TEST((is_mpi_op<bitwise_xor<int>, int>::op() == MPI_BXOR));
