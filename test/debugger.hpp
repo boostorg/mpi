@@ -22,3 +22,5 @@ std::vector<int> extract_paused_ranks(int argc, char** argv);
  * set the local variable 'i' to 0 to let the process restarts.
  */
 void wait_for_debugger(std::vector<int> const& processes, boost::mpi::communicator const& comm);
+/** @override */
+void wait_for_debugger(boost::mpi::communicator const& comm);

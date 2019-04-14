@@ -6,13 +6,15 @@
 // A test of the sendrecv() operation.
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
-#include <boost/test/minimal.hpp>
 #include <vector>
 #include <algorithm>
 #include <boost/serialization/string.hpp>
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/lexical_cast.hpp>
 #include <numeric>
+
+#define BOOST_TEST_MODULE mpi_sendrecv
+#include <boost/test/included/unit_test.hpp>
 
 namespace mpi = boost::mpi;
 
@@ -51,11 +53,10 @@ void test_sendrecv(mpi::communicator& com) {
   BOOST_CHECK(recv == T(wprev));
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(sendrecv)
 {
-  mpi::environment env(argc, argv);
+  mpi::environment env;
   mpi::communicator world;
   test_sendrecv<int>(world);
   test_sendrecv<blob>(world);
-  return 0;
 }

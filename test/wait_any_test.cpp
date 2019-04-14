@@ -13,13 +13,15 @@
 #include <boost/mpi.hpp>
 #include <boost/mpi/nonblocking.hpp>
 #include <boost/serialization/string.hpp>
-#include <boost/test/minimal.hpp>
+
+#define BOOST_TEST_MODULE mpi_wait_any
+#include <boost/test/included/unit_test.hpp>
 
 namespace mpi = boost::mpi;
 
-int test_main(int argc, char* argv[]) 
+BOOST_AUTO_TEST_CASE(wait_any)
 {
-  mpi::environment env(argc, argv);
+  mpi::environment  env;
   mpi::communicator world;
   
   std::vector<std::string> ss(world.size());
@@ -59,6 +61,4 @@ int test_main(int argc, char* argv[])
   }
 
   mpi::wait_all(sreqs.begin(), sreqs.end());
-
-  return 0;
 }

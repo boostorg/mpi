@@ -18,17 +18,31 @@ std::vector<int> extract_paused_ranks(int argc, char** argv) {
 void wait_for_debugger(std::vector<int> const& processes, boost::mpi::communicator const& comm)
 {
   int i = 1;
+  bool waiting = std::find(processes.begin(), processes.end(), comm.rank()) != processes.end();
   for (int r = 0; r < comm.size(); ++r) {
     if (comm.rank() == r) {
-      std::cout << "Rank " << comm.rank() << " has PID " << getpid() << '\n';
+      std::cout << "Rank " << comm.rank() << " has PID " << getpid();
+      if (waiting) {
+        std::cout << " and is waiting.";
+      }
+      std::cout << std::endl;
     }
     comm.barrier();
   }
-  sleep(1);
   if (std::find(processes.begin(), processes.end(), comm.rank()) != processes.end()) {
-    while (i!=0) {
-      sleep(2);
+    while (i != 0) {
+      sleep(5);
     }
   }
+  std::cout << "Rank " << comm.rank() << " will proceed.\n";
+}
+
+void wait_for_debugger(boost::mpi::communicator const& comm)
+{
+  std::vector<int> all;
+  for (int r = 0; r < comm.size(); ++r) {
+    all.push_back(r);
+  }
+  wait_for_debugger(all, comm);
 }
 

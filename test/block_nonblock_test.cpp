@@ -1,17 +1,26 @@
 #include <vector>
 #include <iostream>
 #include <iterator>
+#include <typeinfo>
+
 #include <boost/mpi.hpp>
 #include <boost/serialization/vector.hpp>
-#include <boost/test/minimal.hpp>
+#include <boost/core/demangle.hpp>
+
+//#include "debugger.cpp"
+
+#define BOOST_TEST_MODULE mpi_nonblocking
+#include <boost/test/included/unit_test.hpp>
 
 namespace mpi = boost::mpi;
 
 template<typename T>
 bool test(mpi::communicator const& comm, std::vector<T> const& ref, bool iswap, bool alloc)
 {
+  
   int rank = comm.rank();
   if (rank == 0) {
+    std::cout << "Testing with type " << boost::core::demangle(typeid(T).name()) << '\n';
     if (iswap) {
       std::cout << "Blockin send, non blocking receive.\n";
     } else {
@@ -55,11 +64,13 @@ bool test(mpi::communicator const& comm, std::vector<T> const& ref, bool iswap, 
   }
 }
 
-int test_main(int argc, char **argv)
+BOOST_AUTO_TEST_CASE(non_blocking)
 {
-  mpi::environment env(argc, argv);
+  mpi::environment env;
   mpi::communicator world;
-
+ 
+  BOOST_TEST_REQUIRE(world.size() > 1);
+  
   std::vector<int> integers(13); // don't assume we're lucky
   for(int i = 0; i < int(integers.size()); ++i) {
     integers[i] = i;
@@ -72,33 +83,13 @@ int test_main(int argc, char **argv)
     strings[i] = fmt.str();
   }
   
-  bool block_to_non_block = true;
-  bool non_block_to_block = true;
-  if (argc == 2) {
-    if (std::string(argv[1]) == "b2nb") {
-      non_block_to_block = false;
-    } else if (std::string(argv[1]) == "nb2b") {
-      block_to_non_block = false;
-    } else {
-      if (world.rank() == 0) {
-        std::cerr << "Usage: " << argv[0] << " [<n2nb|nb2b]\n";
-      }
-      return -1;
-    }
-  }
-  bool passed = true;
-  if (block_to_non_block) {
-    passed = passed && test(world, integers, true,  true);
-    passed = passed && test(world, integers, true,  false);
-    passed = passed && test(world, strings, true,  true);
-    passed = passed && test(world, strings, true,  false);
-  }
-  if (non_block_to_block) {
-    passed = passed && test(world, integers, false,  true);
-    passed = passed && test(world, integers, false,  false);
-    passed = passed && test(world, strings, false,  true);
-    passed = passed && test(world, strings, false,  false);
-  }
-  passed = mpi::all_reduce(world, passed, std::logical_and<bool>());
-  return passed ? 0 : 1;
+  BOOST_CHECK(test(world, integers, true,  true));
+  BOOST_CHECK(test(world, integers, true,  false));
+  BOOST_CHECK(test(world, strings, true,  true));
+  BOOST_CHECK(test(world, strings, true,  false));
+
+  BOOST_CHECK(test(world, integers, false,  true));
+  BOOST_CHECK(test(world, integers, false,  false));
+  BOOST_CHECK(test(world, strings, false,  true));
+  BOOST_CHECK(test(world, strings, false,  false));
 }

@@ -6,22 +6,33 @@
 
 // test threading::level operations
 
-#include <boost/mpi/environment.hpp>
-#include <boost/test/minimal.hpp>
+#include <boost/mpi.hpp>
 #include <iostream>
 #include <sstream>
 
+#define BOOST_TEST_MODULE mpi_mt_init
+#include <boost/test/included/unit_test.hpp>
+
 namespace mpi = boost::mpi;
 
-int
-test_main(int argc, char* argv[]) {
+void
+test_mt_init(std::string s)
+{
   mpi::threading::level required = mpi::threading::level(-1);
-  BOOST_CHECK(argc == 2);
-  std::istringstream cmdline(argv[1]);
-  cmdline >> required;
-  BOOST_CHECK(!cmdline.bad());
-  mpi::environment env(argc,argv,required);
+  std::istringstream in(s);
+  in >> required;
+  BOOST_CHECK(!in.bad());
+  mpi::environment env;
   BOOST_CHECK(env.thread_level() >= mpi::threading::single);
   BOOST_CHECK(env.thread_level() <= mpi::threading::multiple);
-  return 0;
+}
+
+BOOST_AUTO_TEST_CASE(mt_init)
+{
+  mpi::environment env;
+  mpi::communicator comm;
+  test_mt_init("single");
+  test_mt_init("funneled");
+  test_mt_init("serialized");
+  test_mt_init("multiple");
 }

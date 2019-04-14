@@ -7,13 +7,16 @@
 // test mpi version
 
 #include <boost/mpi/environment.hpp>
-#include <boost/test/minimal.hpp>
+#include <boost/mpi/communicator.hpp>
 #include <iostream>
+
+#define BOOST_TEST_MODULE mpi_version
+#include <boost/test/included/unit_test.hpp>
 
 namespace mpi = boost::mpi;
 
-int
-test_main(int argc, char* argv[]) {
+void
+test_version(mpi::communicator const& comm) {
 #if defined(MPI_VERSION)
   int mpi_version    = MPI_VERSION;
   int mpi_subversion = MPI_SUBVERSION;
@@ -21,12 +24,37 @@ test_main(int argc, char* argv[]) {
   int mpi_version = 0;
   int mpi_subversion = 0;
 #endif
-
-  mpi::environment env(argc,argv);
-  std::pair<int,int> version = env.version();
-  std::cout << "MPI Version: " << version.first << ',' << version.second << '\n';
-
+  
+  std::pair<int,int> version = mpi::environment::version();
+  if (comm.rank() == 0) {
+    std::cout << "MPI Version: " << version.first << ',' << version.second << '\n';
+  }
   BOOST_CHECK(version.first == mpi_version);
   BOOST_CHECK(version.second == mpi_subversion);
-  return 0;
+}
+
+std::string
+yesno(bool b) {
+  return b ? std::string("yes") : std::string("no");
+}
+
+void
+report_features(mpi::communicator const& comm) {
+  if (comm.rank() == 0) {
+    std::cout << "Assuming working MPI_Improbe:" <<
+#if defined(BOOST_MPI_USE_IMPROBE)
+      "yes" << '\n';
+#else
+      "no"  << '\n';
+#endif
+  }
+}
+
+BOOST_AUTO_TEST_CASE(version)
+{
+  mpi::environment env;
+  mpi::communicator world;
+
+  test_version(world);
+  report_features(world);
 }

@@ -5,18 +5,20 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 // A test of the broadcast() collective.
-#include <boost/mpi/collectives/broadcast.hpp>
-#include <boost/mpi/communicator.hpp>
-#include <boost/mpi/environment.hpp>
-#include <boost/test/minimal.hpp>
-
 #include <algorithm>
 #include <vector>
 #include <map>
 
+#include <boost/mpi/collectives/broadcast.hpp>
+#include <boost/mpi/communicator.hpp>
+#include <boost/mpi/environment.hpp>
+
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/map.hpp>
+
+#define BOOST_TEST_MODULE mpi_broadcast_stl
+#include <boost/test/included/unit_test.hpp>
 
 namespace mpi = boost::mpi;
 
@@ -58,21 +60,16 @@ broadcast_test(const mpi::communicator& comm, const T& bc_value,
   }
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(broadcast_stl)
 {
-  boost::mpi::environment env(argc, argv);
+  boost::mpi::environment env;
 
   mpi::communicator comm;
-  if (comm.size() == 1) {
-    std::cerr << "ERROR: Must run the broadcast test with more than one "
-              << "process." << std::endl;
-    comm.abort(-1);
-  }
+  BOOST_TEST_REQUIRE(comm.size() > 1);
   
   sparse s;
   s.resize(2);
   s[0][12] = 0.12;
   s[1][13] = 1.13;
   broadcast_test(comm, s, "sparse");
-  return 0;
 }

@@ -12,11 +12,13 @@
 #include <boost/mpi/collectives/all_gatherv.hpp>
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/communicator.hpp>
-#include <boost/test/minimal.hpp>
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/list.hpp>
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/lexical_cast.hpp>
+
+#define BOOST_TEST_MODULE mpi_all_gather
+#include <boost/test/included/unit_test.hpp>
 
 #include "gps_position.hpp"
 
@@ -130,18 +132,17 @@ struct string_list_generator
   }
 };
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(all_gather)
 {
-  boost::mpi::environment env(argc, argv);
+  boost::mpi::environment env;
   mpi::communicator comm;
   all_gather_test(comm, int_generator(), "integers");
   all_gather_test(comm, gps_generator(), "GPS positions");
   all_gather_test(comm, string_generator(), "string");
   all_gather_test(comm, string_list_generator(), "list of strings");
-
+  
   all_gatherv_test(comm, int_generator(), "integers");
   all_gatherv_test(comm, gps_generator(), "GPS positions");
   all_gatherv_test(comm, string_generator(), "string");
   all_gatherv_test(comm, string_list_generator(), "list of strings");
-  return 0;
 }

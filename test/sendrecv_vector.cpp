@@ -79,8 +79,7 @@ int main(int argc, char* argv[]) {
     array<int, 9>& d = b2;
     d[2] = -17;
     world.send(1, 0, data);
-  } 
-  else {
+  } else {
     world.recv(0, 0, data);
     // check data at vector ends
     blob& b1 = data[0];

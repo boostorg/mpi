@@ -8,7 +8,6 @@
 #include <boost/mpi/collectives/broadcast.hpp>
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
-#include <boost/test/minimal.hpp>
 #include <algorithm>
 #include "gps_position.hpp"
 #include <boost/serialization/string.hpp>
@@ -16,6 +15,9 @@
 #include <boost/mpi/skeleton_and_content.hpp>
 #include <boost/iterator/counting_iterator.hpp>
 //#include "debugger.hpp"
+
+#define BOOST_TEST_MODULE mpi_broadcast
+#include <boost/test/included/unit_test.hpp>
 
 using boost::mpi::communicator;
 
@@ -133,18 +135,12 @@ test_skeleton_and_content(const communicator& comm, int root = 0)
   (comm.barrier)();
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(broadcast)
 {
-  boost::mpi::environment env(argc, argv);
-
+  boost::mpi::environment env;
   communicator comm;
-  if (comm.size() == 1) {
-    std::cerr << "ERROR: Must run the broadcast test with more than one "
-              << "process." << std::endl;
-    MPI_Abort(comm, -1);
-  }
 
-  //wait_for_debugger(extract_paused_ranks(argc, argv), comm);
+  BOOST_TEST_REQUIRE(comm.size() > 1);
 
   // Check transfer of individual objects
   broadcast_test(comm, 17, "integers");
@@ -160,5 +156,4 @@ int test_main(int argc, char* argv[])
 
   test_skeleton_and_content(comm, 0);
   test_skeleton_and_content(comm, 1);
-  return 0;
 }

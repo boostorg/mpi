@@ -14,14 +14,14 @@
 #include <algorithm>
 #include <functional>
 
-#define BOOST_TEST_MODULE BoostMPI
-#include <boost/test/included/unit_test.hpp>
-
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/collectives.hpp>
 #include <boost/array.hpp>
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/cartesian_communicator.hpp>
+
+#define BOOST_TEST_MODULE mpi_cartesian_topology_init
+#include <boost/test/included/unit_test.hpp>
 
 namespace mpi = boost::mpi;
 
