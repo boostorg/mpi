@@ -273,7 +273,7 @@ struct serialized_array_data {
 
 }
 
-class request::legacy_handler : public request::handler {
+class BOOST_MPI_DECL request::legacy_handler : public request::handler {
 public:
   legacy_handler(communicator const& comm, int source, int tag);
   
@@ -495,7 +495,7 @@ public:
   }
 };
 
-class request::trivial_handler : public request::handler {
+class BOOST_MPI_DECL request::trivial_handler : public request::handler {
 
 public:
   trivial_handler();
