@@ -13,6 +13,10 @@ object initializes MPI, and its destruction will finalize MPI. In the
 vast majority of Boost.MPI programs, an instance of [classref
 boost::mpi::environment mpi::environment] will be declared
 in `main` at the very beginning of the program.
+[warning
+Declaring an [classref boost::mpi::environment mpi::environment] at global scope is undefined behavior.
+[footnote According to the MPI standard, initialization must take place at user's initiative after once the main function has been called.]
+]
 
 Communication with MPI always occurs over a *communicator*,
 which can be created be simply default-constructing an object of type

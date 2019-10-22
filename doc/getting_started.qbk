@@ -134,7 +134,7 @@ using mpi : /opt/mpi/bullxmpi/1.2.8.3/bin/mpicc ;
 ]
 
 [warning
-Boost.MPI only uses the C interface, so specifying the C wrapper should be enough. But some implementations will insist on using the C++ bindings.
+Boost.MPI only uses the C interface, so specifying the C wrapper should be enough. But some implementations will insist on importing the C++ bindings.
 ]
 
 * [*Your wrapper is really eccentric or does not exist]
