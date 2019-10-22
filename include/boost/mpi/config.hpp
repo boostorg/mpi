@@ -120,9 +120,17 @@
 // Configuration for MPICH
 #endif
 
-#if BOOST_MPI_VERSION >= 3 && (!defined(I_MPI_NUMVERSION))
-// This is intel
-#define BOOST_MPI_USE_IMPROBE 1
+#if BOOST_MPI_VERSION >= 3 
+// MPI_Probe an friends should work
+#  if defined(I_MPI_NUMVERSION)
+// Excepted for some Intel versions.
+// Note that I_MPI_NUMVERSION is not always defined with Intel.
+#    if I_MPI_NUMVERSION > 20190004000
+#      define BOOST_MPI_USE_IMPROBE 1
+#    endif
+#  else
+#    define BOOST_MPI_USE_IMPROBE 1
+#  endif
 #endif
 
 /*****************************************************************************
