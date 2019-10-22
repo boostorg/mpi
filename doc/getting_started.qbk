@@ -139,8 +139,8 @@ Boost.MPI only uses the C interface, so specifying the C wrapper should be enoug
 
 * [*Your wrapper is really eccentric or does not exist]
 
-You will need to provide the compilation and link options through de second parameter using 'jam' directives.
-The following type configuration used to be required for some specific Intel MPI implementation:
+With some implementations, or with some specific integration[footnote Some HPC cluster will insist that the users uss theirs own in house interface to the MPI system.] you will need to provide the compilation and link options through de second parameter using 'jam' directives.
+The following type configuration used to be required for some specific Intel MPI implementation (in such a case, the name of the wrapper can be left blank):
 
 [pre
 using mpi : mpiicc : 
