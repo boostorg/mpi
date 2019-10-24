@@ -522,7 +522,7 @@ algorithms.
   `MPI_Graph_neighbors`]] [[funcref boost::mpi::out_edges
   `out_edges`], [funcref boost::mpi::adjacent_vertices `adjacent_vertices`]]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node137.html#Node137
-  `MPI_Cart_shift`]] [unsupported]]
+  `MPI_Cart_shift`]] [[memberref boost::mpi::cartesian_communicator::shifted_ranks `cartesian_communicator::shifted_ranks` ]]]
   [[[@http://www.mpi-forum.org/docs/mpi-1.1/mpi-11-html/node138.html#Node138
   `MPI_Cart_sub`]]  [[classref boost::mpi::cartesian_communicator `cartesian_communicator`]
   constructor]]
