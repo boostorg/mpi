@@ -116,8 +116,15 @@
 #  define BOOST_MPI_HAS_MEMORY_ALLOCATION
 #  define BOOST_MPI_HAS_NOARG_INITIALIZATION
 #  undef  BOOST_MPI_BCAST_BOTTOM_WORKS_FINE
-#elif defined(MPICH_NAME)
+#endif
+
+#if defined(MPICH_NAME)
 // Configuration for MPICH
+#endif
+
+#if defined(OPEN_MPI)
+// We do not want to import C++ binding
+#define OMPI_BUILD_CXX_BINDINGS 1
 #endif
 
 #if BOOST_MPI_VERSION >= 3 
