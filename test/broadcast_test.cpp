@@ -19,22 +19,42 @@
 #define BOOST_TEST_MODULE mpi_broadcast
 #include <boost/test/included/unit_test.hpp>
 
-using boost::mpi::communicator;
-
-using boost::mpi::packed_skeleton_iarchive;
-using boost::mpi::packed_skeleton_oarchive;
+namespace mpi = boost::mpi;
 
 template<typename T>
 void
-broadcast_test(const communicator& comm, const T& bc_value,
-               const char* kind, int root = -1)
+broadcast_test(mpi::communicator const& comm, T const& bc_value,
+               char const* kind, int root = -1)
 {
   if (root == -1) {
     for (root = 0; root < comm.size(); ++root)
       broadcast_test(comm, bc_value, kind, root);
   } else {
-    using boost::mpi::broadcast;
+    T value;
+    if (comm.rank() == root) {
+      value = bc_value;
+      std::cout << "Broadcasting " << kind << " from root " << root << "...";
+      std::cout.flush();
+    }
+    
+    mpi::broadcast(comm, value, root);
+    BOOST_CHECK(value == bc_value);
+    if (comm.rank() == root && value == bc_value)
+      std::cout << "OK." << std::endl;
+  }
 
+  comm.barrier();
+}
+
+template<typename T>
+void
+ibroadcast_test(mpi::communicator const& comm, T const& bc_value,
+		char const* kind, int root = -1)
+{
+  if (root == -1) {
+    for (root = 0; root < comm.size(); ++root)
+      ibroadcast_test(comm, bc_value, kind, root);
+  } else {
     T value;
     if (comm.rank() == root) {
       value = bc_value;
@@ -42,22 +62,27 @@ broadcast_test(const communicator& comm, const T& bc_value,
       std::cout.flush();
     }
 
-    broadcast(comm, value, root);
+    mpi::request req = mpi::ibroadcast(comm, value, root);
+    std::ostringstream buf;
+    buf << "rk" << comm.rank() << ": Broadcasting " << value << " from " << root << "...";
+    if (!req.test()) {
+      buf << ".. not finished here. So we wait...";
+      req.wait();
+      buf << "done.\n";
+    } else {
+      buf << ".. which is already finished.\n";
+    }
+    std::cout << buf.str();
     BOOST_CHECK(value == bc_value);
     if (comm.rank() == root && value == bc_value)
       std::cout << "OK." << std::endl;
   }
-
-  (comm.barrier)();
 }
 
 void
-test_skeleton_and_content(const communicator& comm, int root = 0)
+test_skeleton_and_content(mpi::communicator const& comm, int root = 0)
 {
-  using boost::mpi::content;
-  using boost::mpi::get_content;
   using boost::make_counting_iterator;
-  using boost::mpi::broadcast;
 
   int list_size = comm.size() + 7;
   if (comm.rank() == root) {
@@ -67,21 +92,21 @@ test_skeleton_and_content(const communicator& comm, int root = 0)
       original_list.push_back(i);
 
     // Build up the skeleton
-    packed_skeleton_oarchive oa(comm);
+    mpi::packed_skeleton_oarchive oa(comm);
     oa << original_list;
 
     // Broadcast the skeleton
     std::cout << "Broadcasting integer list skeleton from root " << root
               << "..." << std::flush;
-    broadcast(comm, oa, root);
+    mpi::broadcast(comm, oa, root);
     std::cout << "OK." << std::endl;
 
     // Broadcast the content
     std::cout << "Broadcasting integer list content from root " << root
               << "..." << std::flush;
     {
-      content c = get_content(original_list);
-      broadcast(comm, c, root);
+      mpi::content c = mpi::get_content(original_list);
+      mpi::broadcast(comm, c, root);
     }
     std::cout << "OK." << std::endl;
 
@@ -90,8 +115,8 @@ test_skeleton_and_content(const communicator& comm, int root = 0)
     std::cout << "Broadcasting reversed integer list content from root "
               << root << "..." << std::flush;
     {
-      content c = get_content(original_list);
-      broadcast(comm, c, root);
+      mpi::content c = mpi::get_content(original_list);
+      mpi::broadcast(comm, c, root);
     }
     std::cout << "OK." << std::endl;
 
@@ -101,24 +126,24 @@ test_skeleton_and_content(const communicator& comm, int root = 0)
     std::list<int> junk_list(comm.rank() * 3 + 1, 17);
 
     // Receive the skeleton
-    packed_skeleton_iarchive ia(comm);
-    broadcast(comm, ia, root);
+    mpi::packed_skeleton_iarchive ia(comm);
+    mpi::broadcast(comm, ia, root);
 
     // Build up a list to match the skeleton, and make sure it has the
     // right structure (we have no idea what the data will be).
     std::list<int> transferred_list;
     ia >> transferred_list;
-    BOOST_CHECK((int)transferred_list.size() == list_size);
+    BOOST_CHECK(int(transferred_list.size()) == list_size);
 
     // Receive the content and check it
-    broadcast(comm, get_content(transferred_list), root);
+    mpi::broadcast(comm, mpi::get_content(transferred_list), root);
     bool list_content_ok = std::equal(make_counting_iterator(0),
 				      make_counting_iterator(list_size),
 				      transferred_list.begin());
     BOOST_CHECK(list_content_ok);
 
     // Receive the reversed content and check it
-    broadcast(comm, get_content(transferred_list), root);
+    mpi::broadcast(comm, mpi::get_content(transferred_list), root);
     bool rlist_content_ok = std::equal(make_counting_iterator(0),
 				       make_counting_iterator(list_size),
 				       transferred_list.rbegin());
@@ -132,18 +157,19 @@ test_skeleton_and_content(const communicator& comm, int root = 0)
     }
   }
 
-  (comm.barrier)();
+  comm.barrier();
 }
 
 BOOST_AUTO_TEST_CASE(broadcast_check)
 {
   boost::mpi::environment env;
-  communicator comm;
+  mpi::communicator comm;
 
   BOOST_TEST_REQUIRE(comm.size() > 1);
 
   // Check transfer of individual objects
   broadcast_test(comm, 17, "integers");
+  ibroadcast_test(comm, 17, "integers");
   broadcast_test(comm, gps_position(39,16,20.2799), "GPS positions");
   broadcast_test(comm, gps_position(26,25,30.0), "GPS positions");
   broadcast_test(comm, std::string("Rosie"), "string");
