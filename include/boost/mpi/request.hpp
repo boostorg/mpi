@@ -155,7 +155,6 @@ class BOOST_MPI_DECL request
   template<typename T, class A> class legacy_dynamic_primitive_array_handler;
 #if BOOST_MPI_VERSION >= 3
   template<class Data> class probe_handler;
-  friend class communicator;
 #endif
 
  private:
