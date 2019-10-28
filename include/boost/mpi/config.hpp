@@ -45,7 +45,7 @@
 #endif
 
 #if defined MPI_SUBVERSION
-/** @brief Major version of the underlying MPI implementation supproted standard.
+/** @brief Major version of the underlying MPI implementation supported standard.
  * 
  * If, for some reason, MPI_SUBVERSION is not supported, you should probably set that
  * according to your MPI documentation
