@@ -328,9 +328,10 @@ bool operator==(const communicator& comm1, const communicator& comm2)
 #if BOOST_MPI_VERSION >= 3
 request communicator::ibarrier() const
 {
-  request::trivial_handler* handler = new request::trivial_handler;
-  BOOST_MPI_CHECK_RESULT(MPI_Ibarrier, (*this, &handler->m_request));
-  return request(handler);
+  MPI_Request *c_ptr;
+  request req = request::make_trivial(c_ptr);
+  BOOST_MPI_CHECK_RESULT(MPI_Ibarrier, (*this, c_ptr));
+  return req;
 }
 #endif
 
