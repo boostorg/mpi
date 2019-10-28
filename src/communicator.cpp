@@ -131,7 +131,6 @@ void (communicator::barrier)() const
   BOOST_MPI_CHECK_RESULT(MPI_Barrier, (MPI_Comm(*this)));
 }
 
-
 communicator::operator MPI_Comm() const
 {
   if (comm_ptr) return *comm_ptr;
@@ -324,5 +323,15 @@ bool operator==(const communicator& comm1, const communicator& comm2)
                          (MPI_Comm(comm1), MPI_Comm(comm2), &result));
   return result == MPI_IDENT;
 }
+
+// Non blocking common
+#if BOOST_MPI_VERSION >= 3
+request communicator::ibarrier() const
+{
+  request::trivial_handler* handler = new request::trivial_handler;
+  BOOST_MPI_CHECK_RESULT(MPI_Ibarrier, (*this, &handler->m_request));
+  return request(handler);
+}
+#endif
 
 } } // end namespace boost::mpi
