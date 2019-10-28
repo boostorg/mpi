@@ -39,9 +39,10 @@ class BOOST_MPI_DECL request
   request();
 
   /** 
-   * Just make a request from a C API request.
+   * Just make a request from a C API request and provide its address 
+   * for future assignement.
    */
-  static request make_trivial(MPI_Request const& r);
+  static request make_trivial(MPI_Request*& r);
   /**
    * Send a known number of primitive objects in one MPI request.
    */

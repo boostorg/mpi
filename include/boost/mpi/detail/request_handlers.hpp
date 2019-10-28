@@ -530,13 +530,6 @@ private:
   MPI_Request      m_requests[2];
 };
 
-inline
-request request::make_trivial(MPI_Request const& r) {
-  trivial_handler *handler = new trivial_handler;
-  handler->m_request = r;
-  return request(handler);
-}
-
 template<typename T> 
 request request::make_serialized(communicator const& comm, int source, int tag, T& value) {
 #if defined(BOOST_MPI_USE_IMPROBE)
