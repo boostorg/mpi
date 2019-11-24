@@ -17,6 +17,7 @@ if [ mpi.configured ]
 test-suite mpi
   :
   [ mpi-test version_test : : :  1 ]
+  [ mpi-test bug-109 : bug-109.cpp : : 2 ]
   [ mpi-test block_nonblock_test-b2nb : block_nonblock_test.cpp : : 2 ]
   [ mpi-test block_nonblock_test-nb2b : block_nonblock_test.cpp : : 2 ]
   [ mpi-test random_gather : ../example/random_gather.cpp : : 2 ]
