@@ -194,7 +194,10 @@ wait_all(ForwardIterator first, ForwardIterator last, OutputIterator out)
     difference_type idx = 0;
     for (ForwardIterator current = first; current != last; ++current, ++idx) {
       if (!completed[idx]) {
-        if (optional<status> stat = current->test()) {
+        if (!current->active()) {
+          completed[idx] = true;
+          --num_outstanding_requests;
+        } else if (optional<status> stat = current->test()) {
           // This outstanding request has been completed. We're done.
           results[idx] = *stat;
           completed[idx] = true;
@@ -263,7 +266,10 @@ wait_all(ForwardIterator first, ForwardIterator last)
     difference_type idx = 0;
     for (ForwardIterator current = first; current != last; ++current, ++idx) {
       if (!completed[idx]) {
-        if (optional<status> stat = current->test()) {
+        if (!current->active()) {
+          completed[idx] = true;
+          --num_outstanding_requests;
+        } else if (optional<status> stat = current->test()) {
           // This outstanding request has been completed.
           completed[idx] = true;
           --num_outstanding_requests;
