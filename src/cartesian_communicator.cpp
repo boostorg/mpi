@@ -10,12 +10,13 @@
 #include <cassert>
 
 #include <boost/mpi/cartesian_communicator.hpp>
+#include <boost/mpi/detail/antiques.hpp>
 
 namespace boost { namespace mpi {
 
 namespace {
   template <typename T, typename A>
-  T* c_data(std::vector<T,A>& v) { return &(v[0]); }
+  T* c_data(std::vector<T,A>& v) { return c_data(v); }
 }
 
 std::ostream&
