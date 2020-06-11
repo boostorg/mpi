@@ -140,8 +140,8 @@ class BOOST_MPI_PYTHON_DECL pickle {
   struct data_t;
 
 public:
-  static str dumps(object obj, int protocol = -1);
-  static object loads(str s);
+  static object dumps(object obj, int protocol = -1);
+  static object loads(object s);
   
 private:
   static void initialize_data();
@@ -399,9 +399,9 @@ save_impl(Archiver& ar, const boost::python::object& obj,
           const unsigned int /*version*/,
           mpl::false_ /*has_direct_serialization*/)
 {
-  boost::python::str py_string = boost::python::pickle::dumps(obj);
-  int len = boost::python::extract<int>(py_string.attr("__len__")());
-  const char* string = boost::python::extract<const char*>(py_string);
+  boost::python::object buf = boost::python::pickle::dumps(obj);
+  int len = boost::python::extract<int>(buf.attr("__len__")());
+  const char* string = boost::python::extract<const char*>(buf);
   ar << len << boost::serialization::make_array(string, len);
 }
 
