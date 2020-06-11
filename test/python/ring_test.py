@@ -6,7 +6,7 @@
 
 # Test basic communication.
 
-import boost.parallel.mpi as mpi
+import mpi
 
 def ring_test(comm, value, kind, root):
     next_peer = (comm.rank + 1) % comm.size;

@@ -6,7 +6,7 @@
 
 # Test all_to_all() collective.
 
-import boost.parallel.mpi as mpi
+import mpi
 from generators import *
 
 def all_to_all_test(comm, generator, kind):

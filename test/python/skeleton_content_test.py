@@ -6,7 +6,7 @@
 
 # Test skeleton/content
 
-import boost.parallel.mpi as mpi
+import mpi
 import skeleton_content
 
 def test_skeleton_and_content(comm, root, manual_broadcast = True):

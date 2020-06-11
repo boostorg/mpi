@@ -6,7 +6,7 @@
 
 # Test reduce() collective.
 
-import boost.parallel.mpi as mpi
+import mpi
 from generators import *
 
 def reduce_test(comm, generator, kind, op, op_kind, root):

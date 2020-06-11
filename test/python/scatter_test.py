@@ -6,7 +6,7 @@
 
 # Test scatter() collective.
 
-import boost.parallel.mpi as mpi
+import mpi
 from generators import *
 
 def scatter_test(comm, generator, kind, root):

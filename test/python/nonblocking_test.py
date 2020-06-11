@@ -10,7 +10,7 @@
 
 
 
-import boost.mpi as mpi
+import mpi
 import random
 import sys
 

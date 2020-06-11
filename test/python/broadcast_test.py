@@ -6,7 +6,7 @@
 
 # Test broadcast() collective.
 
-import boost.parallel.mpi as mpi
+import mpi
 
 def broadcast_test(comm, value, kind, root):
     if comm.rank == root:
