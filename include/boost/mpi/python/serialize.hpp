@@ -444,8 +444,8 @@ load_impl(Archiver& ar, boost::python::object& obj,
 
   boost::scoped_array<char> string(new char[len]);
   ar >> boost::serialization::make_array(string.get(), len);
-  boost::python::str py_string(string.get(), len);
-  obj = boost::python::pickle::loads(py_string);
+  boost::python::str buf(string.get(), len);
+  obj = boost::python::pickle::loads(buf);
 }
 
 /// Try to load a Python object by directly deserializing it; fall back
