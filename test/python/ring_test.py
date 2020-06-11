@@ -27,11 +27,11 @@ def ring_test(comm, value, kind, root):
 
     comm.barrier()
     if comm.rank == root:
-        print "OK"
+        print ("OK")
     pass
 
 if mpi.world.size < 2:
-    print "ERROR: ring_test.py must be executed with more than one process"
+    print ("ERROR: ring_test.py must be executed with more than one process")
     mpi.world.abort(-1);
     
 ring_test(mpi.world, 17, 'integers', 0)

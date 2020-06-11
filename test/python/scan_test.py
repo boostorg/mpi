@@ -20,7 +20,7 @@ def scan_test(comm, generator, kind, op, op_kind):
         
     assert result == expected_result
     if comm.rank == 0:
-        print "OK."
+        print ("OK.")
     return
 
 scan_test(mpi.world, int_generator, "integers", lambda x,y:x + y, "sum")

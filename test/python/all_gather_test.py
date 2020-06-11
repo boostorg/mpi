@@ -15,7 +15,7 @@ def all_gather_test(comm, generator, kind):
     result = mpi.all_gather(comm, my_value)
     for p in range(0, comm.size):
         assert result[p] == generator(p)
-    if comm.rank == 0: print "OK."
+    if comm.rank == 0: print( "OK.")
        
     return
 

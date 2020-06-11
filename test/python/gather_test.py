@@ -17,7 +17,7 @@ def gather_test(comm, generator, kind, root):
     if comm.rank == root:
         for p in range(0, comm.size):
             assert result[p] == generator(p)
-        print "OK."
+        print ("OK.")
     else:
         assert result == None
     return

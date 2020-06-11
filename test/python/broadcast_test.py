@@ -15,7 +15,7 @@ def broadcast_test(comm, value, kind, root):
     got_value = mpi.broadcast(comm, value, root)
     assert got_value == value
     if comm.rank == root:
-        print "OK."
+        print ("OK.")
     return
 
 broadcast_test(mpi.world, 17, 'integer', 0)
