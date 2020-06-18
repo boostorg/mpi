@@ -400,8 +400,15 @@ save_impl(Archiver& ar, const boost::python::object& obj,
           mpl::false_ /*has_direct_serialization*/)
 {
   boost::python::object buf = boost::python::pickle::dumps(obj);
+#if PY_MAJOR_VERSION >= 3
+  Py_ssize_t py_len;
+  char* string;
+  PyBytes_AsStringAndSize(buf.ptr(), &string, &py_len);
+  int len = py_len; // int, as in load_impl
+#else
   int len = boost::python::extract<int>(buf.attr("__len__")());
-  const char* string = boost::python::extract<const char*>(buf);
+  char const* string = boost::python::extract<char const*>(buf);
+#endif
   ar << len << boost::serialization::make_array(string, len);
 }
 
@@ -441,10 +448,14 @@ load_impl(Archiver& ar, boost::python::object& obj,
 {
   int len;
   ar >> len;
-
   boost::scoped_array<char> string(new char[len]);
   ar >> boost::serialization::make_array(string.get(), len);
+#if PY_MAJOR_VERSION >= 3
+  char *data = string.get();
+  boost::python::object buf(boost::python::handle<>(PyBytes_FromStringAndSize(data, len)));
+#else
   boost::python::str buf(string.get(), len);
+#endif
   obj = boost::python::pickle::loads(buf);
 }
 
@@ -487,7 +498,6 @@ save(Archiver& ar, const boost::python::object& obj,
 {
   typedef Archiver OArchiver;
   typedef typename input_archiver<OArchiver>::type IArchiver;
-
   detail::save_impl(ar, obj, version, 
                     has_direct_serialization<IArchiver, OArchiver>());
 }
@@ -499,7 +509,6 @@ load(Archiver& ar, boost::python::object& obj,
 {
   typedef Archiver IArchiver;
   typedef typename output_archiver<IArchiver>::type OArchiver;
-
   detail::load_impl(ar, obj, version, 
                     has_direct_serialization<IArchiver, OArchiver>());
 }
