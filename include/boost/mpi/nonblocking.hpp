@@ -91,7 +91,7 @@ wait_any(ForwardIterator first, ForwardIterator last)
         int index;
         status stat;
         BOOST_MPI_CHECK_RESULT(MPI_Waitany, 
-                               (n, &requests[0], &index, &stat.m_status));
+                               (n, detail::c_data(requests), &index, &stat.m_status));
 
         // We don't have a notion of empty requests or status objects,
         // so this is an error.
@@ -222,8 +222,8 @@ wait_all(ForwardIterator first, ForwardIterator last, OutputIterator out)
       // Let MPI wait until all of these operations completes.
       std::vector<MPI_Status> stats(num_outstanding_requests);
       BOOST_MPI_CHECK_RESULT(MPI_Waitall, 
-                             (num_outstanding_requests, &requests[0], 
-                              &stats[0]));
+                             (num_outstanding_requests, detail::c_data(requests), 
+                              detail::c_data(stats)));
 
       for (std::vector<MPI_Status>::iterator i = stats.begin(); 
            i != stats.end(); ++i, ++out) {
@@ -289,7 +289,7 @@ wait_all(ForwardIterator first, ForwardIterator last)
 
       // Let MPI wait until all of these operations completes.
       BOOST_MPI_CHECK_RESULT(MPI_Waitall, 
-                             (num_outstanding_requests, &requests[0], 
+                             (num_outstanding_requests, detail::c_data(requests), 
                               MPI_STATUSES_IGNORE));
 
       // Signal completion
@@ -346,7 +346,7 @@ test_all(ForwardIterator first, ForwardIterator last, OutputIterator out)
   int flag = 0;
   int n = requests.size();
   std::vector<MPI_Status> stats(n);
-  BOOST_MPI_CHECK_RESULT(MPI_Testall, (n, &requests[0], &flag, &stats[0]));
+  BOOST_MPI_CHECK_RESULT(MPI_Testall, (n, detail::c_data(requests), &flag, detail::c_data(stats)));
   if (flag) {
     for (int i = 0; i < n; ++i, ++out) {
       status stat;
@@ -379,7 +379,7 @@ test_all(ForwardIterator first, ForwardIterator last)
   int flag = 0;
   int n = requests.size();
   BOOST_MPI_CHECK_RESULT(MPI_Testall, 
-                         (n, &requests[0], &flag, MPI_STATUSES_IGNORE));
+                         (n, detail::c_data(requests), &flag, MPI_STATUSES_IGNORE));
   return flag != 0;
 }
 
@@ -483,8 +483,8 @@ wait_some(BidirectionalIterator first, BidirectionalIterator last,
         // Let MPI wait until some of these operations complete.
         int num_completed;
         BOOST_MPI_CHECK_RESULT(MPI_Waitsome, 
-                               (n, &requests[0], &num_completed, &indices[0],
-                                &stats[0]));
+                               (n, detail::c_data(requests), &num_completed, detail::c_data(indices),
+                                detail::c_data(stats)));
 
         // Translate the index-based result of MPI_Waitsome into a
         // partitioning on the requests.
@@ -591,7 +591,7 @@ wait_some(BidirectionalIterator first, BidirectionalIterator last)
         // Let MPI wait until some of these operations complete.
         int num_completed;
         BOOST_MPI_CHECK_RESULT(MPI_Waitsome, 
-                               (n, &requests[0], &num_completed, &indices[0],
+                               (n, detail::c_data(requests), &num_completed, detail::c_data(indices),
                                 MPI_STATUSES_IGNORE));
 
         // Translate the index-based result of MPI_Waitsome into a
