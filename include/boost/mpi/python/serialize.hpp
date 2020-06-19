@@ -45,6 +45,8 @@
 #define BOOST_MPI_PYTHON_FORWARD_ONLY
 #include <boost/mpi/python.hpp>
 
+#include "bytesobject.h"
+
 /************************************************************************
  * Boost.Python Serialization Section                                   *
  ************************************************************************/
@@ -400,16 +402,11 @@ save_impl(Archiver& ar, const boost::python::object& obj,
           mpl::false_ /*has_direct_serialization*/)
 {
   boost::python::object buf = boost::python::pickle::dumps(obj);
-#if PY_MAJOR_VERSION >= 3
   Py_ssize_t py_len;
-  char* string;
-  PyBytes_AsStringAndSize(buf.ptr(), &string, &py_len);
+  char* bytes;
+  PyBytes_AsStringAndSize(buf.ptr(), &bytes, &py_len);
   int len = py_len; // int, as in load_impl
-#else
-  int len = boost::python::extract<int>(buf.attr("__len__")());
-  char const* string = boost::python::extract<char const*>(buf);
-#endif
-  ar << len << boost::serialization::make_array(string, len);
+  ar << len << boost::serialization::make_array(bytes, len);
 }
 
 /// Try to save a Python object by directly serializing it; fall back
@@ -448,14 +445,9 @@ load_impl(Archiver& ar, boost::python::object& obj,
 {
   int len;
   ar >> len;
-  boost::scoped_array<char> string(new char[len]);
-  ar >> boost::serialization::make_array(string.get(), len);
-#if PY_MAJOR_VERSION >= 3
-  char *data = string.get();
-  boost::python::object buf(boost::python::handle<>(PyBytes_FromStringAndSize(data, len)));
-#else
-  boost::python::str buf(string.get(), len);
-#endif
+  boost::scoped_array<char> bytes(new char[len]);
+  ar >> boost::serialization::make_array(bytes.get(), len);
+  boost::python::object buf(boost::python::handle<>(PyBytes_FromStringAndSize(bytes.get(), len)));
   obj = boost::python::pickle::loads(buf);
 }
 
