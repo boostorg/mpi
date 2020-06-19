@@ -124,7 +124,7 @@
 
 #if defined(OPEN_MPI)
 // We do not want to import C++ binding
-#define OMPI_BUILD_CXX_BINDINGS 1
+#define OMPI_BUILD_CXX_BINDINGS 0
 #endif
 
 #if BOOST_MPI_VERSION >= 3 
