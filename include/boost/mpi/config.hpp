@@ -127,16 +127,20 @@
 #define OMPI_BUILD_CXX_BINDINGS 0
 #endif
 
-#if BOOST_MPI_VERSION >= 3 
-// MPI_Probe an friends should work
-#  if defined(I_MPI_NUMVERSION)
-// Excepted for some Intel versions.
-// Note that I_MPI_NUMVERSION is not always defined with Intel.
-#    if I_MPI_NUMVERSION > 20190004000
+// Uncomment if you don't want to use MPI_Probe and friends`
+//#define BOOST_MPI_NO_IMPROBE
+#if !defined(BOOST_MPI_NO_IMPROBE)
+#  if BOOST_MPI_VERSION >= 3 
+//   MPI_Probe an friends should work
+#    if defined(I_MPI_NUMVERSION)
+//   Excepted for some Intel versions.
+//   Note that I_MPI_NUMVERSION is not always defined with Intel.
+#      if I_MPI_NUMVERSION > 20190004000
+#        define BOOST_MPI_USE_IMPROBE 1
+#      endif
+#    else
 #      define BOOST_MPI_USE_IMPROBE 1
 #    endif
-#  else
-#    define BOOST_MPI_USE_IMPROBE 1
 #  endif
 #endif
 

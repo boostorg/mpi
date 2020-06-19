@@ -52,5 +52,6 @@ test-suite mpi
   [ mpi-test sendrecv_vector : : : 2 ]
   # Intel MPI 2018 and older are axtected to fail:
   [ mpi-test non_blocking_any_source : : : 2 17 ]
+  [ mpi-test cancel_request : : : 1 2 ]
   ;
 }
