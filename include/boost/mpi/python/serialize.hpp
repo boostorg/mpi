@@ -401,12 +401,10 @@ save_impl(Archiver& ar, const boost::python::object& obj,
           const unsigned int /*version*/,
           mpl::false_ /*has_direct_serialization*/)
 {
-  boost::python::object buf = boost::python::pickle::dumps(obj);
-  Py_ssize_t py_len;
-  char* bytes;
-  PyBytes_AsStringAndSize(buf.ptr(), &bytes, &py_len);
-  int len = py_len; // int, as in load_impl
-  ar << len << boost::serialization::make_array(bytes, len);
+  boost::python::object bytes = boost::python::pickle::dumps(obj);
+  int   sz    = PyBytes_Size(bytes.ptr());
+  char *data  = PyBytes_AsString(bytes.ptr());  
+  ar << sz << boost::serialization::make_array(data, sz);
 }
 
 /// Try to save a Python object by directly serializing it; fall back
@@ -445,10 +443,10 @@ load_impl(Archiver& ar, boost::python::object& obj,
 {
   int len;
   ar >> len;
-  boost::scoped_array<char> bytes(new char[len]);
-  ar >> boost::serialization::make_array(bytes.get(), len);
-  boost::python::object buf(boost::python::handle<>(PyBytes_FromStringAndSize(bytes.get(), len)));
-  obj = boost::python::pickle::loads(buf);
+  boost::scoped_array<char> data(new char[len]);
+  ar >> boost::serialization::make_array(data.get(), len);
+  boost::python::object bytes(boost::python::handle<>(PyBytes_FromStringAndSize(data.get(), len)));
+  obj = boost::python::pickle::loads(bytes);
 }
 
 /// Try to load a Python object by directly deserializing it; fall back
