@@ -39,6 +39,7 @@ test-suite mpi
   [ mpi-test sendrecv_test : : : 1 4 7 48 ]
   [ mpi-test wait_any_test : : : 1 4 7 20 ]
   [ mpi-test wait_all_vector_test : : : 2 ]
+  [ mpi-test wait_all_on_null : : : 1 2 ]
   [ mpi-test scan_test  ]
   [ mpi-test scatter_test  ]
   # Note: Microsoft MPI fails all skeleton-content tests
