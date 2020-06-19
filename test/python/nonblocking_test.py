@@ -7,9 +7,7 @@
 #
 #  Authors: Andreas Kloeckner
 
-
-
-
+from __future__ import print_function
 import mpi
 import random
 import sys

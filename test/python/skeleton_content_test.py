@@ -6,6 +6,7 @@
 
 # Test skeleton/content
 
+from __future__ import print_function
 import mpi
 import skeleton_content
 

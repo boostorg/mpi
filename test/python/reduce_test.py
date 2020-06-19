@@ -6,6 +6,7 @@
 
 # Test reduce() collective.
 
+from __future__ import print_function
 import mpi
 from generators import *
 

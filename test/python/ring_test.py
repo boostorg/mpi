@@ -6,6 +6,7 @@
 
 # Test basic communication.
 
+from __future__ import print_function
 import mpi
 
 def ring_test(comm, value, kind, root):

@@ -7,6 +7,7 @@
 
 # Test broadcast() collective.
 
+from __future__ import print_function
 import mpi
 
 def broadcast_test(comm, value, kind, root):
