@@ -26,7 +26,16 @@ matrix:
   include:
     - os: linux
       compiler: g++
-      env: TOOLSET=gcc COMPILER=g++ CXXSTD=03,11
+      env: TOOLSET=gcc COMPILER=g++ CXXSTD=03
+      addons:
+        apt:
+          packages:
+            - libopenmpi-dev
+            - openmpi-bin
+
+    - os: linux
+      compiler: g++
+      env: TOOLSET=gcc COMPILER=g++ CXXSTD=11
       addons:
         apt:
           packages:
@@ -35,7 +44,7 @@ matrix:
 
     - os: linux
       compiler: g++-4.4
-      env: TOOLSET=gcc COMPILER=g++-4.4 CXXSTD=98,0x
+      env: TOOLSET=gcc COMPILER=g++-4.4 CXXSTD=98
       addons:
         apt:
           packages:
@@ -46,8 +55,33 @@ matrix:
             - ubuntu-toolchain-r-test
 
     - os: linux
+      compiler: g++-4.4
+      env: TOOLSET=gcc COMPILER=g++-4.4 CXXSTD=0x
+      addons:
+        apt:
+          packages:
+            - g++-4.4
+            - libopenmpi-dev
+            - openmpi-bin
+          sources:
+            - ubuntu-toolchain-r-test
+
+
+    - os: linux
       compiler: g++-4.6
-      env: TOOLSET=gcc COMPILER=g++-4.6 CXXSTD=03,0x
+      env: TOOLSET=gcc COMPILER=g++-4.6 CXXSTD=03
+      addons:
+        apt:
+          packages:
+            - g++-4.6
+            - libopenmpi-dev
+            - openmpi-bin
+          sources:
+            - ubuntu-toolchain-r-test
+
+    - os: linux
+      compiler: g++-4.6
+      env: TOOLSET=gcc COMPILER=g++-4.6 CXXSTD=0x
       addons:
         apt:
           packages:
@@ -59,7 +93,19 @@ matrix:
 
     - os: linux
       compiler: g++-5
-      env: TOOLSET=gcc COMPILER=g++-5 CXXSTD=11,14
+      env: TOOLSET=gcc COMPILER=g++-5 CXXSTD=11
+      addons:
+        apt:
+          packages:
+            - g++-5
+            - libopenmpi-dev
+            - openmpi-bin
+          sources:
+            - ubuntu-toolchain-r-test
+
+    - os: linux
+      compiler: g++-5
+      env: TOOLSET=gcc COMPILER=g++-5 CXXSTD=14
       addons:
         apt:
           packages:
@@ -71,7 +117,19 @@ matrix:
 
     - os: linux
       compiler: g++-6
-      env: TOOLSET=gcc COMPILER=g++-6 CXXSTD=11,14
+      env: TOOLSET=gcc COMPILER=g++-6 CXXSTD=11
+      addons:
+        apt:
+          packages:
+            - g++-6
+            - libopenmpi-dev
+            - openmpi-bin
+          sources:
+            - ubuntu-toolchain-r-test
+
+    - os: linux
+      compiler: g++-6
+      env: TOOLSET=gcc COMPILER=g++-6 CXXSTD=14
       addons:
         apt:
           packages:
@@ -83,7 +141,19 @@ matrix:
 
     - os: linux
       compiler: g++-7
-      env: TOOLSET=gcc COMPILER=g++-7 CXXSTD=14,17
+      env: TOOLSET=gcc COMPILER=g++-7 CXXSTD=14
+      addons:
+        apt:
+          packages:
+            - g++-7
+            - libopenmpi-dev
+            - openmpi-bin
+          sources:
+            - ubuntu-toolchain-r-test
+
+    - os: linux
+      compiler: g++-7
+      env: TOOLSET=gcc COMPILER=g++-7 CXXSTD=17
       addons:
         apt:
           packages:
@@ -95,7 +165,19 @@ matrix:
 
     - os: linux
       compiler: g++-8
-      env: TOOLSET=gcc COMPILER=g++-8 CXXSTD=14,17
+      env: TOOLSET=gcc COMPILER=g++-8 CXXSTD=14
+      addons:
+        apt:
+          packages:
+            - g++-8
+            - libopenmpi-dev
+            - openmpi-bin
+          sources:
+            - ubuntu-toolchain-r-test
+
+    - os: linux
+      compiler: g++-8
+      env: TOOLSET=gcc COMPILER=g++-8 CXXSTD=17
       addons:
         apt:
           packages:
@@ -107,7 +189,34 @@ matrix:
 
     - os: linux
       compiler: clang++
-      env: TOOLSET=clang COMPILER=clang++ CXXSTD=03,11,14,1z
+      env: TOOLSET=clang COMPILER=clang++ CXXSTD=03
+      addons:
+        apt:
+          packages:
+            - libopenmpi-dev
+            - openmpi-bin
+
+    - os: linux
+      compiler: clang++
+      env: TOOLSET=clang COMPILER=clang++ CXXSTD=11
+      addons:
+        apt:
+          packages:
+            - libopenmpi-dev
+            - openmpi-bin
+
+    - os: linux
+      compiler: clang++
+      env: TOOLSET=clang COMPILER=clang++ CXXSTD=14
+      addons:
+        apt:
+          packages:
+            - libopenmpi-dev
+            - openmpi-bin
+
+    - os: linux
+      compiler: clang++
+      env: TOOLSET=clang COMPILER=clang++ CXXSTD=1z
       addons:
         apt:
           packages:
@@ -116,7 +225,37 @@ matrix:
 
     - os: linux
       compiler: clang++-libc++
-      env: TOOLSET=clang COMPILER=clang++-libc++ CXXSTD=03,11,14,1z
+      env: TOOLSET=clang COMPILER=clang++-libc++ CXXSTD=03
+      addons:
+        apt:
+          packages:
+            - libc++-dev
+            - libopenmpi-dev
+            - openmpi-bin
+
+    - os: linux
+      compiler: clang++-libc++
+      env: TOOLSET=clang COMPILER=clang++-libc++ CXXSTD=11
+      addons:
+        apt:
+          packages:
+            - libc++-dev
+            - libopenmpi-dev
+            - openmpi-bin
+
+    - os: linux
+      compiler: clang++-libc++
+      env: TOOLSET=clang COMPILER=clang++-libc++ CXXSTD=14
+      addons:
+        apt:
+          packages:
+            - libc++-dev
+            - libopenmpi-dev
+            - openmpi-bin
+
+    - os: linux
+      compiler: clang++-libc++
+      env: TOOLSET=clang COMPILER=clang++-libc++ CXXSTD=1z
       addons:
         apt:
           packages:
