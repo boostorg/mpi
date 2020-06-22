@@ -128,7 +128,7 @@
 #endif
 
 // Uncomment if you don't want to use MPI_Probe and friends`
-//#define BOOST_MPI_NO_IMPROBE
+//#define BOOST_MPI_NO_IMPROBE 1
 #if !defined(BOOST_MPI_NO_IMPROBE)
 #  if BOOST_MPI_VERSION >= 3 
 //   MPI_Probe an friends should work
