@@ -226,6 +226,20 @@ $cd <boost distribution>
 $./b2 install
 ]
 
+[section:pyinstall Python post installation]
+
+If you plan to use the [link mpi.python Python bindings] for
+Boost.MPI in conjunction with the C++ Boost.MPI, some post installation work is still required.
+
+The previous step will install the python bindings, inside the `<dis>/lib/boost-pythonX.Y/mpi.so` shared object. In order to have the Python bindings module [*mpi] inside the [*boost] package, that file will need to be inside a directory
+
+* named [*boost]
+* containing a [*__init__.py] file
+* reachable from your [@https://docs.python.org/3/using/cmdline.html#envvar-PYTHONPATH PYTHONPATH]
+
+The details depend on your platform conventions.
+
+[endsect:pyinstall]
 [endsect:installation]
 [endsect:config]
 [section:using Using Boost.MPI]
