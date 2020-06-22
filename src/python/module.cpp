@@ -31,7 +31,7 @@ extern void export_nonblocking();
 
 extern const char* module_docstring;
 
-BOOST_PYTHON_MODULE(mpi)
+void export_module()
 {
   // Setup module documentation
   scope().attr("__doc__") = module_docstring;
@@ -50,6 +50,11 @@ BOOST_PYTHON_MODULE(mpi)
   export_status();
   export_timer();
   export_nonblocking();
+}
+      
+BOOST_PYTHON_MODULE(mpi)
+{
+  export_module();
 }
 
 } } } // end namespace boost::mpi::python
