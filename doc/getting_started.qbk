@@ -236,13 +236,13 @@ normally would for MPI programs, but remember to link against the
 
 [pre
 mpic++ -I/path/to/boost/mpi my_application.cpp -Llibdir \
-  -lboost_mpi-gcc-mt-1_35 -lboost_serialization-gcc-d-1_35.a
+  -lboost_mpi -lboost_serialization
 ]
 
 If you plan to use the [link mpi.python Python bindings] for
 Boost.MPI in conjunction with the C++ Boost.MPI, you will also need to
 link against the boost_mpi_python library, e.g., by adding
-`-lboost_mpi_python-gcc-mt-1_35` to your link command. This step will
+`-lboost_mpi_python-gcc` to your link command. This step will
 only be necessary if you intend to [link mpi.python.user_data
 register C++ types] or use the [link
 mpi.python.skeleton_content skeleton/content mechanism] from
