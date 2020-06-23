@@ -46,15 +46,16 @@ lib boost_mpi
     intercommunicator.cpp
     mpi_datatype_cache.cpp
     mpi_datatype_oarchive.cpp
+    offsets.cpp
     packed_iarchive.cpp
     packed_oarchive.cpp
     packed_skeleton_iarchive.cpp
     packed_skeleton_oarchive.cpp
     point_to_point.cpp
     request.cpp
+    status.cpp
     text_skeleton_oarchive.cpp
     timer.cpp
-    offsets.cpp
   : # Requirements
     <library>../../serialization/build//boost_serialization
     <library>/mpi//mpi [ mpi.extra-requirements ]
