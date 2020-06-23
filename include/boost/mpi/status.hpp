@@ -104,7 +104,7 @@ class BOOST_MPI_DECL status
 };
 
 template<typename T> 
-optional<int> status::count_impl(mpl::true_) const
+inline optional<int> status::count_impl(mpl::true_) const
 {
   if (m_count != -1)
     return m_count;
@@ -127,6 +127,7 @@ inline optional<int> status::count_impl(mpl::false_) const
   else
     return m_count;
 }
+
 
 } } // end namespace boost::mpi
 
