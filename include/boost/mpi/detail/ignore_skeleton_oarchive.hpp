@@ -56,7 +56,7 @@ BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(archive::object_reference_type)
 BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(archive::tracking_type)
 BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(archive::class_name_type)
 BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(serialization::collection_size_type)
-BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(serialization:library_version_type)
+BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(serialization::library_version_type)
 BOOST_ARCHIVE_IGNORE_IMPLEMENTATION(serialization::item_version_type)
 
     void save_override(std::string const & s)       
