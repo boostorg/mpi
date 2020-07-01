@@ -1,4 +1,4 @@
-# Support for the Message Passing Interface (MPI)
+># Support for the Message Passing Interface (MPI)
 #
 # (C) Copyright 2005, 2006 Trustees of Indiana University
 # (C) Copyright 2005 Douglas Gregor
@@ -52,5 +52,6 @@ test-suite mpi
   [ mpi-test sendrecv_vector : : : 2 ]
   # Intel MPI 2018 and older are axtected to fail:
   [ mpi-test non_blocking_any_source : : : 2 17 ]
+  [ mpi-test buf_size : : : 1 ]
   ;
 }
