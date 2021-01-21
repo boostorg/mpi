@@ -38,6 +38,7 @@ test-suite mpi
   [ mpi-test ring_test : : : 2 3 4 7 8 13 17 ]
   [ mpi-test sendrecv_test : : : 1 4 7 48 ]
   [ mpi-test wait_any_test : : : 1 4 7 20 ]
+  [ mpi-test wait_any_on_null : : : 1 2 ]
   [ mpi-test wait_all_vector_test : : : 2 ]
   [ mpi-test wait_all_on_null : : : 1 2 ]
   [ mpi-test scan_test  ]
