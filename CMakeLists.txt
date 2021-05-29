@@ -3,9 +3,11 @@
 # Distributed under the Boost Software License, Version 1.0.
 # https://www.boost.org/LICENSE_1_0.txt
 
-cmake_minimum_required(VERSION 3.5...3.16)
+cmake_minimum_required(VERSION 3.5...3.20)
 
 project(boost_mpi VERSION "${BOOST_SUPERPROJECT_VERSION}" LANGUAGES CXX)
+
+find_package(MPI COMPONENTS CXX)
 
 add_library(boost_mpi
   src/broadcast.cpp
@@ -54,6 +56,9 @@ target_link_libraries(boost_mpi
     Boost::static_assert
     Boost::throw_exception
     Boost::type_traits
+
+    MPI::MPI_CXX
+
   PRIVATE
     Boost::lexical_cast
     Boost::utility
