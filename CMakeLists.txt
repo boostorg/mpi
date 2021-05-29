@@ -49,7 +49,6 @@ target_link_libraries(boost_mpi
     Boost::iterator
     Boost::mpl
     Boost::optional
-    Boost::python
     Boost::serialization
     Boost::smart_ptr
     Boost::static_assert
