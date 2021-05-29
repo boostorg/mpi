@@ -7,7 +7,11 @@ cmake_minimum_required(VERSION 3.5...3.20)
 
 project(boost_mpi VERSION "${BOOST_SUPERPROJECT_VERSION}" LANGUAGES CXX)
 
-find_package(MPI COMPONENTS CXX)
+if(BOOST_ENABLE_MPI)
+
+  find_package(MPI REQUIRED COMPONENTS CXX)
+
+endif()
 
 add_library(boost_mpi
   src/broadcast.cpp
