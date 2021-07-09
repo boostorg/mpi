@@ -12,6 +12,7 @@
 #include <boost/mpi/exception.hpp>
 #include <boost/mpi/datatype.hpp>
 #include <boost/mpi/communicator.hpp>
+#include <boost/mpi/detail/request_handlers.hpp>
 
 namespace boost { namespace mpi {
 
@@ -133,6 +134,25 @@ namespace detail {
         ia >> values[i];
     }
   }
+  
+#if BOOST_MPI_VERSION >= 3
+  // We're sending a type that has an associated MPI datatype, so
+  // we'll use MPI_Ibcast to do all of the work.
+  template<typename T>
+  request
+  ibroadcast_impl(const communicator& comm, T* values, int n, int root, 
+		  mpl::true_)
+  {
+    MPI_Request* c_ptr;
+    request req = request::make_trivial(c_ptr);
+    BOOST_MPI_CHECK_RESULT(MPI_Ibcast,
+                           (values, n,
+                            boost::mpi::get_mpi_datatype<T>(*values),
+                            root, MPI_Comm(comm), c_ptr));
+    return req;
+  }
+#endif
+  
 } // end namespace detail
 
 template<typename T>
@@ -147,6 +167,19 @@ void broadcast(const communicator& comm, T* values, int n, int root)
   detail::broadcast_impl(comm, values, n, root, is_mpi_datatype<T>());
 }
 
+#if BOOST_MPI_VERSION >= 3
+template<typename T>
+request ibroadcast(const communicator& comm, T& value, int root)
+{
+  return detail::ibroadcast_impl(comm, &value, 1, root, is_mpi_datatype<T>());
+}
+
+template<typename T>
+request ibroadcast(const communicator& comm, T* values, int n, int root)
+{
+  return detail::ibroadcast_impl(comm, values, n, root, is_mpi_datatype<T>());
+} 
+#endif
 } } // end namespace boost::mpi
 
 // If the user has already included skeleton_and_content.hpp, include
