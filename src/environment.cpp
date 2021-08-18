@@ -60,6 +60,32 @@ std::ostream& operator<<(std::ostream& out, level l)
   return out;
 }
 
+int level2int(threading::level mt_level)
+{
+  switch(l) {
+  case single:
+    return MPI_THREAD_SINGLE;
+  case funneled:
+    return MPI_THREAD_FUNNELED;
+  case serialized:
+    return MPI_THREAD_SERIALIZED;
+  case multiple:
+    return MPI_THREAD_MULTIPLE;
+  }
+}
+
+threading::level int2level(int mpi_level)
+{
+  if (mpi_level == MPI_THREAD_SINGLE)
+    return single;
+  if (mpi_level == MPI_THREAD_FUNNELED)
+    return funneled;
+  if (mpi_level == MPI_THREAD_SERIALIZED)
+    return serialized;
+  if (mpi_level == MPI_THREAD_MULTIPLE)
+    return multiple;
+}
+
 } // namespace threading
 
 #ifdef BOOST_MPI_HAS_NOARG_INITIALIZATION
@@ -87,7 +113,7 @@ environment::environment(threading::level mt_level, bool abrt)
   int dummy_thread_level = 0;
   if (!initialized()) {
     BOOST_MPI_CHECK_RESULT(MPI_Init_thread, 
-                           (0, 0, int(mt_level), &dummy_thread_level ));
+                           (0, 0, level2int(mt_level), &dummy_thread_level ));
     i_initialized = true;
   }
 
@@ -124,7 +150,7 @@ environment::environment(int& argc, char** &argv, threading::level mt_level,
   int dummy_thread_level = 0;
   if (!initialized()) {
     BOOST_MPI_CHECK_RESULT(MPI_Init_thread, 
-                           (&argc, &argv, int(mt_level), &dummy_thread_level));
+                           (&argc, &argv, level2int(mt_level), &dummy_thread_level));
     i_initialized = true;
   }
 
@@ -237,7 +263,7 @@ threading::level environment::thread_level()
   int level;
 
   BOOST_MPI_CHECK_RESULT(MPI_Query_thread, (&level));
-  return static_cast<threading::level>(level);
+  return int2level(level);
 }
 
 bool environment::is_main_thread()

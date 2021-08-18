@@ -28,14 +28,14 @@ namespace threading {
 enum level {
   /** Only one thread will execute. 
    */
-  single     = MPI_THREAD_SINGLE,
+  single,
   /** Only main thread will do MPI calls.
    * 
    * The process may be multi-threaded, but only the main 
    * thread will make MPI calls (all MPI calls are ``funneled''
    * to the main thread).
    */
-  funneled   = MPI_THREAD_FUNNELED,
+  funneled,
   /** Only one thread at the time do MPI calls.
    * 
    * The process may be multi-threaded, and multiple 
@@ -43,12 +43,12 @@ enum level {
    * MPI calls are not made concurrently from two distinct 
    * threads (all MPI calls are ``serialized'').
    */
-  serialized = MPI_THREAD_SERIALIZED,
+  serialized,
   /** Multiple thread may do MPI calls.
    * 
    * Multiple threads may call MPI, with no restrictions.
    */
-  multiple   = MPI_THREAD_MULTIPLE
+  multiple
 };
 
 /** Formated output for threading level. */
