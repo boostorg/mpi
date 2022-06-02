@@ -271,6 +271,17 @@ public:
    */
   static std::pair<int, int> version();
 
+  /** @brief MPI library implementation version string.
+   *
+   * This routine returns a string with an additional library version
+   * information. The actual form of this version string is unspecified,
+   * but may be documented by the underlying MPI implementation.
+   * This routine is implemented as a call to @c MPI_Get_library_version,
+   * which is available from MPI-3. On older implementations the empty
+   * string will be returned.
+   */
+  static std::string library_version();
+
 private:
   /// Whether this environment object called MPI_Init
   bool i_initialized;

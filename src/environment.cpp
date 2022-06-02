@@ -255,4 +255,16 @@ std::pair<int, int> environment::version()
   return std::make_pair(major, minor);
 }
 
+std::string environment::library_version()
+{
+#if (3 <= MPI_VERSION)
+  char lib_version[MPI_MAX_LIBRARY_VERSION_STRING];
+  int len = 0;
+  BOOST_MPI_CHECK_RESULT(MPI_Get_library_version, (lib_version, &len));
+  return std::string(result, len);
+#else
+  return "";
+#endif
+}
+
 } } // end namespace boost::mpi
