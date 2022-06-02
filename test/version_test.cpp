@@ -31,6 +31,12 @@ test_version(mpi::communicator const& comm) {
   }
   BOOST_CHECK(version.first == mpi_version);
   BOOST_CHECK(version.second == mpi_subversion);
+  std::string lib_version = mpi::environment::library_version();
+#if (3 <= MPI_VERSION)
+  BOOST_CHECK(lib_version.size() > 0);
+#else
+  BOOST_CHECK(lib_version.size() == 0);
+#endif
 }
 
 std::string
