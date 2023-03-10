@@ -46,14 +46,14 @@ int main()
       std::copy(data[i].begin(), data[i].end(), std::ostream_iterator<int>(std::cout, " "));
       std::cout << std::endl;
       int idx = data[i].size();
-      MPI_CHECK(std::equal_range(data[i].begin(), data[i].end(), idx)
+      BOOST_MPI_CHECK(std::equal_range(data[i].begin(), data[i].end(), idx)
                 == std::make_pair(data[i].begin(), data[i].end()), failed);
       check[idx-1] = true;
     }
     for(int i = 0; i < world.size() - 1; ++i) {
       std::cout << "Received from " << i+1 << " is " << ok(check[i]) << '\n';
     }
-    MPI_CHECK(std::equal_range(check.begin(), check.end(), true)
+    BOOST_MPI_CHECK(std::equal_range(check.begin(), check.end(), true)
               == std::make_pair(check.begin(), check.end()), failed); 
   } else {
     std::vector<int> vec(rank, rank);

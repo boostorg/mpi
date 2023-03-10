@@ -21,9 +21,9 @@ test_mt_init(std::string s)
   mpi::threading::level required = mpi::threading::level(-1);
   std::istringstream in(s);
   in >> required;
-  MPI_CHECK(!in.bad(), failed);
-  MPI_CHECK(mpi::environment::thread_level() >= mpi::threading::single, failed);
-  MPI_CHECK(mpi::environment::thread_level() <= mpi::threading::multiple, failed);
+  BOOST_MPI_CHECK(!in.bad(), failed);
+  BOOST_MPI_CHECK(mpi::environment::thread_level() >= mpi::threading::single, failed);
+  BOOST_MPI_CHECK(mpi::environment::thread_level() <= mpi::threading::multiple, failed);
   return failed;
 }
 
@@ -32,9 +32,9 @@ int main()
   int failed = 0;
   mpi::environment env;
   mpi::communicator comm;
-  MPI_FAILED_CHECK(test_mt_init("single"), failed);
-  MPI_FAILED_CHECK(test_mt_init("funneled"), failed);
-  MPI_FAILED_CHECK(test_mt_init("serialized"), failed);
-  MPI_FAILED_CHECK(test_mt_init("multiple"), failed);
+  BOOST_MPI_COUNT_FAILED(test_mt_init("single"), failed);
+  BOOST_MPI_COUNT_FAILED(test_mt_init("funneled"), failed);
+  BOOST_MPI_COUNT_FAILED(test_mt_init("serialized"), failed);
+  BOOST_MPI_COUNT_FAILED(test_mt_init("multiple"), failed);
   return failed;
 }

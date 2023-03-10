@@ -98,7 +98,7 @@ reduce_test(const communicator& comm, Generator generator,
       value_type expected_result = std::accumulate(generated_values.begin(),
                                                    generated_values.end(),
                                                    init, op);
-      MPI_CHECK(result_value == expected_result, failed);
+      BOOST_MPI_CHECK(result_value == expected_result, failed);
       if (result_value == expected_result)
         std::cout << "OK." << std::endl;
     } else {
@@ -212,29 +212,29 @@ int main()
 
   int failed = 0;
   // Built-in MPI datatypes with built-in MPI operations
-  MPI_FAILED_CHECK(reduce_test(comm, int_generator(), "integers", std::plus<int>(), "sum", 0), failed);
-  MPI_FAILED_CHECK(reduce_test(comm, int_generator(), "integers", std::multiplies<int>(),
+  BOOST_MPI_COUNT_FAILED(reduce_test(comm, int_generator(), "integers", std::plus<int>(), "sum", 0), failed);
+  BOOST_MPI_COUNT_FAILED(reduce_test(comm, int_generator(), "integers", std::multiplies<int>(),
                                "product", 1), failed);
-  MPI_FAILED_CHECK(reduce_test(comm, int_generator(), "integers", maximum<int>(),
+  BOOST_MPI_COUNT_FAILED(reduce_test(comm, int_generator(), "integers", maximum<int>(),
                                "maximum", 0), failed);
-  MPI_FAILED_CHECK(reduce_test(comm, int_generator(), "integers", minimum<int>(),
+  BOOST_MPI_COUNT_FAILED(reduce_test(comm, int_generator(), "integers", minimum<int>(),
                                "minimum", 2), failed);
 
   // User-defined MPI datatypes with operations that have the
   // same name as built-in operations.
-  MPI_FAILED_CHECK(reduce_test(comm, point_generator(point(0,0,0)), "points",
+  BOOST_MPI_COUNT_FAILED(reduce_test(comm, point_generator(point(0,0,0)), "points",
                                std::plus<point>(), "sum", point()), failed);
 
   // Built-in MPI datatypes with user-defined operations
-  MPI_FAILED_CHECK(reduce_test(comm, int_generator(17), "integers", secret_int_bit_and(),
+  BOOST_MPI_COUNT_FAILED(reduce_test(comm, int_generator(17), "integers", secret_int_bit_and(),
                                "bitwise and", -1), failed);
 
   // Arbitrary types with user-defined, commutative operations.
-  MPI_FAILED_CHECK(reduce_test(comm, wrapped_int_generator(17), "wrapped integers",
+  BOOST_MPI_COUNT_FAILED(reduce_test(comm, wrapped_int_generator(17), "wrapped integers",
                                std::plus<wrapped_int>(), "sum", wrapped_int(0)), failed);
 
   // Arbitrary types with (non-commutative) user-defined operations
-  MPI_FAILED_CHECK(reduce_test(comm, string_generator(), "strings",
+  BOOST_MPI_COUNT_FAILED(reduce_test(comm, string_generator(), "strings",
                                std::plus<std::string>(), "concatenation", std::string()), failed);
   return failed;
 }

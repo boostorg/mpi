@@ -51,7 +51,7 @@ test_sendrecv(mpi::communicator& com) {
       std::cout << "rank " << wrank << " received " << recv << " from " << wprev << '\n';
     }
   }
-  MPI_CHECK(recv == T(wprev), failed);
+  BOOST_MPI_CHECK(recv == T(wprev), failed);
   return failed;
 }
 
@@ -60,7 +60,7 @@ int main()
   mpi::environment env;
   mpi::communicator world;
   int failed = 0;
-  MPI_FAILED_CHECK(test_sendrecv<int>(world), failed);
-  MPI_FAILED_CHECK(test_sendrecv<blob>(world), failed);
+  BOOST_MPI_COUNT_FAILED(test_sendrecv<int>(world), failed);
+  BOOST_MPI_COUNT_FAILED(test_sendrecv<blob>(world), failed);
   return failed;
 }

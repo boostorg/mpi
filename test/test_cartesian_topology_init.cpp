@@ -34,7 +34,7 @@ main() {
     // Check the basic ctor
     mpi::cartesian_dimension def;
     mpi::cartesian_topology t1(10);
-    MPI_CHECK(t1.stl() == std::vector<mpi::cartesian_dimension>(10, def), failed);
+    BOOST_MPI_CHECK(t1.stl() == std::vector<mpi::cartesian_dimension>(10, def), failed);
   }
 #if !defined(BOOST_NO_CXX11_HDR_INITIALIZER_LIST)
   {
@@ -43,8 +43,8 @@ main() {
     bool per[] = {true, false, true};
     mpi::cartesian_topology t1(dims, per);
     mpi::cartesian_topology t2({{2,true},{3, false},{4, true}});
-    MPI_CHECK(t1.size() == 3, failed);
-    MPI_CHECK(t1 == t2, failed);
+    BOOST_MPI_CHECK(t1.size() == 3, failed);
+    BOOST_MPI_CHECK(t1 == t2, failed);
   }
 #endif
   // Container based ctor only available as a replacement for initializer list ctor
@@ -55,7 +55,7 @@ main() {
     std::copy(d, d+3, std::back_inserter(seq));
     mpi::cartesian_topology t1(seq);
     mpi::cartesian_topology t2(d);
-    MPI_CHECK(t1 == t2, failed);
+    BOOST_MPI_CHECK(t1 == t2, failed);
   }
   {
     // Check range based with array based ctor.
@@ -64,8 +64,8 @@ main() {
     bool per[] = {true, false, true};
     mpi::cartesian_topology t1(dims, per);
     mpi::cartesian_topology t2(d);
-    MPI_CHECK(t1.size() == 3, failed);
-    MPI_CHECK(t1 == t2, failed);
+    BOOST_MPI_CHECK(t1.size() == 3, failed);
+    BOOST_MPI_CHECK(t1 == t2, failed);
   }
   {
     // Iterator based ctor vs C array based ctor
@@ -73,16 +73,16 @@ main() {
     std::vector<mpi::cartesian_dimension> vdims(d, d+3);
     mpi::cartesian_topology t1(vdims);
     mpi::cartesian_topology t2(d);
-    MPI_CHECK(t1.size() == 3, failed);
-    MPI_CHECK(t1 == t2, failed);
-    MPI_CHECK(!(t1 != t2), failed);
+    BOOST_MPI_CHECK(t1.size() == 3, failed);
+    BOOST_MPI_CHECK(t1 == t2, failed);
+    BOOST_MPI_CHECK(!(t1 != t2), failed);
     t1[1].periodic = true;
-    MPI_CHECK(t1 != t2, failed);
+    BOOST_MPI_CHECK(t1 != t2, failed);
     t1[2].periodic = false;
     t1[2].size = 0;
     vdims.push_back(mpi::cartesian_dimension(3, false));
     mpi::cartesian_topology t3(vdims);
-    MPI_CHECK(t1 != t3, failed);
+    BOOST_MPI_CHECK(t1 != t3, failed);
   }
   return failed;
 }

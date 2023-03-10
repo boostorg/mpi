@@ -85,17 +85,17 @@ main() {
 
   std::vector<int> empty;
   int failed = 0;
-  MPI_CHECK(test(world, empty, false, true), failed);
-  MPI_CHECK(test(world, empty, false, false), failed);
+  BOOST_MPI_CHECK(test(world, empty, false, true), failed);
+  BOOST_MPI_CHECK(test(world, empty, false, false), failed);
 
-  MPI_CHECK(test(world, integers, true,  true), failed);
-  MPI_CHECK(test(world, integers, true,  false), failed);
-  MPI_CHECK(test(world, strings, true,  true), failed);
-  MPI_CHECK(test(world, strings, true,  false), failed);
+  BOOST_MPI_CHECK(test(world, integers, true,  true), failed);
+  BOOST_MPI_CHECK(test(world, integers, true,  false), failed);
+  BOOST_MPI_CHECK(test(world, strings, true,  true), failed);
+  BOOST_MPI_CHECK(test(world, strings, true,  false), failed);
 
-  MPI_CHECK(test(world, integers, false,  true), failed);
-  MPI_CHECK(test(world, integers, false,  false), failed);
-  MPI_CHECK(test(world, strings, false,  true), failed);
-  MPI_CHECK(test(world, strings, false,  false), failed);
+  BOOST_MPI_CHECK(test(world, integers, false,  true), failed);
+  BOOST_MPI_CHECK(test(world, integers, false,  false), failed);
+  BOOST_MPI_CHECK(test(world, strings, false,  true), failed);
+  BOOST_MPI_CHECK(test(world, strings, false,  false), failed);
   return failed;
 }

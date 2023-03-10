@@ -113,8 +113,8 @@ int main()
 
   // The communicator's topology should have the same number of
   // vertices and edges and the original graph
-  MPI_CHECK((int)num_vertices(graph) == num_vertices(graph_comm), failed);
-  MPI_CHECK((int)num_edges(graph) == num_edges(graph_comm), failed);
+  BOOST_MPI_CHECK((int)num_vertices(graph) == num_vertices(graph_comm), failed);
+  BOOST_MPI_CHECK((int)num_edges(graph) == num_edges(graph_comm), failed);
 
   // Display the communicator graph
   if (graph_comm.rank() == 0) {
@@ -136,7 +136,7 @@ int main()
   // Verify the isomorphism
   if (graph_comm.rank() == 0)
     std::cout << "Verifying isomorphism..." << std::endl;
-  MPI_CHECK(verify_isomorphism(graph, graph_comm, graph_alt_index), failed);
+  BOOST_MPI_CHECK(verify_isomorphism(graph, graph_comm, graph_alt_index), failed);
   
   return failed;
 }

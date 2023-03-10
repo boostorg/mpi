@@ -37,11 +37,11 @@ ring_test(const communicator& comm, const T& pass_value, const char* kind,
               << "...";
     comm.send((rank + 1) % size, 0, pass_value);
     comm.recv((rank + size - 1) % size, 0, transferred_value);
-    MPI_CHECK(transferred_value == pass_value, failed);
+    BOOST_MPI_CHECK(transferred_value == pass_value, failed);
     if (transferred_value == pass_value) std::cout << " OK." << std::endl;
   } else {
     comm.recv((rank + size - 1) % size, 0, transferred_value);
-    MPI_CHECK(transferred_value == pass_value, failed);
+    BOOST_MPI_CHECK(transferred_value == pass_value, failed);
     comm.send((rank + 1) % size, 0, transferred_value);
   }
   
@@ -68,18 +68,18 @@ ring_array_test(const communicator& comm, const T* pass_values,
     comm.recv((rank + size - 1) % size, 0, transferred_values, n);
     bool okay = std::equal(pass_values, pass_values + n,
                            transferred_values);
-    MPI_CHECK(okay, failed);
+    BOOST_MPI_CHECK(okay, failed);
     if (okay) std::cout << " OK." << std::endl;
   } else {
     status stat = comm.probe(boost::mpi::any_source, 0);
     boost::optional<int> num_values = stat.template count<T>();
     if (boost::mpi::is_mpi_datatype<T>()) {
-      MPI_CHECK(num_values && *num_values == n, failed);
+      BOOST_MPI_CHECK(num_values && *num_values == n, failed);
     } else {
-      MPI_CHECK(!num_values || *num_values == n, failed);     
+      BOOST_MPI_CHECK(!num_values || *num_values == n, failed);     
     }
     comm.recv(stat.source(), 0, transferred_values, n);
-    MPI_CHECK(std::equal(pass_values, pass_values + n,
+    BOOST_MPI_CHECK(std::equal(pass_values, pass_values + n,
                          transferred_values), failed);
     comm.send((rank + 1) % size, 0, transferred_values, n);
   }
@@ -96,35 +96,35 @@ int main()
   boost::mpi::environment env;
   communicator comm;
   int failed = 0;
-  MPI_CHECK(comm.size() > 1, failed);
+  BOOST_MPI_CHECK(comm.size() > 1, failed);
   if (failed = 0) {
     // Check transfer of individual objects
-    MPI_FAILED_CHECK(ring_test(comm, 17, "integers", 0), failed);
-    MPI_FAILED_CHECK(ring_test(comm, 17, "integers", 1), failed);
-    MPI_FAILED_CHECK(ring_test(comm, red, "enums", 1), failed);
-    MPI_FAILED_CHECK(ring_test(comm, red, "enums", 1), failed);
-    MPI_FAILED_CHECK(ring_test(comm, gps_position(39,16,20.2799), "GPS positions", 0), failed);
-    MPI_FAILED_CHECK(ring_test(comm, gps_position(26,25,30.0), "GPS positions", 1), failed);
-    MPI_FAILED_CHECK(ring_test(comm, std::string("Rosie"), "string", 0), failed);
+    BOOST_MPI_COUNT_FAILED(ring_test(comm, 17, "integers", 0), failed);
+    BOOST_MPI_COUNT_FAILED(ring_test(comm, 17, "integers", 1), failed);
+    BOOST_MPI_COUNT_FAILED(ring_test(comm, red, "enums", 1), failed);
+    BOOST_MPI_COUNT_FAILED(ring_test(comm, red, "enums", 1), failed);
+    BOOST_MPI_COUNT_FAILED(ring_test(comm, gps_position(39,16,20.2799), "GPS positions", 0), failed);
+    BOOST_MPI_COUNT_FAILED(ring_test(comm, gps_position(26,25,30.0), "GPS positions", 1), failed);
+    BOOST_MPI_COUNT_FAILED(ring_test(comm, std::string("Rosie"), "string", 0), failed);
     
     std::list<std::string> strings;
     strings.push_back("Hello");
     strings.push_back("MPI");
     strings.push_back("World");
-    MPI_FAILED_CHECK(ring_test(comm, strings, "list of strings", 1), failed);
+    BOOST_MPI_COUNT_FAILED(ring_test(comm, strings, "list of strings", 1), failed);
     
     // Check transfer of arrays
     int int_array[2] = { 17, 42 };
-    MPI_FAILED_CHECK(ring_array_test(comm, int_array, 2, "integer", 1), failed);
+    BOOST_MPI_COUNT_FAILED(ring_array_test(comm, int_array, 2, "integer", 1), failed);
     gps_position gps_position_array[2] = {
       gps_position(39,16,20.2799),
       gps_position(26,25,30.0)
     };
-    MPI_FAILED_CHECK(ring_array_test(comm, gps_position_array, 2, "GPS position", 1), failed);
+    BOOST_MPI_COUNT_FAILED(ring_array_test(comm, gps_position_array, 2, "GPS position", 1), failed);
     
     std::string string_array[3] = { "Hello", "MPI", "World" };
-    MPI_FAILED_CHECK(ring_array_test(comm, string_array, 3, "string", 0), failed);
-    MPI_FAILED_CHECK(ring_array_test(comm, string_array, 3, "string", 1), failed);
+    BOOST_MPI_COUNT_FAILED(ring_array_test(comm, string_array, 3, "string", 0), failed);
+    BOOST_MPI_COUNT_FAILED(ring_array_test(comm, string_array, 3, "string", 1), failed);
   }
   return failed;
 }

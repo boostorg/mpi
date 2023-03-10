@@ -53,7 +53,7 @@ int main()
     std::ostringstream fmt;
     fmt << msg << i;
     std::vector<std::string>::iterator found = std::find(ss.begin(), ss.end(), fmt.str());
-    MPI_CHECK(found != ss.end(), failed);
+    BOOST_MPI_CHECK(found != ss.end(), failed);
     fmt.str("");
     fmt << "Proc " << world.rank() << " Got msg from " << i << '\n';
     std::cout << fmt.str();

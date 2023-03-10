@@ -49,7 +49,7 @@ scatter_test(const communicator& comm, Generator generator,
       scatter(comm, value, root);
     }
 
-    MPI_CHECK(value == generator(comm.rank()), failed);
+    BOOST_MPI_CHECK(value == generator(comm.rank()), failed);
   }
 
   comm.barrier();
@@ -149,7 +149,7 @@ scatterv_test(const communicator& comm, Generator generator,
     }
 
     for (int i = 0; i < mysize; ++i)
-      MPI_CHECK(myvalues[i] == generator(comm.rank()), failed);
+      BOOST_MPI_CHECK(myvalues[i] == generator(comm.rank()), failed);
   }
 
   comm.barrier();
@@ -205,7 +205,7 @@ scatterd_test(const communicator& comm, Generator generator,
     }
 
     for (int i = 0; i < mysize; ++i)
-      MPI_CHECK(myvalues[i] == generator(comm.rank()), failed);
+      BOOST_MPI_CHECK(myvalues[i] == generator(comm.rank()), failed);
   }
 
   comm.barrier();
@@ -217,20 +217,20 @@ int main()
   environment env;
   communicator comm;
   int failed = 0;
-  MPI_FAILED_CHECK(scatter_test(comm, int_generator(), "integers"), failed);
-  MPI_FAILED_CHECK(scatter_test(comm, gps_generator(), "GPS positions"), failed);
-  MPI_FAILED_CHECK(scatter_test(comm, string_generator(), "string"), failed);
-  MPI_FAILED_CHECK(scatter_test(comm, string_list_generator(), "list of strings"), failed);
+  BOOST_MPI_COUNT_FAILED(scatter_test(comm, int_generator(), "integers"), failed);
+  BOOST_MPI_COUNT_FAILED(scatter_test(comm, gps_generator(), "GPS positions"), failed);
+  BOOST_MPI_COUNT_FAILED(scatter_test(comm, string_generator(), "string"), failed);
+  BOOST_MPI_COUNT_FAILED(scatter_test(comm, string_list_generator(), "list of strings"), failed);
   
-  MPI_FAILED_CHECK(scatterv_test(comm, int_generator(), "integers"), failed);
-  MPI_FAILED_CHECK(scatterv_test(comm, gps_generator(), "GPS positions"), failed);
-  MPI_FAILED_CHECK(scatterv_test(comm, string_generator(), "string"), failed);
-  MPI_FAILED_CHECK(scatterv_test(comm, string_list_generator(), "list of strings"), failed);
+  BOOST_MPI_COUNT_FAILED(scatterv_test(comm, int_generator(), "integers"), failed);
+  BOOST_MPI_COUNT_FAILED(scatterv_test(comm, gps_generator(), "GPS positions"), failed);
+  BOOST_MPI_COUNT_FAILED(scatterv_test(comm, string_generator(), "string"), failed);
+  BOOST_MPI_COUNT_FAILED(scatterv_test(comm, string_list_generator(), "list of strings"), failed);
 
-  MPI_FAILED_CHECK(scatterd_test(comm, int_generator(), "integers"), failed);
-  MPI_FAILED_CHECK(scatterd_test(comm, gps_generator(), "GPS positions"), failed);
-  MPI_FAILED_CHECK(scatterd_test(comm, string_generator(), "string"), failed);
-  MPI_FAILED_CHECK(scatterd_test(comm, string_list_generator(), "list of strings"), failed);
+  BOOST_MPI_COUNT_FAILED(scatterd_test(comm, int_generator(), "integers"), failed);
+  BOOST_MPI_COUNT_FAILED(scatterd_test(comm, gps_generator(), "GPS positions"), failed);
+  BOOST_MPI_COUNT_FAILED(scatterd_test(comm, string_generator(), "string"), failed);
+  BOOST_MPI_COUNT_FAILED(scatterd_test(comm, string_list_generator(), "list of strings"), failed);
 
   return failed;
 }

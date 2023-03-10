@@ -46,7 +46,7 @@ count_failed(T nfailed, std::string msg, int& failed) {
 
 void count_failed(int nfailed, std::string msg, int& failed);
 
-#define MPI_CHECK(cond, failed)        check_failed(cond, #cond, failed);
-#define MPI_FAILED_CHECK(fct,  failed) count_failed(fct, #fct, failed);
+#define BOOST_MPI_CHECK(cond, failed)        check_failed(cond, #cond, failed);
+#define BOOST_MPI_COUNT_FAILED(fct,  failed) count_failed(fct, #fct, failed);
 
 #endif

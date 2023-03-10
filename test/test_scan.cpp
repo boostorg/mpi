@@ -86,7 +86,7 @@ scan_test(const communicator& comm, Generator generator,
   value_type result_value;
   scan(comm, value, result_value, op);
   value_type scan_result = scan(comm, value, op);
-  MPI_CHECK(scan_result == result_value, failed);
+  BOOST_MPI_CHECK(scan_result == result_value, failed);
   
   // Compute expected result
   std::vector<value_type> generated_values;
@@ -95,7 +95,7 @@ scan_test(const communicator& comm, Generator generator,
   std::vector<value_type> expected_results(comm.size());
   std::partial_sum(generated_values.begin(), generated_values.end(),
                    expected_results.begin(), op);
-  MPI_CHECK(result_value == expected_results[comm.rank()], failed);
+  BOOST_MPI_CHECK(result_value == expected_results[comm.rank()], failed);
   if (comm.rank() == 0) std::cout << "Done." << std::endl;
 
   (comm.barrier)();
@@ -203,29 +203,29 @@ int main()
   int failed = 0;
 
   // Built-in MPI datatypes with built-in MPI operations
-  MPI_FAILED_CHECK(scan_test(comm, int_generator(), "integers", std::plus<int>(), "sum"), failed);
-  MPI_FAILED_CHECK(scan_test(comm, int_generator(), "integers", std::multiplies<int>(),
+  BOOST_MPI_COUNT_FAILED(scan_test(comm, int_generator(), "integers", std::plus<int>(), "sum"), failed);
+  BOOST_MPI_COUNT_FAILED(scan_test(comm, int_generator(), "integers", std::multiplies<int>(),
                              "product"), failed);
-  MPI_FAILED_CHECK(scan_test(comm, int_generator(), "integers", maximum<int>(),
+  BOOST_MPI_COUNT_FAILED(scan_test(comm, int_generator(), "integers", maximum<int>(),
                              "maximum"), failed);
-  MPI_FAILED_CHECK(scan_test(comm, int_generator(), "integers", minimum<int>(),
+  BOOST_MPI_COUNT_FAILED(scan_test(comm, int_generator(), "integers", minimum<int>(),
                              "minimum"), failed);
 
   // User-defined MPI datatypes with operations that have the
   // same name as built-in operations.
-  MPI_FAILED_CHECK(scan_test(comm, point_generator(point(0,0,0)), "points",
+  BOOST_MPI_COUNT_FAILED(scan_test(comm, point_generator(point(0,0,0)), "points",
                              std::plus<point>(), "sum"), failed);
 
   // Built-in MPI datatypes with user-defined operations
-  MPI_FAILED_CHECK(scan_test(comm, int_generator(17), "integers", secret_int_bit_and(),
+  BOOST_MPI_COUNT_FAILED(scan_test(comm, int_generator(17), "integers", secret_int_bit_and(),
                              "bitwise and"), failed);
 
   // Arbitrary types with user-defined, commutative operations.
-  MPI_FAILED_CHECK(scan_test(comm, wrapped_int_generator(17), "wrapped integers",
+  BOOST_MPI_COUNT_FAILED(scan_test(comm, wrapped_int_generator(17), "wrapped integers",
                              std::plus<wrapped_int>(), "sum"), failed);
 
   // Arbitrary types with (non-commutative) user-defined operations
-  MPI_FAILED_CHECK(scan_test(comm, string_generator(), "strings",
+  BOOST_MPI_COUNT_FAILED(scan_test(comm, string_generator(), "strings",
                              std::plus<std::string>(), "concatenation"), failed);
   return failed;
 }

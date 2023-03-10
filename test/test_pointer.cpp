@@ -35,7 +35,7 @@ int main()
     boost::shared_ptr<A> p;
     world.recv(0, 0, p);
     std::cout << p->i << std::endl;
-    MPI_CHECK(p->i==42, failed);
+    BOOST_MPI_CHECK(p->i==42, failed);
   }
   return failed;
 }

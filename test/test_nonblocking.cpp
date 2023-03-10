@@ -49,19 +49,19 @@ nonblocking_tests( const communicator& comm, const T* values, int num_values,
                    const char* kind, bool composite)
 {
   int failed = 0;
-  MPI_FAILED_CHECK(nonblocking_test(comm, values, num_values, kind, mk_wait_any), failed);
-  MPI_FAILED_CHECK(nonblocking_test(comm, values, num_values, kind, mk_test_any), failed);
+  BOOST_MPI_COUNT_FAILED(nonblocking_test(comm, values, num_values, kind, mk_wait_any), failed);
+  BOOST_MPI_COUNT_FAILED(nonblocking_test(comm, values, num_values, kind, mk_test_any), failed);
   //wait_for_debugger(comm);
-  MPI_FAILED_CHECK(nonblocking_test(comm, values, num_values, kind, mk_wait_all), failed);
-  MPI_FAILED_CHECK(nonblocking_test(comm, values, num_values, kind, mk_wait_all_keep), failed);
+  BOOST_MPI_COUNT_FAILED(nonblocking_test(comm, values, num_values, kind, mk_wait_all), failed);
+  BOOST_MPI_COUNT_FAILED(nonblocking_test(comm, values, num_values, kind, mk_wait_all_keep), failed);
   if (!composite) {
-    MPI_FAILED_CHECK(nonblocking_test(comm, values, num_values, kind, mk_test_all), failed);
-    MPI_FAILED_CHECK(nonblocking_test(comm, values, num_values, kind, mk_test_all_keep), failed);
+    BOOST_MPI_COUNT_FAILED(nonblocking_test(comm, values, num_values, kind, mk_test_all), failed);
+    BOOST_MPI_COUNT_FAILED(nonblocking_test(comm, values, num_values, kind, mk_test_all_keep), failed);
   }
-  MPI_FAILED_CHECK(nonblocking_test(comm, values, num_values, kind, mk_wait_some), failed);
-  MPI_FAILED_CHECK(nonblocking_test(comm, values, num_values, kind, mk_wait_some_keep), failed);
-  MPI_FAILED_CHECK(nonblocking_test(comm, values, num_values, kind, mk_test_some), failed);
-  MPI_FAILED_CHECK(nonblocking_test(comm, values, num_values, kind, mk_test_some_keep), failed);
+  BOOST_MPI_COUNT_FAILED(nonblocking_test(comm, values, num_values, kind, mk_wait_some), failed);
+  BOOST_MPI_COUNT_FAILED(nonblocking_test(comm, values, num_values, kind, mk_wait_some_keep), failed);
+  BOOST_MPI_COUNT_FAILED(nonblocking_test(comm, values, num_values, kind, mk_test_some), failed);
+  BOOST_MPI_COUNT_FAILED(nonblocking_test(comm, values, num_values, kind, mk_test_some_keep), failed);
 
   return failed;
 }
@@ -199,7 +199,7 @@ nonblocking_test(const communicator& comm, const T* values, int num_values,
     break;
     
   default:
-    MPI_CHECK(false, failed);
+    BOOST_MPI_CHECK(false, failed);
   }
   
   if (comm.rank() == 0) {
@@ -219,10 +219,10 @@ nonblocking_test(const communicator& comm, const T* values, int num_values,
       std::cerr << "ERROR!" << std::endl;
   }
   
-  MPI_CHECK(incoming_value == values[0], failed);
+  BOOST_MPI_CHECK(incoming_value == values[0], failed);
   
   if (method != mk_wait_any && method != mk_test_any)
-    MPI_CHECK(std::equal(incoming_values.begin(), incoming_values.end(), values), failed);
+    BOOST_MPI_CHECK(std::equal(incoming_values.begin(), incoming_values.end(), values), failed);
   return failed;
 }
 
@@ -232,21 +232,21 @@ int main()
   communicator comm;
   int failed = 0;
   int int_array[3] = {17, 42, 256};
-  MPI_FAILED_CHECK(nonblocking_tests(comm, int_array, 3, "integers", false), failed);
+  BOOST_MPI_COUNT_FAILED(nonblocking_tests(comm, int_array, 3, "integers", false), failed);
 
   gps_position gps_array[2] = {
     gps_position(17, 42, .06),
     gps_position(42, 17, .06)
   };
-  MPI_FAILED_CHECK(nonblocking_tests(comm, gps_array, 2, "gps positions", false), failed);
+  BOOST_MPI_COUNT_FAILED(nonblocking_tests(comm, gps_array, 2, "gps positions", false), failed);
 
   std::string string_array[2] = { "Hello", "World" };
-  MPI_FAILED_CHECK(nonblocking_tests(comm, string_array, 2, "strings", true), failed);
+  BOOST_MPI_COUNT_FAILED(nonblocking_tests(comm, string_array, 2, "strings", true), failed);
 
   std::list<std::string> lst_of_strings;
   for (int i = 0; i < comm.size(); ++i)
     lst_of_strings.push_back(boost::lexical_cast<std::string>(i));
 
-  MPI_FAILED_CHECK(nonblocking_tests(comm, &lst_of_strings, 1, "list of strings", true), failed);
+  BOOST_MPI_COUNT_FAILED(nonblocking_tests(comm, &lst_of_strings, 1, "list of strings", true), failed);
   return failed;
 }

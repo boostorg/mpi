@@ -83,17 +83,17 @@ test_skeleton_and_content(const communicator& comm, int root,
     } else {
       broadcast(comm, skeleton(transferred_list), root);
     }
-    MPI_CHECK((int)transferred_list.size() == list_size, failed);
+    BOOST_MPI_CHECK((int)transferred_list.size() == list_size, failed);
     
     // Receive the content and check it
     comm.recv(root, 1, get_content(transferred_list));
-    MPI_CHECK(std::equal(make_counting_iterator(0),
+    BOOST_MPI_CHECK(std::equal(make_counting_iterator(0),
                            make_counting_iterator(list_size),
                          transferred_list.begin()), failed);
     
     // Receive the reversed content and check it
     comm.recv(root, 2, get_content(transferred_list));
-    MPI_CHECK(std::equal(make_counting_iterator(0),
+    BOOST_MPI_CHECK(std::equal(make_counting_iterator(0),
                            make_counting_iterator(list_size),
                          transferred_list.rbegin()), failed);
   }
@@ -167,19 +167,19 @@ test_skeleton_and_content_nonblocking(const communicator& comm, int root)
     std::list<int> transferred_list;
     request req = comm.irecv(root, 0, skeleton(transferred_list));
     req.wait();
-    MPI_CHECK((int)transferred_list.size() == list_size, failed);
+    BOOST_MPI_CHECK((int)transferred_list.size() == list_size, failed);
     
     // Receive the content and check it
     req = comm.irecv(root, 1, get_content(transferred_list));
     req.wait();
-    MPI_CHECK(std::equal(make_counting_iterator(0),
+    BOOST_MPI_CHECK(std::equal(make_counting_iterator(0),
                            make_counting_iterator(list_size),
                          transferred_list.begin()), failed);
     
     // Receive the reversed content and check it
     req = comm.irecv(root, 2, get_content(transferred_list));
     req.wait();
-    MPI_CHECK(std::equal(make_counting_iterator(0),
+    BOOST_MPI_CHECK(std::equal(make_counting_iterator(0),
                            make_counting_iterator(list_size),
                          transferred_list.rbegin()), failed);
   }
@@ -193,14 +193,14 @@ int main()
   boost::mpi::environment env;
   communicator comm;
   int failed = 0;
-  MPI_CHECK(comm.size() > 1, failed);
+  BOOST_MPI_CHECK(comm.size() > 1, failed);
   if (failed == 0) {
-    MPI_FAILED_CHECK(test_skeleton_and_content(comm, 0, true), failed);
-    MPI_FAILED_CHECK(test_skeleton_and_content(comm, 0, false), failed);
-    MPI_FAILED_CHECK(test_skeleton_and_content(comm, 1, true), failed);
-    MPI_FAILED_CHECK(test_skeleton_and_content(comm, 1, false), failed);
-    MPI_FAILED_CHECK(test_skeleton_and_content_nonblocking(comm, 0), failed);
-    MPI_FAILED_CHECK(test_skeleton_and_content_nonblocking(comm, 1), failed);
+    BOOST_MPI_COUNT_FAILED(test_skeleton_and_content(comm, 0, true), failed);
+    BOOST_MPI_COUNT_FAILED(test_skeleton_and_content(comm, 0, false), failed);
+    BOOST_MPI_COUNT_FAILED(test_skeleton_and_content(comm, 1, true), failed);
+    BOOST_MPI_COUNT_FAILED(test_skeleton_and_content(comm, 1, false), failed);
+    BOOST_MPI_COUNT_FAILED(test_skeleton_and_content_nonblocking(comm, 0), failed);
+    BOOST_MPI_COUNT_FAILED(test_skeleton_and_content_nonblocking(comm, 1), failed);
   }
   return failed;
 }

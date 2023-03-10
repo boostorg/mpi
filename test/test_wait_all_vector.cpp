@@ -37,9 +37,9 @@ int main()
   mpi::wait_all( reqs.begin(), reqs.end() );
   
   if ( rank == 1 ) {
-    MPI_CHECK(data.size() == sz, failed);
+    BOOST_MPI_CHECK(data.size() == sz, failed);
     for ( int i=0; i<sz; ++i ) {
-      MPI_CHECK(data[i] == i, failed);
+      BOOST_MPI_CHECK(data[i] == i, failed);
     }
   }  
   return failed;

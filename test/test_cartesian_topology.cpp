@@ -55,7 +55,7 @@ test_coordinates_consistency( mpi::cartesian_communicator const& cc,
                 &(min[0]), mpi::minimum<int>(), p);
     cc.barrier();
     if (p == cc.rank()) {
-      MPI_CHECK(std::equal(coords.begin(), coords.end(), min.begin()), failed);
+      BOOST_MPI_CHECK(std::equal(coords.begin(), coords.end(), min.begin()), failed);
       std::ostringstream out;
       out << "proc " << p << " at (";
       std::copy(min.begin(), min.end(), std::ostream_iterator<int>(out, " "));
@@ -124,7 +124,7 @@ test_topology_consistency( mpi::cartesian_communicator const& cc)
   mpi::all_reduce(cc, 
                   &(itopo[0]), itopo.size(), &(otopo[0]),
                   topo_minimum());
-  MPI_CHECK(std::equal(itopo.begin(), itopo.end(), otopo.begin()), failed);
+  BOOST_MPI_CHECK(std::equal(itopo.begin(), itopo.end(), otopo.begin()), failed);
   if (master) {
     std::cout << "We agree on " << topology_description(otopo) << '\n';
   }
@@ -136,7 +136,7 @@ int
 test_cartesian_topology( mpi::cartesian_communicator const& cc)
 {
   int failed = 0;
-  MPI_CHECK(cc.has_cartesian_topology(), failed);
+  BOOST_MPI_CHECK(cc.has_cartesian_topology(), failed);
   for( int r = 0; r < cc.size(); ++r) {
     cc.barrier();
     if (r == cc.rank()) {
@@ -164,8 +164,8 @@ test_cartesian_topology( mpi::communicator const& world, mpi::cartesian_topology
   int failed = 0;
   mpi::cartesian_communicator cc(world, topo, true);
   if (cc) {
-    MPI_CHECK(cc.has_cartesian_topology(), failed);
-    MPI_CHECK(cc.ndims() == int(topo.size()), failed);
+    BOOST_MPI_CHECK(cc.has_cartesian_topology(), failed);
+    BOOST_MPI_CHECK(cc.ndims() == int(topo.size()), failed);
     if (cc.rank() == 0) {
       std::cout << "Asked topology " << topo << ", got " << cc.topology() << '\n';
     }
@@ -199,13 +199,13 @@ int main()
       topo[1] = cd(1, false);
     }
   }
-  MPI_FAILED_CHECK(test_cartesian_topology( world, topo), failed);
+  BOOST_MPI_COUNT_FAILED(test_cartesian_topology( world, topo), failed);
 #if !defined(BOOST_NO_CXX11_DEFAULTED_MOVES)
   world.barrier();
   if (world.rank()==0) {
     std::cout << "Testing move constructor.\n";
   }
-  MPI_FAILED_CHECK(test_cartesian_topology( world, std::move(topo)), failed);
+  BOOST_MPI_COUNT_FAILED(test_cartesian_topology( world, std::move(topo)), failed);
 #endif
   return failed;
 }

@@ -37,7 +37,7 @@ broadcast_test(const mpi::communicator& comm, const T& bc_value,
   }
   
   broadcast(comm, value, root);
-  MPI_CHECK(value == bc_value, failed);
+  BOOST_MPI_CHECK(value == bc_value, failed);
   if (comm.rank() == root) {
     if (value == bc_value) {
       std::cout << "OK." << std::endl;
@@ -56,7 +56,7 @@ broadcast_test(const mpi::communicator& comm, const T& bc_value,
 {
   int failed = 0;
   for (int root = 0; root < comm.size(); ++root) {
-    MPI_FAILED_CHECK(broadcast_test(comm, bc_value, kind, root), failed);
+    BOOST_MPI_COUNT_FAILED(broadcast_test(comm, bc_value, kind, root), failed);
   }
   return failed;
 }
@@ -66,13 +66,13 @@ int main()
   boost::mpi::environment env;
   int failed = 0;
   mpi::communicator comm;
-  MPI_CHECK(comm.size() > 1, failed);
+  BOOST_MPI_CHECK(comm.size() > 1, failed);
   if (failed == 0) {
     sparse s;
     s.resize(2);
     s[0][12] = 0.12;
     s[1][13] = 1.13;
-    MPI_FAILED_CHECK(broadcast_test(comm, s, "sparse"), failed);
+    BOOST_MPI_COUNT_FAILED(broadcast_test(comm, s, "sparse"), failed);
   }
   return failed;
 }

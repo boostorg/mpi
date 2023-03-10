@@ -44,7 +44,7 @@ all_to_all_test(const communicator& comm, Generator generator,
   all_to_all(comm, in_values, out_values);
 
   for (int p = 0; p < comm.size(); ++p) {
-    MPI_CHECK(out_values[p] == generator((p + 1) * (comm.rank() + 1)), failed);
+    BOOST_MPI_CHECK(out_values[p] == generator((p + 1) * (comm.rank() + 1)), failed);
   }
 
   if (comm.rank() == 0) {
@@ -107,9 +107,9 @@ int main()
   boost::mpi::environment env;
   communicator comm;
   int failed = 0;
-  MPI_FAILED_CHECK(all_to_all_test(comm, int_generator(), "integers"), failed);
-  MPI_FAILED_CHECK(all_to_all_test(comm, gps_generator(), "GPS positions"), failed);
-  MPI_FAILED_CHECK(all_to_all_test(comm, string_generator(), "string"), failed);
-  MPI_FAILED_CHECK(all_to_all_test(comm, string_list_generator(), "list of strings"), failed);
+  BOOST_MPI_COUNT_FAILED(all_to_all_test(comm, int_generator(), "integers"), failed);
+  BOOST_MPI_COUNT_FAILED(all_to_all_test(comm, gps_generator(), "GPS positions"), failed);
+  BOOST_MPI_COUNT_FAILED(all_to_all_test(comm, string_generator(), "string"), failed);
+  BOOST_MPI_COUNT_FAILED(all_to_all_test(comm, string_list_generator(), "list of strings"), failed);
   return failed;
 }

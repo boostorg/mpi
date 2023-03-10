@@ -43,12 +43,12 @@ group_test(const mpi::communicator& comm)
   if(part_a)
     {
       std::cout << "comm rank: " << comm.rank() << " -> part_a rank:" << part_a.rank() << std::endl;
-      MPI_CHECK(part_a.rank() == comm.rank(), failed);
+      BOOST_MPI_CHECK(part_a.rank() == comm.rank(), failed);
     }
   if(part_b)
     {
       std::cout << "comm rank: " << comm.rank() << " -> part_b rank:" << part_b.rank() << std::endl;
-      MPI_CHECK(part_b.rank() == comm.rank() - comm.size()/2, failed);
+      BOOST_MPI_CHECK(part_b.rank() == comm.rank() - comm.size()/2, failed);
     }
   return failed;
 }
@@ -58,6 +58,6 @@ int main()
   mpi::environment env;
   mpi::communicator comm;
   int failed = 0;
-  MPI_FAILED_CHECK(group_test(comm), failed);
+  BOOST_MPI_COUNT_FAILED(group_test(comm), failed);
   return failed;
 }

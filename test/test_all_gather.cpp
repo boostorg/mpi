@@ -43,7 +43,7 @@ all_gather_test(const mpi::communicator& comm, Generator generator,
   for (int p = 0; p < comm.size(); ++p)
     expected_values.push_back(generator(p));
   int failed = 0;
-  MPI_CHECK(values == expected_values, failed);
+  BOOST_MPI_CHECK(values == expected_values, failed);
   if (comm.rank() == 0 && values == expected_values)
     std::cout << "OK." << std::endl;
   
@@ -78,7 +78,7 @@ all_gatherv_test(const mpi::communicator& comm, Generator generator,
   
   mpi::all_gatherv(comm, myvalues, values, sizes);
   int failed = 0;
-  MPI_CHECK(values == expected, failed);
+  BOOST_MPI_CHECK(values == expected, failed);
   
   if (comm.rank() == 0 && values == expected)
     std::cout << "OK." << std::endl;
@@ -139,15 +139,15 @@ int main()
   boost::mpi::environment env;
   mpi::communicator comm;
   int failed = 0;
-  MPI_FAILED_CHECK(all_gather_test(comm, int_generator(), "integers"), failed);
-  MPI_FAILED_CHECK(all_gather_test(comm, gps_generator(), "GPS positions"), failed);
-  MPI_FAILED_CHECK(all_gather_test(comm, string_generator(), "string"), failed);
-  MPI_FAILED_CHECK(all_gather_test(comm, string_list_generator(), "list of strings"), failed);
+  BOOST_MPI_COUNT_FAILED(all_gather_test(comm, int_generator(), "integers"), failed);
+  BOOST_MPI_COUNT_FAILED(all_gather_test(comm, gps_generator(), "GPS positions"), failed);
+  BOOST_MPI_COUNT_FAILED(all_gather_test(comm, string_generator(), "string"), failed);
+  BOOST_MPI_COUNT_FAILED(all_gather_test(comm, string_list_generator(), "list of strings"), failed);
   
-  MPI_FAILED_CHECK(all_gatherv_test(comm, int_generator(), "integers"), failed);
-  MPI_FAILED_CHECK(all_gatherv_test(comm, gps_generator(), "GPS positions"), failed);
-  MPI_FAILED_CHECK(all_gatherv_test(comm, string_generator(), "string"), failed);
-  MPI_FAILED_CHECK(all_gatherv_test(comm, string_list_generator(), "list of strings"), failed);
+  BOOST_MPI_COUNT_FAILED(all_gatherv_test(comm, int_generator(), "integers"), failed);
+  BOOST_MPI_COUNT_FAILED(all_gatherv_test(comm, gps_generator(), "GPS positions"), failed);
+  BOOST_MPI_COUNT_FAILED(all_gatherv_test(comm, string_generator(), "string"), failed);
+  BOOST_MPI_COUNT_FAILED(all_gatherv_test(comm, string_list_generator(), "list of strings"), failed);
   
   return failed;
 }

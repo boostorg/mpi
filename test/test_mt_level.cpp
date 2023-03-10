@@ -22,14 +22,14 @@ test_threading_level_io(mpi::threading::level orig) {
   mt::level printed = mt::level(-1);
 
   out << orig;
-  MPI_CHECK(out.good(), failed);
+  BOOST_MPI_CHECK(out.good(), failed);
   std::string orig_str(out.str());
   std::cout << "orig string:" << orig_str << '\n';
   std::istringstream in(orig_str);
   in >> printed;
-  MPI_CHECK(!in.bad(), failed);
+  BOOST_MPI_CHECK(!in.bad(), failed);
   std::cout << "orig: " << orig << ", printed: " << printed << std::endl;
-  MPI_CHECK(orig == printed, failed);
+  BOOST_MPI_CHECK(orig == printed, failed);
   return failed;
 }
 
@@ -37,10 +37,10 @@ int
 test_threading_levels_io() {
   namespace mt = boost::mpi::threading;
   int failed = 0;
-  MPI_FAILED_CHECK(test_threading_level_io(mt::single), failed);
-  MPI_FAILED_CHECK(test_threading_level_io(mt::funneled), failed);
-  MPI_FAILED_CHECK(test_threading_level_io(mt::serialized), failed);
-  MPI_FAILED_CHECK(test_threading_level_io(mt::multiple), failed);
+  BOOST_MPI_COUNT_FAILED(test_threading_level_io(mt::single), failed);
+  BOOST_MPI_COUNT_FAILED(test_threading_level_io(mt::funneled), failed);
+  BOOST_MPI_COUNT_FAILED(test_threading_level_io(mt::serialized), failed);
+  BOOST_MPI_COUNT_FAILED(test_threading_level_io(mt::multiple), failed);
   return failed;
 }
 
@@ -48,68 +48,68 @@ int
 test_threading_level_cmp() {
   namespace mt = boost::mpi::threading;
   int failed = 0;
-  MPI_CHECK(mt::single == mt::single, failed);
-  MPI_CHECK(mt::funneled == mt::funneled, failed);
-  MPI_CHECK(mt::serialized == mt::serialized, failed);
-  MPI_CHECK(mt::multiple == mt::multiple, failed);
+  BOOST_MPI_CHECK(mt::single == mt::single, failed);
+  BOOST_MPI_CHECK(mt::funneled == mt::funneled, failed);
+  BOOST_MPI_CHECK(mt::serialized == mt::serialized, failed);
+  BOOST_MPI_CHECK(mt::multiple == mt::multiple, failed);
   
-  MPI_CHECK(mt::single != mt::funneled, failed);
-  MPI_CHECK(mt::single != mt::serialized, failed);
-  MPI_CHECK(mt::single != mt::multiple, failed);
+  BOOST_MPI_CHECK(mt::single != mt::funneled, failed);
+  BOOST_MPI_CHECK(mt::single != mt::serialized, failed);
+  BOOST_MPI_CHECK(mt::single != mt::multiple, failed);
   
-  MPI_CHECK(mt::funneled != mt::single, failed);
-  MPI_CHECK(mt::funneled != mt::serialized, failed);
-  MPI_CHECK(mt::funneled != mt::multiple, failed);
+  BOOST_MPI_CHECK(mt::funneled != mt::single, failed);
+  BOOST_MPI_CHECK(mt::funneled != mt::serialized, failed);
+  BOOST_MPI_CHECK(mt::funneled != mt::multiple, failed);
   
-  MPI_CHECK(mt::serialized != mt::single, failed);
-  MPI_CHECK(mt::serialized != mt::funneled, failed);
-  MPI_CHECK(mt::serialized != mt::multiple, failed);
+  BOOST_MPI_CHECK(mt::serialized != mt::single, failed);
+  BOOST_MPI_CHECK(mt::serialized != mt::funneled, failed);
+  BOOST_MPI_CHECK(mt::serialized != mt::multiple, failed);
   
-  MPI_CHECK(mt::multiple != mt::single, failed);
-  MPI_CHECK(mt::multiple != mt::funneled, failed);
-  MPI_CHECK(mt::multiple != mt::serialized, failed);
+  BOOST_MPI_CHECK(mt::multiple != mt::single, failed);
+  BOOST_MPI_CHECK(mt::multiple != mt::funneled, failed);
+  BOOST_MPI_CHECK(mt::multiple != mt::serialized, failed);
   
-  MPI_CHECK(mt::single < mt::funneled, failed);
-  MPI_CHECK(mt::funneled > mt::single, failed);
-  MPI_CHECK(mt::single < mt::serialized, failed);
-  MPI_CHECK(mt::serialized > mt::single, failed);
-  MPI_CHECK(mt::single < mt::multiple, failed);
-  MPI_CHECK(mt::multiple > mt::single, failed);
+  BOOST_MPI_CHECK(mt::single < mt::funneled, failed);
+  BOOST_MPI_CHECK(mt::funneled > mt::single, failed);
+  BOOST_MPI_CHECK(mt::single < mt::serialized, failed);
+  BOOST_MPI_CHECK(mt::serialized > mt::single, failed);
+  BOOST_MPI_CHECK(mt::single < mt::multiple, failed);
+  BOOST_MPI_CHECK(mt::multiple > mt::single, failed);
   
-  MPI_CHECK(mt::funneled < mt::serialized, failed);
-  MPI_CHECK(mt::serialized > mt::funneled, failed);
-  MPI_CHECK(mt::funneled < mt::multiple, failed);
-  MPI_CHECK(mt::multiple > mt::funneled, failed);
+  BOOST_MPI_CHECK(mt::funneled < mt::serialized, failed);
+  BOOST_MPI_CHECK(mt::serialized > mt::funneled, failed);
+  BOOST_MPI_CHECK(mt::funneled < mt::multiple, failed);
+  BOOST_MPI_CHECK(mt::multiple > mt::funneled, failed);
   
-  MPI_CHECK(mt::serialized < mt::multiple, failed);
-  MPI_CHECK(mt::multiple > mt::serialized, failed);
+  BOOST_MPI_CHECK(mt::serialized < mt::multiple, failed);
+  BOOST_MPI_CHECK(mt::multiple > mt::serialized, failed);
   
-  MPI_CHECK(mt::single <= mt::single, failed);
-  MPI_CHECK(mt::single <= mt::funneled, failed);
-  MPI_CHECK(mt::funneled >= mt::single, failed);
-  MPI_CHECK(mt::single <= mt::serialized, failed);
-  MPI_CHECK(mt::serialized >= mt::single, failed);
-  MPI_CHECK(mt::single <= mt::multiple, failed);
-  MPI_CHECK(mt::multiple >= mt::single, failed);
+  BOOST_MPI_CHECK(mt::single <= mt::single, failed);
+  BOOST_MPI_CHECK(mt::single <= mt::funneled, failed);
+  BOOST_MPI_CHECK(mt::funneled >= mt::single, failed);
+  BOOST_MPI_CHECK(mt::single <= mt::serialized, failed);
+  BOOST_MPI_CHECK(mt::serialized >= mt::single, failed);
+  BOOST_MPI_CHECK(mt::single <= mt::multiple, failed);
+  BOOST_MPI_CHECK(mt::multiple >= mt::single, failed);
   
-  MPI_CHECK(mt::funneled <= mt::funneled, failed);
-  MPI_CHECK(mt::funneled <= mt::serialized, failed);
-  MPI_CHECK(mt::serialized >= mt::funneled, failed);
-  MPI_CHECK(mt::funneled <= mt::multiple, failed);
-  MPI_CHECK(mt::multiple >= mt::funneled, failed);
+  BOOST_MPI_CHECK(mt::funneled <= mt::funneled, failed);
+  BOOST_MPI_CHECK(mt::funneled <= mt::serialized, failed);
+  BOOST_MPI_CHECK(mt::serialized >= mt::funneled, failed);
+  BOOST_MPI_CHECK(mt::funneled <= mt::multiple, failed);
+  BOOST_MPI_CHECK(mt::multiple >= mt::funneled, failed);
   
-  MPI_CHECK(mt::serialized <= mt::serialized, failed);
-  MPI_CHECK(mt::serialized <= mt::multiple, failed);
-  MPI_CHECK(mt::multiple >= mt::serialized, failed);
+  BOOST_MPI_CHECK(mt::serialized <= mt::serialized, failed);
+  BOOST_MPI_CHECK(mt::serialized <= mt::multiple, failed);
+  BOOST_MPI_CHECK(mt::multiple >= mt::serialized, failed);
   
-  MPI_CHECK(mt::multiple <= mt::multiple, failed);
+  BOOST_MPI_CHECK(mt::multiple <= mt::multiple, failed);
   return failed;
 }
     
 int main()
 {
   int failed = 0;
-  MPI_FAILED_CHECK(test_threading_levels_io(), failed);
-  MPI_FAILED_CHECK(test_threading_level_cmp(), failed);
+  BOOST_MPI_COUNT_FAILED(test_threading_levels_io(), failed);
+  BOOST_MPI_COUNT_FAILED(test_threading_level_cmp(), failed);
   return failed;
 }

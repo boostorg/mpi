@@ -45,9 +45,9 @@ gather_test(const communicator& comm, Generator generator,
       std::vector<value_type> expected_values;
       for (int p = 0; p < comm.size(); ++p)
         expected_values.push_back(generator(p));
-      MPI_CHECK(values == expected_values, failed);
+      BOOST_MPI_CHECK(values == expected_values, failed);
     } else {
-      MPI_CHECK(values.empty(), failed);
+      BOOST_MPI_CHECK(values.empty(), failed);
     }
   }
 
@@ -93,7 +93,7 @@ gatherv_test(const communicator& comm, Generator generator,
         for (int i = 0; i < p+1; ++i)
           expected_values.push_back(generator(p));
 
-      MPI_CHECK(values == expected_values, failed);
+      BOOST_MPI_CHECK(values == expected_values, failed);
     } else {
       gatherv(comm, myvalues, root);
     }
@@ -157,14 +157,14 @@ int main()
   communicator comm;
 
   int failed = 0;
-  MPI_FAILED_CHECK(gather_test(comm, int_generator(), "integers"), failed);
-  MPI_FAILED_CHECK(gather_test(comm, gps_generator(), "GPS positions"), failed);
-  MPI_FAILED_CHECK(gather_test(comm, string_generator(), "string"), failed);
-  MPI_FAILED_CHECK(gather_test(comm, string_list_generator(), "list of strings"), failed);
+  BOOST_MPI_COUNT_FAILED(gather_test(comm, int_generator(), "integers"), failed);
+  BOOST_MPI_COUNT_FAILED(gather_test(comm, gps_generator(), "GPS positions"), failed);
+  BOOST_MPI_COUNT_FAILED(gather_test(comm, string_generator(), "string"), failed);
+  BOOST_MPI_COUNT_FAILED(gather_test(comm, string_list_generator(), "list of strings"), failed);
 
-  MPI_FAILED_CHECK(gatherv_test(comm, int_generator(), "integers"), failed);
-  MPI_FAILED_CHECK(gatherv_test(comm, gps_generator(), "GPS positions"), failed);
-  MPI_FAILED_CHECK(gatherv_test(comm, string_generator(), "string"), failed);
-  MPI_FAILED_CHECK(gatherv_test(comm, string_list_generator(), "list of strings"), failed);
+  BOOST_MPI_COUNT_FAILED(gatherv_test(comm, int_generator(), "integers"), failed);
+  BOOST_MPI_COUNT_FAILED(gatherv_test(comm, gps_generator(), "GPS positions"), failed);
+  BOOST_MPI_COUNT_FAILED(gatherv_test(comm, string_generator(), "string"), failed);
+  BOOST_MPI_COUNT_FAILED(gatherv_test(comm, string_list_generator(), "list of strings"), failed);
   return failed;
 }

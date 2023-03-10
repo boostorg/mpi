@@ -43,7 +43,7 @@ broadcast_test(const communicator& comm, const T& bc_value,
     }
 
     broadcast(comm, value, root);
-    MPI_CHECK(value == bc_value, failed);
+    BOOST_MPI_CHECK(value == bc_value, failed);
     if (comm.rank() == root && value == bc_value)
       std::cout << "OK." << std::endl;
   }
@@ -110,21 +110,21 @@ test_skeleton_and_content(const communicator& comm, int root = 0)
     // right structure (we have no idea what the data will be).
     std::list<int> transferred_list;
     ia >> transferred_list;
-    MPI_CHECK((int)transferred_list.size() == list_size, failed);
+    BOOST_MPI_CHECK((int)transferred_list.size() == list_size, failed);
 
     // Receive the content and check it
     broadcast(comm, get_content(transferred_list), root);
     bool list_content_ok = std::equal(make_counting_iterator(0),
 				      make_counting_iterator(list_size),
 				      transferred_list.begin());
-    MPI_CHECK(list_content_ok, failed);
+    BOOST_MPI_CHECK(list_content_ok, failed);
 
     // Receive the reversed content and check it
     broadcast(comm, get_content(transferred_list), root);
     bool rlist_content_ok = std::equal(make_counting_iterator(0),
 				       make_counting_iterator(list_size),
 				       transferred_list.rbegin());
-    MPI_CHECK(rlist_content_ok, failed);
+    BOOST_MPI_CHECK(rlist_content_ok, failed);
     if (!(list_content_ok && rlist_content_ok)) {
       if (comm.rank() == 1) {
 	std::cout
@@ -144,23 +144,23 @@ int main()
   communicator comm;
   
   int failed = 0;
-  MPI_CHECK(comm.size() > 1, failed);
+  BOOST_MPI_CHECK(comm.size() > 1, failed);
   if (failed == 0) {
 
     // Check transfer of individual objects
-    MPI_FAILED_CHECK(broadcast_test(comm, 17, "integers"), failed);
-    MPI_FAILED_CHECK(broadcast_test(comm, gps_position(39,16,20.2799), "GPS positions"), failed);
-    MPI_FAILED_CHECK(broadcast_test(comm, gps_position(26,25,30.0), "GPS positions"), failed);
-    MPI_FAILED_CHECK(broadcast_test(comm, std::string("Rosie"), "string"), failed);
+    BOOST_MPI_COUNT_FAILED(broadcast_test(comm, 17, "integers"), failed);
+    BOOST_MPI_COUNT_FAILED(broadcast_test(comm, gps_position(39,16,20.2799), "GPS positions"), failed);
+    BOOST_MPI_COUNT_FAILED(broadcast_test(comm, gps_position(26,25,30.0), "GPS positions"), failed);
+    BOOST_MPI_COUNT_FAILED(broadcast_test(comm, std::string("Rosie"), "string"), failed);
     
     std::list<std::string> strings;
     strings.push_back("Hello");
     strings.push_back("MPI");
     strings.push_back("World");
-    MPI_FAILED_CHECK(broadcast_test(comm, strings, "list of strings"), failed);
+    BOOST_MPI_COUNT_FAILED(broadcast_test(comm, strings, "list of strings"), failed);
     
-    MPI_FAILED_CHECK(test_skeleton_and_content(comm, 0), failed);
-    MPI_FAILED_CHECK(test_skeleton_and_content(comm, 1), failed);
+    BOOST_MPI_COUNT_FAILED(test_skeleton_and_content(comm, 0), failed);
+    BOOST_MPI_COUNT_FAILED(test_skeleton_and_content(comm, 1), failed);
   }
   return failed;
 }
