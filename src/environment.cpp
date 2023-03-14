@@ -16,7 +16,47 @@
 #include <ostream>
 
 namespace boost { namespace mpi {
+namespace detail {
+
+int level2int(threading::level l)
+{
+  using namespace threading;
+  
+  switch(l) {
+  case single:
+    return MPI_THREAD_SINGLE;
+  case funneled:
+    return MPI_THREAD_FUNNELED;
+  case serialized:
+    return MPI_THREAD_SERIALIZED;
+  case multiple:
+    return MPI_THREAD_MULTIPLE;
+  default:
+    environment::abort(70); // EX_SOFTWARE
+  }
+}
+  
+threading::level int2level(int mpi_level)
+{
+  using namespace threading;
+  
+  switch(mpi_level) {
+  case MPI_THREAD_SINGLE:
+    return single;
+  case MPI_THREAD_FUNNELED:
+    return funneled;
+  case MPI_THREAD_SERIALIZED:
+    return serialized;
+  case MPI_THREAD_MULTIPLE:
+    return multiple;
+  default:
+    environment::abort(70); // EX_SOFTWARE
+  }
+}
+} // namespace detail
+
 namespace threading {
+
 std::istream& operator>>(std::istream& in, level& l)
 {
   std::string tk;
@@ -87,7 +127,7 @@ environment::environment(threading::level mt_level, bool abrt)
   int dummy_thread_level = 0;
   if (!initialized()) {
     BOOST_MPI_CHECK_RESULT(MPI_Init_thread, 
-                           (0, 0, int(mt_level), &dummy_thread_level ));
+                           (0, 0, detail::level2int(mt_level), &dummy_thread_level ));
     i_initialized = true;
   }
 
@@ -124,7 +164,7 @@ environment::environment(int& argc, char** &argv, threading::level mt_level,
   int dummy_thread_level = 0;
   if (!initialized()) {
     BOOST_MPI_CHECK_RESULT(MPI_Init_thread, 
-                           (&argc, &argv, int(mt_level), &dummy_thread_level));
+                           (&argc, &argv, detail::level2int(mt_level), &dummy_thread_level));
     i_initialized = true;
   }
 
@@ -237,7 +277,7 @@ threading::level environment::thread_level()
   int level;
 
   BOOST_MPI_CHECK_RESULT(MPI_Query_thread, (&level));
-  return static_cast<threading::level>(level);
+  return detail::int2level(level);
 }
 
 bool environment::is_main_thread()
