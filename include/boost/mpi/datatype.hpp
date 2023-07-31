@@ -141,7 +141,7 @@ struct is_mpi_builtin_datatype
  *  be accessible via @c get_mpi_datatype.
 
  *  For any C++ type that maps to a built-in MPI data type (see @c
- *  is_mpi_builtin_datatype), @c is_mpi_data_type is trivially
+ *  is_mpi_builtin_datatype), @c is_mpi_datatype is trivially
  *  true. However, any POD ("Plain Old Data") type containing types
  *  that themselves can be represented by MPI data types can itself be
  *  represented as an MPI data type. For instance, a @c point3d class
