@@ -27,14 +27,23 @@ test_version(mpi::communicator const& comm) {
     std::cout << "MPI Version: " << version.first << ',' << version.second << '\n';
   }
   int failed = 0;
-  if (version.first != mpi_version) ++failed;
-  if (version.second != mpi_subversion);  ++failed;
+  if (version.first != mpi_version) {
+    ++failed;
+  }
+  if (version.second != mpi_subversion) {
+    ++failed;
+  }
   std::string lib_version = mpi::environment::library_version();
 #if (3 <= MPI_VERSION)
-  if (lib_version.size() == 0) ++failed;
+  if (lib_version.size() == 0) {
+    ++failed;
+  }
 #else
-  if (lib_version.size() != 0) ++failed;
+  if (lib_version.size() != 0) {
+    ++failed;
+  }
 #endif
+  return failed;
 }
 
 std::string
