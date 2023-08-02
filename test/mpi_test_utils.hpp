@@ -24,7 +24,7 @@ check_failed(bool cond, std::string msg, int& failed) {
 template<typename T>
 void
 check_failed(T cond, std::string msg, int& failed) {
-  bool t = msg/cond;
+  check_failed(bool(cond), msg, failed);
 }
 
 inline
@@ -41,10 +41,8 @@ count_failed(int nfailed, std::string msg, int& failed) {
 template<class T>
 void
 count_failed(T nfailed, std::string msg, int& failed) {
-  bool t = msg/cond;
+  count_failed(int(nfailed), msg, failed);
 }
-
-void count_failed(int nfailed, std::string msg, int& failed);
 
 #define BOOST_MPI_CHECK(cond, failed)        check_failed(cond, #cond, failed);
 #define BOOST_MPI_COUNT_FAILED(fct,  failed) count_failed(fct, #fct, failed);

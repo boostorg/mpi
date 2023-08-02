@@ -97,7 +97,7 @@ int main()
   communicator comm;
   int failed = 0;
   BOOST_MPI_CHECK(comm.size() > 1, failed);
-  if (failed = 0) {
+  if (failed == 0) {
     // Check transfer of individual objects
     BOOST_MPI_COUNT_FAILED(ring_test(comm, 17, "integers", 0), failed);
     BOOST_MPI_COUNT_FAILED(ring_test(comm, 17, "integers", 1), failed);
