@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 3.5...3.20)
 
-project(boost_mpi VERSION "${BOOST_SUPERPROJECT_VERSION}" LANGUAGES CXX)
+project(boost_mpi VERSION "${BOOST_SUPERPROJECT_VERSION}" LANGUAGES C CXX)
 
 add_library(boost_mpi
   src/broadcast.cpp
@@ -62,8 +62,8 @@ target_link_libraries(boost_mpi
 
 if(BOOST_ENABLE_MPI)
 
-  find_package(MPI REQUIRED COMPONENTS CXX)
-  target_link_libraries(boost_mpi PUBLIC MPI::MPI_CXX)
+  find_package(MPI REQUIRED COMPONENTS C)
+  target_link_libraries(boost_mpi PUBLIC MPI::MPI_C)
 
 endif()
 
