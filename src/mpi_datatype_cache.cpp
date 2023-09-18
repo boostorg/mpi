@@ -8,6 +8,7 @@
 
 #include <boost/archive/detail/archive_serializer_map.hpp>
 #include <boost/mpi/detail/mpi_datatype_cache.hpp>
+#include <boost/mpi/datatype.hpp>
 #include <map>
 
 namespace boost { namespace mpi { namespace detail {
@@ -34,6 +35,9 @@ namespace boost { namespace mpi { namespace detail {
       // ignore errors in the destructor
       for (stored_map_type::iterator it=impl->map.begin(); it != impl->map.end(); ++it)
         MPI_Type_free(&(it->second));
+      // We explicitly created this one, as there is no equivalent in the MPI standard
+      MPI_Datatype bool_type = get_mpi_datatype(bool());
+      MPI_Type_free(&bool_type);
     }
   }
   
