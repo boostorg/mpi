@@ -9,8 +9,14 @@
 # Authors: Douglas Gregor
 #          Andrew Lumsdaine
 
-project : requirements <library>/boost//mpi ;
 import mpi : mpi-test ;
+
+project : requirements
+    <source>/boost/test//boost_test
+    <source>/boost/mpi//boost_mpi
+    <source>/boost/mpi//boost_mpi_python
+    <mpi.run-flags>--oversubscribe
+    ;
 
 if [ mpi.configured ]
 {
