@@ -66,6 +66,7 @@ lib boost_mpi
   : # Usage requirements
     <library>/boost/serialization//boost_serialization
     <library>/mpi//mpi [ mpi.extra-requirements ]
+    <define>BOOST_MPI_NO_LIB=1
   ;
 
     if [ python.configured ]
@@ -94,6 +95,7 @@ lib boost_mpi
               : # Usage requirements
                 <library>/mpi//mpi [ mpi.extra-requirements ]
                 <library>/python//python
+                <define>BOOST_MPI_PYTHON_NO_LIB=1
               ;
 
             python-extension mpi
@@ -136,7 +138,7 @@ else
             : "warning: skipping optional Message Passing Interface (MPI) library."
             : "note: to enable MPI support, add \"using mpi ;\" to user-config.jam."
             : "note: to suppress this message, pass \"--without-mpi\" to b2."
-            : "note: otherwise, you can safely ignore this message." 
+            : "note: otherwise, you can safely ignore this message."
             ;
     }
     alias boost_mpi_python ;
