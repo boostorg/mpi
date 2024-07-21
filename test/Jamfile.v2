@@ -3,7 +3,7 @@
 # (C) Copyright 2005, 2006 Trustees of Indiana University
 # (C) Copyright 2005 Douglas Gregor
 #
-# Distributed under the Boost Software License, Version 1.0. (See accompanying 
+# Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt.)
 #
 # Authors: Douglas Gregor
@@ -12,9 +12,9 @@
 import mpi : mpi-test ;
 
 project : requirements
-    <source>/boost/test//boost_test
-    <source>/boost/mpi//boost_mpi
-    <source>/boost/mpi//boost_mpi_python
+    <library>/boost/test//boost_test
+    <library>/boost/mpi//boost_mpi
+    <library>/boost/mpi//boost_mpi_python
     <mpi.run-flags>--oversubscribe
     ;
 
