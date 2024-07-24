@@ -5,26 +5,28 @@
 
 require-b2 5.2 ;
 
+constant boost_dependencies :
+    /boost/assert//boost_assert
+    /boost/config//boost_config
+    /boost/core//boost_core
+    /boost/foreach//boost_foreach
+    /boost/function//boost_function
+    /boost/graph//boost_graph
+    /boost/integer//boost_integer
+    /boost/iterator//boost_iterator
+    /boost/lexical_cast//boost_lexical_cast
+    /boost/mpl//boost_mpl
+    /boost/optional//boost_optional
+    /boost/python//boost_python
+    /boost/serialization//boost_serialization
+    /boost/smart_ptr//boost_smart_ptr
+    /boost/static_assert//boost_static_assert
+    /boost/throw_exception//boost_throw_exception
+    /boost/type_traits//boost_type_traits
+    /boost/utility//boost_utility ;
+
 project /boost/mpi
     : common-requirements
-        <library>/boost/assert//boost_assert
-        <library>/boost/config//boost_config
-        <library>/boost/core//boost_core
-        <library>/boost/foreach//boost_foreach
-        <library>/boost/function//boost_function
-        <library>/boost/graph//boost_graph
-        <library>/boost/integer//boost_integer
-        <library>/boost/iterator//boost_iterator
-        <library>/boost/lexical_cast//boost_lexical_cast
-        <library>/boost/mpl//boost_mpl
-        <library>/boost/optional//boost_optional
-        <library>/boost/python//boost_python
-        <library>/boost/serialization//boost_serialization
-        <library>/boost/smart_ptr//boost_smart_ptr
-        <library>/boost/static_assert//boost_static_assert
-        <library>/boost/throw_exception//boost_throw_exception
-        <library>/boost/type_traits//boost_type_traits
-        <library>/boost/utility//boost_utility
         <include>include
     ;
 
@@ -38,3 +40,4 @@ explicit
 call-if : boost-library mpi
     : install boost_mpi boost_mpi_python mpi
     ;
+

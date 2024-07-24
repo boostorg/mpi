@@ -28,6 +28,7 @@ if [ mpi.configured ]
 
 project
   : source-location ../src
+  : common-requirements <library>$(boost_dependencies)
   ;
 
 lib boost_mpi
