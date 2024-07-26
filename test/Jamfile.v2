@@ -12,7 +12,7 @@
 import mpi : mpi-test ;
 
 project : requirements
-    <library>/boost/test//boost_test
+    <library>/boost/test//included
     <library>/boost/mpi//boost_mpi
     <library>/boost/mpi//boost_mpi_python
     <mpi.run-flags>--oversubscribe
