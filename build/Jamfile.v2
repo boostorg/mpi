@@ -23,12 +23,17 @@ rule tag ( name : type ? : property-set )
     }
 }
 
+constant boost_dependencies_private :
+    /boost/utility//boost_utility
+    ;
+
 if [ mpi.configured ]
 {
 
 project
   : source-location ../src
   : common-requirements <library>$(boost_dependencies)
+  : requirements <library>$(boost_dependencies_private)
   ;
 
 lib boost_mpi
