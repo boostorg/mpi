@@ -41,7 +41,9 @@ namespace boost { namespace mpi {
  *
  *  @returns A pair containing the status object that corresponds to
  *  the completed operation and the iterator referencing the completed
- *  request.
+ *  request. If there are no active handles (distance(first, last) == 0,
+ *  all requests already done or null requests), returns an empty
+ *  status and iterator "last".
  */
 template<typename ForwardIterator>
 std::pair<status, ForwardIterator> 
@@ -56,6 +58,7 @@ wait_any(ForwardIterator first, ForwardIterator last)
 
   bool all_trivial_requests = true;
   difference_type n = 0;
+  bool has_outstanding_request = false;
   ForwardIterator current = first;
   while (true) {
     // Check if we have found a completed request. If so, return it.
@@ -63,6 +66,8 @@ wait_any(ForwardIterator first, ForwardIterator last)
       optional<status> result = current->test();
       if (bool(result)) {
         return std::make_pair(*result, current);
+      } else {
+        has_outstanding_request = true;
       }
     }
     
@@ -93,16 +98,18 @@ wait_any(ForwardIterator first, ForwardIterator last)
         BOOST_MPI_CHECK_RESULT(MPI_Waitany, 
                                (n, detail::c_data(requests), &index, &stat.m_status));
 
-        // We don't have a notion of empty requests or status objects,
-        // so this is an error.
+        // No active handles
         if (index == MPI_UNDEFINED)
-          boost::throw_exception(exception("MPI_Waitany", MPI_ERR_REQUEST));
+          return std::make_pair(stat, last);
 
         // Find the iterator corresponding to the completed request.
         current = first;
         advance(current, index);
         *current->trivial() = requests[index];
         return std::make_pair(stat, current);
+      } else if (!has_outstanding_request) {
+        // No active handles
+        return std::make_pair(status{}, last);
       }
 
       // There are some nontrivial requests, so we must continue our
@@ -110,6 +117,7 @@ wait_any(ForwardIterator first, ForwardIterator last)
       n = 0;
       current = first;
       all_trivial_requests = true;
+      has_outstanding_request = false;
     }
   }
 
