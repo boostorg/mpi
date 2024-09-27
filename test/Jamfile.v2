@@ -56,7 +56,9 @@ test-suite mpi
   [ mpi-test groups_test  ]
   # tests that require -std=c++11
   [ mpi-test sendrecv_vector : : : 2 ]
-  # Intel MPI 2018 and older are axtected to fail:
+  # Intel MPI 2018 and older are expected to fail:
   [ mpi-test non_blocking_any_source : : : 2 17 ]
+  # Non Blockin common (MPI 3 only)
+  [ mpi-test ibarrier_test : : : 1 3 ]
   ;
 }
