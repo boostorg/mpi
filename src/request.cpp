@@ -26,6 +26,13 @@ request::preserve(boost::shared_ptr<void> d) {
 }
 request request::make_dynamic() { return request(new dynamic_handler()); }
 
+request request::make_trivial(MPI_Request*& r) {
+  trivial_handler *handler = new trivial_handler;
+  r = &(handler->m_request);
+  return request(handler);
+}
+
+
 request
 request::make_bottom_send(communicator const& comm, int dest, int tag, MPI_Datatype tp) {
   trivial_handler* handler = new trivial_handler;
