@@ -128,7 +128,7 @@ struct bool_generator
 {
   typedef bool result_type;
 
-  bool_generator(int nbtrue = 0) : nb_true(nbtrue) { }
+  bool_generator(int nbtrue) : nb_true(nbtrue) { }
   
   int operator()(int p) const { return p < nb_true; }
 
@@ -232,8 +232,8 @@ int main()
                                "maximum", 0), failed);
   BOOST_MPI_COUNT_FAILED(reduce_test(comm, int_generator(), "integers", minimum<int>(),
                                "minimum", 2), failed);
-  BOOST_MPI_COUNT_FAILED(reduce_test(comm, bool_generator(), "bools", std::logical_or<bool>(), "logical_or", 0), failed);
-  BOOST_MPI_COUNT_FAILED(reduce_test(comm, bool_generator(), "bools", std::logical_and<bool>(), "logical_and", 0), failed);
+  BOOST_MPI_COUNT_FAILED(reduce_test(comm, bool_generator(2), "bools", std::logical_or<bool>(), "logical_or", 0), failed);
+  BOOST_MPI_COUNT_FAILED(reduce_test(comm, bool_generator(2), "bools", std::logical_and<bool>(), "logical_and", 0), failed);
   
   // User-defined MPI datatypes with operations that have the
   // same name as built-in operations.
