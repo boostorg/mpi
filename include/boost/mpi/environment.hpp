@@ -52,10 +52,10 @@ enum level {
 };
 
 /** Formated output for threading level. */
-std::ostream& operator<<(std::ostream& out, level l);
+BOOST_MPI_DECL std::ostream& operator<<(std::ostream& out, level l);
 
 /** Formated input for threading level. */
-std::istream& operator>>(std::istream& in, level& l);
+BOOST_MPI_DECL std::istream& operator>>(std::istream& in, level& l);
 } // namespace threading
 /** @brief Initialize, finalize, and query the MPI environment.
  *

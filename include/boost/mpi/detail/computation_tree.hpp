@@ -9,6 +9,8 @@
 #ifndef BOOST_MPI_COMPUTATION_TREE_HPP
 #define BOOST_MPI_COMPUTATION_TREE_HPP
 
+#include <boost/mpi/config.hpp>
+
 namespace boost { namespace mpi { namespace detail {
 
 /**
@@ -16,7 +18,7 @@ namespace boost { namespace mpi { namespace detail {
  *
  * Objects of this type
  */
-class computation_tree
+class BOOST_MPI_DECL computation_tree
 {
  public:
   computation_tree(int rank, int size, int root, int branching_factor = -1);

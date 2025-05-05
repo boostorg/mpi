@@ -57,7 +57,7 @@ broadcast<const packed_skeleton_oarchive>(const communicator& comm,
  * INTERNAL ONLY
  */
 template<>
-void
+BOOST_MPI_DECL void
 broadcast<packed_skeleton_oarchive>(const communicator& comm,
                                     packed_skeleton_oarchive& oa, int root);
 
@@ -65,7 +65,7 @@ broadcast<packed_skeleton_oarchive>(const communicator& comm,
  * INTERNAL ONLY
  */
 template<>
-void
+BOOST_MPI_DECL void
 broadcast<packed_skeleton_iarchive>(const communicator& comm,
                                     packed_skeleton_iarchive& ia, int root);
 
@@ -73,13 +73,15 @@ broadcast<packed_skeleton_iarchive>(const communicator& comm,
  * INTERNAL ONLY
  */
 template<>
-void broadcast<content>(const communicator& comm, content& c, int root);
+BOOST_MPI_DECL void
+broadcast<content>(const communicator& comm, content& c, int root);
 
 /**
  * INTERNAL ONLY
  */
 template<>
-void broadcast<const content>(const communicator& comm, const content& c,
+BOOST_MPI_DECL void
+broadcast<const content>(const communicator& comm, const content& c,
                               int root);
 
 /************************************************************************

@@ -26,7 +26,7 @@ BOOST_MPI_DECL void sizes2offsets(std::vector<int> const& sizes, std::vector<int
 // to each process in a scater) and a sequence of displacements (typically the
 // slot index at with those record starts), convert the later to a number 
 // of skipped slots.
-void offsets2skipped(int const* sizes, int const* offsets, int* skipped, int n);
+BOOST_MPI_DECL void offsets2skipped(int const* sizes, int const* offsets, int* skipped, int n);
 
 // Reconstruct offsets from sizes assuming no padding.
 // Only takes place if on the root process and if 
@@ -40,7 +40,7 @@ BOOST_MPI_DECL int* make_offsets(communicator const& comm, int const* sizes, int
 // displs are provided.
 // If memory was allocated, returns a pointer to it
 // otherwise null.
-int* make_skipped_slots(communicator const& comm, int const* sizes, int const* displs, int root = -1);
+BOOST_MPI_DECL int* make_skipped_slots(communicator const& comm, int const* sizes, int const* displs, int root = -1);
 
 }
 }}// end namespace boost::mpi
