@@ -6,12 +6,13 @@
 
 // An example using Boost.MPI's split() operation on communicators to
 // create separate data-generating processes and data-collecting
-// processes using boost::optional for broadcasting.
+// processes using boost::mpi::optional for broadcasting.
 #include <boost/mpi.hpp>
 #include <iostream>
 #include <cstdlib>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/optional.hpp>
+#include <boost/mpi/optional.hpp>
 namespace mpi = boost::mpi;
 
 enum message_tags { msg_data_packet, msg_finished };
@@ -61,8 +62,8 @@ void collect_data(mpi::communicator local, mpi::communicator world)
       // Wait for a message
       mpi::status msg = world.probe();
       if (msg.tag() == msg_data_packet) {
-        // Receive the packet of data into a boost::optional
-        boost::optional<std::vector<int> > data;
+        // Receive the packet of data into a boost::mpi::optional
+        boost::mpi::optional<std::vector<int> > data;
         data = std::vector<int>();
         world.recv(msg.source(), msg.source(), *data);
 
@@ -73,13 +74,13 @@ void collect_data(mpi::communicator local, mpi::communicator world)
         world.recv(msg.source(), msg.tag());
 
         // Broadcast to each collector to tell them we've finished.
-        boost::optional<std::vector<int> > data;
+        boost::mpi::optional<std::vector<int> > data;
         broadcast(local, data, 0);
         break;
       }
     }
   } else {
-    boost::optional<std::vector<int> > data;
+    boost::mpi::optional<std::vector<int> > data;
     do {
       // Wait for a broadcast from the master collector
       broadcast(local, data, 0);

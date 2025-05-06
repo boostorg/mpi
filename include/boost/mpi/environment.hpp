@@ -14,8 +14,8 @@
 #define BOOST_MPI_ENVIRONMENT_HPP
 
 #include <boost/mpi/config.hpp>
+#include <boost/mpi/optional.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/optional.hpp>
 #include <string>
 #include <iosfwd>
 
