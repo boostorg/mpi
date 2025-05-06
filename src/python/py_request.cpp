@@ -52,7 +52,7 @@ const object python::request_with_value::wrap_wait()
 
 const object python::request_with_value::wrap_test()
 {
-  ::boost::optional<status> stat = request::test();
+  ::boost::mpi::optional<status> stat = request::test();
   if (stat)
   {
     if (m_internal_value.get() || m_external_value)
@@ -69,7 +69,7 @@ namespace boost { namespace mpi { namespace python {
   
 const object request_test(request &req)                                         
 {                                                                               
-  ::boost::optional<status> stat = req.test();                                  
+  ::boost::mpi::optional<status> stat = req.test();                                  
   if (stat)                                                                     
     return object(*stat);                                                       
   else                                                                          

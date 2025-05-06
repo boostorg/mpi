@@ -11,7 +11,6 @@
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/optional.hpp>
-
 #include <algorithm>
 #include "gps_position.hpp"
 #include <boost/serialization/string.hpp>

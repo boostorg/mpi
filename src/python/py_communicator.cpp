@@ -62,7 +62,7 @@ communicator_irecv(const communicator& comm, int source, int tag)
 object
 communicator_iprobe(const communicator& comm, int source, int tag)
 {
-  if (boost::optional<status> result = comm.iprobe(source, tag))
+  if (boost::mpi::optional<status> result = comm.iprobe(source, tag))
     return object(*result);
   else
     return object();

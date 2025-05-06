@@ -752,7 +752,7 @@ class BOOST_MPI_DECL communicator
    *
    *   @returns If a matching message is available, returns
    *   information about that message. Otherwise, returns an empty
-   *   @c boost::optional.
+   *   @c boost::mpi::optional.
    */
   optional<status>
   iprobe(int source = any_source, int tag = any_tag) const;
