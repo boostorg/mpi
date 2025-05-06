@@ -146,7 +146,7 @@ protected:
 
 public:
   bool active() const { return m_source != MPI_PROC_NULL; }
-  optional<MPI_Request&> trivial() { return boost::none; }
+  MPI_Request* trivial() { return nullptr; }
   void cancel() { m_source = MPI_PROC_NULL; }
 
   status wait() {
@@ -286,7 +286,7 @@ public:
   }
   
   bool active() const;
-  optional<MPI_Request&> trivial();
+  MPI_Request* trivial();
   
   MPI_Request      m_requests[2];
   communicator     m_comm;
@@ -505,7 +505,7 @@ public:
   void cancel();
   
   bool active() const;
-  optional<MPI_Request&> trivial();
+  MPI_Request* trivial();
 
 private:
   friend class request;
@@ -520,7 +520,7 @@ class request::dynamic_handler : public request::handler {
   void cancel();
   
   bool active() const;
-  optional<MPI_Request&> trivial();
+  MPI_Request* trivial();
 
 private:
   friend class request;

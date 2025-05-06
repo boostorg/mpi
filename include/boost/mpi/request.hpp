@@ -14,7 +14,7 @@
 
 #include <boost/mpi/config.hpp>
 #include <boost/mpi/status.hpp>
-#include <boost/optional.hpp>
+#include <boost/mpi/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/mpi/packed_iarchive.hpp>
 
@@ -111,12 +111,11 @@ class BOOST_MPI_DECL request
   void cancel() { if (m_handler) { m_handler->cancel(); } m_preserved.reset(); }
   
   /**
-   * The trivial MPI requet implenting this request, provided it's trivial.
+   * The trivial MPI request pointer implenting this request, provided it's trivial.
+   * nullptr otherwise.
    * Probably irrelevant to most users.
    */
-  optional<MPI_Request&> trivial() { return (m_handler
-					     ? m_handler->trivial()
-					     : optional<MPI_Request&>()); }
+  MPI_Request* trivial() { return m_handler ? m_handler->trivial() : nullptr; }
 
   /**
    * Is this request potentialy pending ?
@@ -134,7 +133,7 @@ class BOOST_MPI_DECL request
     virtual void cancel() = 0;
     
     virtual bool active() const = 0;
-    virtual optional<MPI_Request&> trivial() = 0;
+    virtual MPI_Request* trivial() = 0;
   };
   
  private:

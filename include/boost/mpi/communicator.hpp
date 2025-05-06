@@ -17,7 +17,7 @@
 #include <boost/assert.hpp>
 #include <boost/mpi/config.hpp>
 #include <boost/mpi/exception.hpp>
-#include <boost/optional.hpp>
+#include <boost/mpi/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/mpi/datatype.hpp>
 #include <boost/mpi/nonblocking.hpp>

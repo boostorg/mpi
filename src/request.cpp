@@ -97,9 +97,9 @@ request::make_packed_send(communicator const& comm, int dest, int tag, void cons
 
 request::handler::~handler() {}
     
-optional<MPI_Request&>
+MPI_Request*
 request::legacy_handler::trivial() {
-  return boost::none;
+  return nullptr;
 }
 
 bool
@@ -143,10 +143,10 @@ request::trivial_handler::active() const
   return m_request != MPI_REQUEST_NULL; 
 }
 
-optional<MPI_Request&>
+MPI_Request*
 request::trivial_handler::trivial() 
 { 
-  return m_request; 
+  return &m_request; 
 }
   
 // dynamic handler
@@ -231,9 +231,9 @@ request::dynamic_handler::active() const
           || m_requests[1] != MPI_REQUEST_NULL);
 }
 
-optional<MPI_Request&>
+MPI_Request*
 request::dynamic_handler::trivial() {
-  return boost::none;
+  return nullptr;
 }
   
 } } // end namespace boost::mpi

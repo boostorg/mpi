@@ -35,12 +35,17 @@
  * Comment this if your platform is not homogeneous and that portable 
  * serialization/deserialization must be performed.
  *
- * It you do so, check that your MPI implementation supports thats kind of environment.
+ * It you do so, check that your MPI implementation supports that kind of environment.
  */
 #define BOOST_MPI_HOMOGENEOUS
 
+/** @brief Uncomment this macro is you have std::optional available (assuming C++17)
+ *  but still want to use boost::optional in the Boost MPI interface.
+ */
+// #define BOOST_MPI_FORCE_BOOST_OPTIONAL
+
 #if defined MPI_VERSION
-/** @brief Major version of the underlying MPI implementation supproted standard.
+/** @brief Major version of the underlying MPI implementation supported standard.
  * 
  * If, for some reason, MPI_VERSION is not supported, you should probably set that
  * according to your MPI documentation
@@ -52,7 +57,7 @@
 #endif
 
 #if defined MPI_SUBVERSION
-/** @brief Major version of the underlying MPI implementation supported standard.
+/** @brief Minor version of the underlying MPI implementation supported standard.
  * 
  * If, for some reason, MPI_SUBVERSION is not supported, you should probably set that
  * according to your MPI documentation

@@ -14,7 +14,7 @@
 
 #include <boost/mpi/config.hpp>
 #include <boost/mpi/datatype.hpp>
-#include <boost/optional.hpp>
+#include <boost/mpi/optional.hpp>
 #include <boost/mpl/bool.hpp>
 
 namespace boost { namespace mpi {

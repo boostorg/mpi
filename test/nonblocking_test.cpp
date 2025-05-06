@@ -8,6 +8,7 @@
 #include <boost/mpi/nonblocking.hpp>
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
+#include <boost/mpi/optional.hpp>
 #include "gps_position.hpp"
 #include <boost/lexical_cast.hpp>
 #include <boost/serialization/string.hpp>
@@ -75,7 +76,8 @@ nonblocking_test(const communicator& comm, const T* values, int num_values,
   using boost::mpi::test_all;
   using boost::mpi::wait_some;
   using boost::mpi::test_some;
-
+  using boost::mpi::optional;
+  
   int next = (comm.rank() + 1) % comm.size();
   int prev = (comm.rank() + comm.size() - 1) % comm.size();
 			    
@@ -122,7 +124,7 @@ nonblocking_test(const communicator& comm, const T* values, int num_values,
     
   case mk_test_any:
     {
-      boost::optional<status_iterator_pair> result;
+      optional<status_iterator_pair> result;
       do {
         result = test_any(reqs.begin(), reqs.end());
       } while (!result);
