@@ -38,6 +38,11 @@ class BOOST_MPI_DECL request
    */
   request();
 
+  /** 
+   * Just make a request from a C API request and provide its address 
+   * for future assignement.
+   */
+  static request make_trivial(MPI_Request*& r);
   /**
    * Send a known number of primitive objects in one MPI request.
    */
@@ -150,7 +155,9 @@ class BOOST_MPI_DECL request
   template<typename T, class A> class legacy_dynamic_primitive_array_handler;
 #if BOOST_MPI_VERSION >= 3
   template<class Data> class probe_handler;
+  friend class communicator;
 #endif
+
  private:
   shared_ptr<handler> m_handler;
   shared_ptr<void>    m_preserved;

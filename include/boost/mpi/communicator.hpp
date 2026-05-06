@@ -775,6 +775,15 @@ class BOOST_MPI_DECL communicator
   void barrier() const;
 #endif
 
+#if BOOST_MPI_VERSION >= 3
+  /**
+   * @brief Non blocking version of barrier.
+   *
+   * This version will return immediatly. The request completes 
+   * once all participants have reached the barrier.
+   */
+  request ibarrier() const;
+#endif 
   /** @brief Determine if this communicator is valid for
    * communication.
    *
