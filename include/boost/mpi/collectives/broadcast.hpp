@@ -106,7 +106,7 @@ namespace detail {
   template<typename T>
   void
   broadcast_impl(const communicator& comm, T* values, int n, int root, 
-                 mpl::false_ non_mpi_datatype)
+                 mpl::false_)
   {
     // Implementation proposed by Lorenz Hübschle-Schneider
     if (comm.rank() == root) {
