@@ -10,6 +10,7 @@
 // types, serializable objects, etc.)
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
+#include <boost/mpi/optional.hpp>
 #include <algorithm>
 #include "gps_position.hpp"
 #include <boost/serialization/string.hpp>
@@ -72,7 +73,7 @@ ring_array_test(const communicator& comm, const T* pass_values,
     if (okay) std::cout << " OK." << std::endl;
   } else {
     status stat = comm.probe(boost::mpi::any_source, 0);
-    boost::optional<int> num_values = stat.template count<T>();
+    boost::mpi::optional<int> num_values = stat.template count<T>();
     if (boost::mpi::is_mpi_datatype<T>()) {
       BOOST_MPI_CHECK(num_values && *num_values == n, failed);
     } else {

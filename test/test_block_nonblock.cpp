@@ -64,10 +64,11 @@ bool test(mpi::communicator const& comm, std::vector<T> const& ref, bool iswap, 
 
 int
 main() {
-  mpi::environment env;
-  mpi::communicator world;
+  mpi::environment env{};
+  mpi::communicator world{};
  
   if (world.size() == 1) {
+    std::cerr << "Needs more than one MPI process.\n";
     return -1;
   }
   

@@ -125,7 +125,7 @@ namespace
   object wrap_test_any(request_list &requests)
   {
     check_request_list_not_empty(requests);
-    ::boost::optional<pair<status, request_list::iterator> > result = 
+    ::boost::mpi::optional<pair<status, request_list::iterator> > result = 
       test_any(requests.begin(), requests.end());
 
     if (result)

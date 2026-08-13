@@ -15,7 +15,7 @@
 #include <boost/mpi/config.hpp>
 #include <vector>
 #include <iterator> // for std::iterator_traits
-#include <boost/optional.hpp>
+#include <boost/mpi/optional.hpp>
 #include <utility> // for std::pair
 #include <algorithm> // for iter_swap, reverse
 #include <boost/static_assert.hpp>

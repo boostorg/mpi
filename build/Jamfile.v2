@@ -147,7 +147,6 @@ else
             : "note: otherwise, you can safely ignore this message."
             ;
     }
-    alias boost_mpi_python ;
-    alias mpi ;
-    alias boost_mpi ;
+    alias boost_mpi_python : boost_mpi ;
+    alias mpi : boost_mpi ;
 }

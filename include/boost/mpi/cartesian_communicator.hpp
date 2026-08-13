@@ -81,7 +81,7 @@ operator!=(cartesian_dimension const& d1, cartesian_dimension const& d2) {
 /**
  * @brief Pretty printing of a cartesian dimension (size, periodic)
  */
-std::ostream& operator<<(std::ostream& out, cartesian_dimension const& d);
+BOOST_MPI_DECL std::ostream& operator<<(std::ostream& out, cartesian_dimension const& d);
 
 /**
  * @brief Describe the topology of a cartesian grid.
@@ -235,7 +235,7 @@ operator!=(cartesian_topology const& t1, cartesian_topology const& t2) {
 /**
  * @brief Pretty printing of a cartesian topology
  */
-std::ostream& operator<<(std::ostream& out, cartesian_topology const& t);
+BOOST_MPI_DECL std::ostream& operator<<(std::ostream& out, cartesian_topology const& t);
 
 /**
  * @brief An MPI communicator with a cartesian topology.

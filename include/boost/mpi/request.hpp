@@ -14,7 +14,7 @@
 
 #include <boost/mpi/config.hpp>
 #include <boost/mpi/status.hpp>
-#include <boost/optional.hpp>
+#include <boost/mpi/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/mpi/packed_iarchive.hpp>
 

@@ -418,7 +418,7 @@ inline int target(const std::pair<int, int>& edge, const graph_communicator&)
  * outgoing from the given vertex in a graph topology of a
  * communicator.
  */
-std::pair<detail::comm_out_edge_iterator, detail::comm_out_edge_iterator>
+BOOST_MPI_DECL std::pair<detail::comm_out_edge_iterator, detail::comm_out_edge_iterator>
 out_edges(int vertex, const graph_communicator& comm);
 
 
@@ -426,7 +426,7 @@ out_edges(int vertex, const graph_communicator& comm);
  * @brief Returns the out-degree of a vertex in the graph topology of
  * a communicator.
  */
-int out_degree(int vertex, const graph_communicator& comm);
+BOOST_MPI_DECL int out_degree(int vertex, const graph_communicator& comm);
 
 // Adjacency Graph requirements
 
@@ -464,14 +464,14 @@ inline int num_vertices(const graph_communicator& comm) { return comm.size(); }
  * @brief Returns an iterator range that contains all of the edges
  * with the communicator's graph topology.
  */
-std::pair<detail::comm_edge_iterator, detail::comm_edge_iterator>
+BOOST_MPI_DECL std::pair<detail::comm_edge_iterator, detail::comm_edge_iterator>
 edges(const graph_communicator& comm);
 
 /**
  * @brief Returns the number of edges in the communicator's graph
  * topology.
  */
-int num_edges(const graph_communicator& comm);
+BOOST_MPI_DECL int num_edges(const graph_communicator& comm);
 
 // Property Graph requirements
 

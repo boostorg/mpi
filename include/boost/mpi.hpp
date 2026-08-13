@@ -23,6 +23,7 @@
 #include <boost/mpi/collectives.hpp>
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/datatype.hpp>
+#include <boost/mpi/optional.hpp>
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/graph_communicator.hpp>
 #include <boost/mpi/group.hpp>

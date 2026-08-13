@@ -18,7 +18,7 @@
 #include <boost/mpi/exception.hpp>
 #include <boost/mpi/detail/antiques.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/optional.hpp>
+#include <boost/mpi/optional.hpp>
 #include <vector>
 
 namespace boost { namespace mpi {

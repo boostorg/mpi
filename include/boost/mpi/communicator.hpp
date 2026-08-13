@@ -17,7 +17,7 @@
 #include <boost/assert.hpp>
 #include <boost/mpi/config.hpp>
 #include <boost/mpi/exception.hpp>
-#include <boost/optional.hpp>
+#include <boost/mpi/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/mpi/datatype.hpp>
 #include <boost/mpi/nonblocking.hpp>
@@ -752,7 +752,7 @@ class BOOST_MPI_DECL communicator
    *
    *   @returns If a matching message is available, returns
    *   information about that message. Otherwise, returns an empty
-   *   @c boost::optional.
+   *   @c boost::mpi::optional.
    */
   optional<status>
   iprobe(int source = any_source, int tag = any_tag) const;
