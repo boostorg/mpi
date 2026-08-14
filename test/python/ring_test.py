@@ -7,7 +7,7 @@
 # Test basic communication.
 
 from __future__ import print_function
-import mpi
+import boost.mpi
 
 def ring_test(comm, value, kind, root):
     next_peer = (comm.rank + 1) % comm.size;
@@ -31,13 +31,13 @@ def ring_test(comm, value, kind, root):
         print ("OK")
     pass
 
-if mpi.world.size < 2:
+if boost.mpi.world.size < 2:
     print ("ERROR: ring_test.py must be executed with more than one process")
-    mpi.world.abort(-1);
+    boost.mpi.world.abort(-1);
     
-ring_test(mpi.world, 17, 'integers', 0)
-ring_test(mpi.world, 17, 'integers', 1)
-ring_test(mpi.world, 'Hello, World!', 'string', 0)
-ring_test(mpi.world, 'Hello, World!', 'string', 1)
-ring_test(mpi.world, ['Hello', 'MPI', 'Python', 'World'], 'list of strings', 0)
-ring_test(mpi.world, ['Hello', 'MPI', 'Python', 'World'], 'list of strings', 1)
+ring_test(boost.mpi.world, 17, 'integers', 0)
+ring_test(boost.mpi.world, 17, 'integers', 1)
+ring_test(boost.mpi.world, 'Hello, World!', 'string', 0)
+ring_test(boost.mpi.world, 'Hello, World!', 'string', 1)
+ring_test(boost.mpi.world, ['Hello', 'MPI', 'Python', 'World'], 'list of strings', 0)
+ring_test(boost.mpi.world, ['Hello', 'MPI', 'Python', 'World'], 'list of strings', 1)

@@ -7,8 +7,8 @@
 # Test skeleton/content
 
 from __future__ import print_function
-import mpi
-import skeleton_content
+import boost.mpi
+import boost.skeleton_content
 
 def test_skeleton_and_content(comm, root, manual_broadcast = True):
     assert manual_broadcast
@@ -25,7 +25,7 @@ def test_skeleton_and_content(comm, root, manual_broadcast = True):
         if manual_broadcast:
             for p in range(0,comm.size):
                 if p != comm.rank:
-                    comm.send(p, 0, value = mpi.skeleton(original_list))
+                    comm.send(p, 0, value = boost.mpi.skeleton(original_list))
         print ("OK.")
 
         # Broadcast content
@@ -33,7 +33,7 @@ def test_skeleton_and_content(comm, root, manual_broadcast = True):
         if manual_broadcast:
             for p in range(0,comm.size):
                 if p != comm.rank:
-                    comm.send(p, 0, value = mpi.get_content(original_list))
+                    comm.send(p, 0, value = boost.mpi.get_content(original_list))
 
         print ("OK.")
 
@@ -43,7 +43,7 @@ def test_skeleton_and_content(comm, root, manual_broadcast = True):
         if manual_broadcast:
             for p in range(0,comm.size):
                 if p != comm.rank:
-                    comm.send(p, 0, value = mpi.get_content(original_list))
+                    comm.send(p, 0, value = boost.mpi.get_content(original_list))
 
         print ("OK.")
     else:
@@ -62,15 +62,15 @@ def test_skeleton_and_content(comm, root, manual_broadcast = True):
         # Receive the content and check it
         transferred_list = transferred_list_skeleton.object
         if manual_broadcast:
-            comm.recv(root, 0, mpi.get_content(transferred_list))
+            comm.recv(root, 0, boost.mpi.get_content(transferred_list))
         assert transferred_list == original_list
 
         # Receive the content (again) and check it
         original_list.reverse()
         if manual_broadcast:
-            comm.recv(root, 0, mpi.get_content(transferred_list))
+            comm.recv(root, 0, boost.mpi.get_content(transferred_list))
         assert transferred_list == original_list
         
 
-test_skeleton_and_content(mpi.world, 0)
-test_skeleton_and_content(mpi.world, 1)
+test_skeleton_and_content(boost.mpi.world, 0)
+test_skeleton_and_content(boost.mpi.world, 1)

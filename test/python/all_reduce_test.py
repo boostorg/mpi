@@ -7,14 +7,14 @@
 # Test all_reduce() collective.
 
 from __future__ import print_function
-import mpi
+import boost.mpi
 from generators import *
 
 def all_reduce_test(comm, generator, kind, op, op_kind):
     if comm.rank == 0:
         print ("Reducing to %s of %s..." % (op_kind, kind)),
     my_value = generator(comm.rank)
-    result = mpi.all_reduce(comm, my_value, op)
+    result = boost.mpi.all_reduce(comm, my_value, op)
     expected_result = generator(0);
     for p in range(1, comm.size):
         expected_result = op(expected_result, generator(p))
@@ -24,7 +24,7 @@ def all_reduce_test(comm, generator, kind, op, op_kind):
         print ("OK.")
     return
 
-all_reduce_test(mpi.world, int_generator, "integers", lambda x,y:x + y, "sum")
-all_reduce_test(mpi.world, int_generator, "integers", lambda x,y:x * y, "product")
-all_reduce_test(mpi.world, string_generator, "strings", lambda x,y:x + y, "concatenation")
-all_reduce_test(mpi.world, string_list_generator, "list of strings", lambda x,y:x + y, "concatenation")
+all_reduce_test(boost.mpi.world, int_generator, "integers", lambda x,y:x + y, "sum")
+all_reduce_test(boost.mpi.world, int_generator, "integers", lambda x,y:x * y, "product")
+all_reduce_test(boost.mpi.world, string_generator, "strings", lambda x,y:x + y, "concatenation")
+all_reduce_test(boost.mpi.world, string_list_generator, "list of strings", lambda x,y:x + y, "concatenation")

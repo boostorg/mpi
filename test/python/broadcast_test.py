@@ -8,25 +8,25 @@
 # Test broadcast() collective.
 
 from __future__ import print_function
-import mpi
+import boost.mpi
 
 def broadcast_test(comm, value, kind, root):
     if comm.rank == 0:
         print ("Broadcasting %s from root %d..." % (kind, root)),
     got_value = None
-    got_value = mpi.broadcast(comm, value, root)
+    got_value = boost.mpi.broadcast(comm, value, root)
     if comm.rank == 0:
         print ("OK.")
     return
 
-broadcast_test(mpi.world, 17, 'integer', 0)
-broadcast_test(mpi.world, 'Hello, World!', 'string', 0)
-broadcast_test(mpi.world, ['Hello', 'MPI', 'Python', 'World'],
+broadcast_test(boost.mpi.world, 17, 'integer', 0)
+broadcast_test(boost.mpi.world, 'Hello, World!', 'string', 0)
+broadcast_test(boost.mpi.world, ['Hello', 'MPI', 'Python', 'World'],
                'list of strings', 0)
-if mpi.world.size > 1:
-    broadcast_test(mpi.world, 17, 'integer', 1)
-    broadcast_test(mpi.world, 'Hello, World!', 'string', 1)
-    broadcast_test(mpi.world, ['Hello', 'MPI', 'Python', 'World'],
+if boost.mpi.world.size > 1:
+    broadcast_test(boost.mpi.world, 17, 'integer', 1)
+    broadcast_test(boost.mpi.world, 'Hello, World!', 'string', 1)
+    broadcast_test(boost.mpi.world, ['Hello', 'MPI', 'Python', 'World'],
                    'list of strings', 1)
 
 

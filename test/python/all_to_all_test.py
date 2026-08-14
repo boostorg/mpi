@@ -7,7 +7,7 @@
 # Test all_to_all() collective.
 
 from __future__ import print_function
-import mpi
+import boost.mpi
 from generators import *
 
 def all_to_all_test(comm, generator, kind):
@@ -17,7 +17,7 @@ def all_to_all_test(comm, generator, kind):
     values = list()
     for p in range(0, comm.size):
         values.append(generator(p))
-    result = mpi.all_to_all(comm, values)
+    result = boost.mpi.all_to_all(comm, values)
 
     for p in range(0, comm.size):
         assert result[p] == generator(comm.rank)
@@ -25,7 +25,7 @@ def all_to_all_test(comm, generator, kind):
     if comm.rank == 0: print ("OK.")
     return
 
-all_to_all_test(mpi.world, int_generator, "integers")
-all_to_all_test(mpi.world, gps_generator, "GPS positions")
-all_to_all_test(mpi.world, string_generator, "strings")
-all_to_all_test(mpi.world, string_list_generator, "list of strings")
+all_to_all_test(boost.mpi.world, int_generator, "integers")
+all_to_all_test(boost.mpi.world, gps_generator, "GPS positions")
+all_to_all_test(boost.mpi.world, string_generator, "strings")
+all_to_all_test(boost.mpi.world, string_list_generator, "list of strings")

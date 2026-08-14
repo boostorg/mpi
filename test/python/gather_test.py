@@ -7,14 +7,14 @@
 # Test gather() collective.
 
 from __future__ import print_function
-import mpi
+import boost.mpi
 from generators import *
 
 def gather_test(comm, generator, kind, root):
     if comm.rank == root:
         print ("Gathering %s to root %d..." % (kind, root)),
     my_value = generator(comm.rank)
-    result = mpi.gather(comm, my_value, root)
+    result = boost.mpi.gather(comm, my_value, root)
     if comm.rank == root:
         for p in range(0, comm.size):
             assert result[p] == generator(p)
@@ -23,11 +23,11 @@ def gather_test(comm, generator, kind, root):
         assert result == None
     return
 
-gather_test(mpi.world, int_generator, "integers", 0)
-gather_test(mpi.world, int_generator, "integers", 1)
-gather_test(mpi.world, gps_generator, "GPS positions", 0)
-gather_test(mpi.world, gps_generator, "GPS positions", 1)
-gather_test(mpi.world, string_generator, "strings", 0)
-gather_test(mpi.world, string_generator, "strings", 1)
-gather_test(mpi.world, string_list_generator, "list of strings", 0)
-gather_test(mpi.world, string_list_generator, "list of strings", 1)
+gather_test(boost.mpi.world, int_generator, "integers", 0)
+gather_test(boost.mpi.world, int_generator, "integers", 1)
+gather_test(boost.mpi.world, gps_generator, "GPS positions", 0)
+gather_test(boost.mpi.world, gps_generator, "GPS positions", 1)
+gather_test(boost.mpi.world, string_generator, "strings", 0)
+gather_test(boost.mpi.world, string_generator, "strings", 1)
+gather_test(boost.mpi.world, string_list_generator, "list of strings", 0)
+gather_test(boost.mpi.world, string_list_generator, "list of strings", 1)

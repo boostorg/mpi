@@ -8,7 +8,7 @@
 #  Authors: Andreas Kloeckner
 
 from __future__ import print_function
-import mpi
+import boost.mpi
 import random
 import sys
 
@@ -18,14 +18,11 @@ TAG_DATA = 1
 TAG_TERMINATE = 2
 TAG_PROGRESS_REPORT = 3
 
-
-
-
 class TagGroupListener:
     """Class to help listen for only a given set of tags.
 
     This is contrived: Typicallly you could just listen for 
-    mpi.any_tag and filter."""
+    boost.mpi.any_tag and filter."""
     def __init__(self, comm, tags):
         self.tags = tags
         self.comm = comm
@@ -35,8 +32,8 @@ class TagGroupListener:
         for tag in self.tags:
             if tag not in self.active_requests:
                 self.active_requests[tag] = self.comm.irecv(tag=tag)
-        requests = mpi.RequestList(self.active_requests.values())
-        data, status, index = mpi.wait_any(requests)
+        requests = boost.mpi.RequestList(self.active_requests.values())
+        data, status, index = boost.mpi.wait_any(requests)
         del self.active_requests[status.tag]
         return status, data
 
@@ -49,27 +46,27 @@ class TagGroupListener:
 
 
 def rank0():
-    sent_histories = (mpi.size-1)*15
+    sent_histories = (boost.mpi.size-1)*15
     print ("sending %d packets on their way" % sent_histories)
-    send_reqs = mpi.RequestList()
+    send_reqs = boost.mpi.RequestList()
     for i in range(sent_histories):
-        dest = random.randrange(1, mpi.size)
-        send_reqs.append(mpi.world.isend(dest, TAG_DATA, []))
+        dest = random.randrange(1, boost.mpi.size)
+        send_reqs.append(boost.mpi.world.isend(dest, TAG_DATA, []))
 
-    mpi.wait_all(send_reqs)
+    boost.mpi.wait_all(send_reqs)
 
     completed_histories = []
     progress_reports = {}
     dead_kids = []
 
-    tgl = TagGroupListener(mpi.world,
+    tgl = TagGroupListener(boost.mpi.world,
             [TAG_DATA, TAG_DEBUG, TAG_PROGRESS_REPORT, TAG_TERMINATE])
 
     def is_complete():
         for i in progress_reports.values():
             if i != sent_histories:
                 return False
-        return len(dead_kids) == mpi.size-1
+        return len(dead_kids) == boost.mpi.size-1
 
     while True:
         status, data = tgl.wait()
@@ -79,8 +76,8 @@ def rank0():
             completed_histories.append(data)
             if len(completed_histories) == sent_histories:
                 print ("all histories received, exiting")
-                for rank in range(1, mpi.size):
-                    mpi.world.send(rank, TAG_TERMINATE, None)
+                for rank in range(1, boost.mpi.size):
+                    boost.mpi.world.send(rank, TAG_TERMINATE, None)
         elif status.tag == TAG_PROGRESS_REPORT:
             progress_reports[len(data)] = progress_reports.get(len(data), 0) + 1
         elif status.tag == TAG_DEBUG:
@@ -97,28 +94,28 @@ def rank0():
 
 def comm_rank():
     while True:
-        data, status = mpi.world.recv(return_status=True)
+        data, status = boost.mpi.world.recv(return_status=True)
         if status.tag == TAG_DATA:
-            mpi.world.send(0, TAG_PROGRESS_REPORT, data)
-            data.append(mpi.rank)
+            boost.mpi.world.send(0, TAG_PROGRESS_REPORT, data)
+            data.append(boost.mpi.rank)
             if len(data) >= MAX_GENERATIONS:
                 dest = 0
             else:
-                dest = random.randrange(1, mpi.size)
-            mpi.world.send(dest, TAG_DATA, data)
+                dest = random.randrange(1, boost.mpi.size)
+            boost.mpi.world.send(dest, TAG_DATA, data)
         elif status.tag == TAG_TERMINATE:
             from time import sleep
-            mpi.world.send(0, TAG_TERMINATE, 0)
+            boost.mpi.world.send(0, TAG_TERMINATE, 0)
             break
         else:
-            print ("[DIRECTDBG %d] unexpected tag %d from %d" % (mpi.rank, status.tag, status.source))
+            print ("[DIRECTDBG %d] unexpected tag %d from %d" % (boost.mpi.rank, status.tag, status.source))
 
 
 def main():
     # this program sends around messages consisting of lists of visited nodes
     # randomly. After MAX_GENERATIONS, they are returned to rank 0.
 
-    if mpi.rank == 0:
+    if boost.mpi.rank == 0:
         rank0()
     else:
         comm_rank()
