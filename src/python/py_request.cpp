@@ -64,13 +64,13 @@ const object python::request_with_value::wrap_test()
     return object();
 }
 
-bool operator==(python::request_with_value const&, python::request_with_value const&) {
+namespace boost { namespace mpi { namespace python {
+
+bool operator==(request_with_value const&, request_with_value const&) {
   PyErr_SetString(PyExc_NotImplementedError, "mpi requests are not comparable");
   throw error_already_set();
 }
 
-namespace boost { namespace mpi { namespace python {
-  
 const object request_test(request &req)                                         
 {                                                                               
   ::boost::mpi::optional<status> stat = req.test();                                  
