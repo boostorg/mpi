@@ -217,7 +217,7 @@ struct serialized_data {
 
 template<>
 struct serialized_data<packed_iarchive> {
-  serialized_data(communicator const& comm, packed_iarchive& ar) : m_archive(ar) {}
+  serialized_data(communicator const&, packed_iarchive& ar) : m_archive(ar) {}
   
   void* buffer() { return m_archive.address(); }
   void  resize(std::size_t sz) { m_archive.resize(sz); }
