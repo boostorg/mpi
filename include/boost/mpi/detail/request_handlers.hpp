@@ -509,6 +509,9 @@ public:
 
 private:
   friend class request;
+#if BOOST_MPI_VERSION >= 3
+  friend class communicator;
+#endif
   MPI_Request      m_request;
 };
 
